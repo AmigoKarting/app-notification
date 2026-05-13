@@ -11,17 +11,23 @@ alter table public.profiles
   add column if not exists phone_last4 text;
 
 -- Mise à jour du trigger handle_new_user pour prendre les métadonnées
+-- IMPORTANT: garde la logique "premier inscrit = dev" de la migration 0006
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  no_dev_yet boolean;
 begin
+  select not exists (select 1 from public.profiles where role = 'dev')
+  into no_dev_yet;
+
   insert into public.profiles (id, role, first_name, last_name, phone, phone_last4, email)
   values (
     new.id,
-    'employee',
+    case when no_dev_yet then 'dev'::public.app_role else 'employee'::public.app_role end,
     coalesce(new.raw_user_meta_data->>'first_name', null),
     coalesce(new.raw_user_meta_data->>'last_name', null),
     coalesce(new.raw_user_meta_data->>'phone', null),
