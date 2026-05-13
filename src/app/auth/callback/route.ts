@@ -10,19 +10,28 @@ const SAFE_REDIRECT = /^\/(?!\/)[A-Za-z0-9_\-./?=&%]*$/;
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const nextParam = searchParams.get("next") ?? "/dashboard";
-  const next = SAFE_REDIRECT.test(nextParam) ? nextParam : "/dashboard";
+  const nextParam = searchParams.get("next") ?? "/";
+  const next = SAFE_REDIRECT.test(nextParam) ? nextParam : "/";
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`);
   }
 
-  const supabase = createClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  try {
+    const supabase = createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error) {
+    if (error) {
+      console.error("[AUTH CALLBACK] exchangeCodeForSession error:", error.message);
+      return NextResponse.redirect(
+        `${origin}/login?error=${encodeURIComponent(error.message)}`,
+      );
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[AUTH CALLBACK] crash:", msg);
     return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent(error.message)}`,
+      `${origin}/login?error=${encodeURIComponent("Erreur d'authentification")}`,
     );
   }
 
