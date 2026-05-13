@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { dispatchSchedules } from "@/domain/notification-schedules/worker";
+import { dispatchReminders } from "@/domain/reminders/dispatcher";
 import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
@@ -23,20 +24,43 @@ function authorize(request: Request): boolean {
   return timingSafeEqual(header, expected);
 }
 
+/**
+ * Endpoint combiné : exécute les planifications récurrentes ET les rappels
+ * en un seul appel. Permet de n'utiliser qu'un seul cron Vercel.
+ *
+ * Pour des exécutions fréquentes (toutes les minutes), utilise un cron
+ * externe gratuit (cron-job.org, UptimeRobot, GitHub Actions…) qui
+ * appelle cet endpoint en GET/POST avec le header Authorization: Bearer <CRON_SECRET>.
+ */
 async function handle(request: Request) {
   if (!authorize(request)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const results: Record<string, unknown> = {};
+
+  // 1. Planifications récurrentes
   try {
-    const result = await dispatchSchedules();
-    return NextResponse.json({ ok: true, ...result });
+    results.schedules = await dispatchSchedules();
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown error";
     logger.error("cron.schedules.failed", { error: message });
-    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    results.schedules = { ok: false, error: message };
   }
+
+  // 2. Rappels par email (legacy)
+  try {
+    results.reminders = await dispatchReminders();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown error";
+    logger.error("cron.reminders.failed", { error: message });
+    results.reminders = { ok: false, error: message };
+  }
+
+  return NextResponse.json({ ok: true, ...results });
 }
 
+// Vercel Cron envoie GET. cron-job.org / GitHub Actions peuvent envoyer POST.
 export async function GET(request: Request) {
   return handle(request);
 }

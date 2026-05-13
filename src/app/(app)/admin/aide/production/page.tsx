@@ -125,31 +125,60 @@ TWILIO_AUTH_TOKEN=xxxxxxxx`}</pre>
 
       <GuideSection title="5 · Cron pour les planifications">
         <p>
-          Le worker des planifications doit tourner périodiquement. Deux options :
+          L'endpoint <code>/api/cron/run-schedules</code> exécute les planifications récurrentes
+          ET les rappels en un seul appel. Il doit tourner régulièrement.
         </p>
-        <ul className="ml-5 list-disc space-y-2">
-          <li>
-            <strong>Vercel Cron</strong> (déjà configuré dans <code>vercel.json</code>). Sur le
-            plan Hobby tu es limité à 1 run/jour ; sur le plan Pro tu peux tourner toutes les
-            minutes — recommandé pour des planifications horaires.
-          </li>
-          <li>
-            <strong>cron-job.org</strong> (gratuit, illimité). Crée un job qui POST sur
-            <code> https://ton-domaine.com/api/cron/run-schedules</code> avec le header
-            <code> Authorization: Bearer ${"{CRON_SECRET}"}</code>, toutes les minutes.
-          </li>
-        </ul>
+
+        <Callout type="info">
+          <strong>Vercel Hobby</strong> (plan gratuit) ne permet que <strong>2 crons max</strong>,
+          et seulement des <strong>schedules quotidiens</strong> (1 fois/jour). L'app est déjà
+          configurée pour fonctionner dans cette limite. Mais pour des planifications
+          fréquentes (toutes les heures, toutes les minutes), tu dois ajouter un
+          <strong> cron externe gratuit</strong> (voir ci-dessous).
+        </Callout>
+
+        <p className="font-semibold">Option A — Vercel Cron seul (plan Hobby)</p>
+        <p>
+          Déjà configuré dans <code>vercel.json</code> : le worker tourne 1 fois par jour à 7h UTC.
+          Suffisant si tes planifications sont quotidiennes.
+        </p>
+
+        <p className="font-semibold mt-4">Option B — Cron externe pour des envois fréquents (recommandé)</p>
+        <p>
+          Utilise <strong>cron-job.org</strong> (gratuit, illimité) pour appeler l'endpoint
+          plus souvent :
+        </p>
         <Steps>
-          <Step number={1} title="Générer un CRON_SECRET fort">
+          <Step number={1} title="Créer un compte sur cron-job.org">
+            <a
+              href="https://cron-job.org"
+              target="_blank"
+              rel="noreferrer"
+              className="text-brand-700 hover:underline"
+            >
+              cron-job.org
+            </a>{" "}
+            → inscris-toi (gratuit).
+          </Step>
+          <Step number={2} title="Créer un cron job">
+            <ul className="ml-5 list-disc space-y-1 mt-1">
+              <li><strong>URL</strong> : <code>https://ton-domaine.com/api/cron/run-schedules</code></li>
+              <li><strong>Méthode</strong> : POST (ou GET)</li>
+              <li><strong>Schedule</strong> : toutes les minutes, toutes les 5 min, ou toutes les heures selon ton besoin</li>
+              <li><strong>Header</strong> : ajouter <code>Authorization: Bearer TON_CRON_SECRET</code></li>
+            </ul>
+          </Step>
+          <Step number={3} title="Générer un CRON_SECRET">
             <pre className="mt-2 overflow-x-auto rounded-md bg-neutral-100 p-3 text-xs">openssl rand -hex 32</pre>
+            Copie le résultat.
           </Step>
-          <Step number={2} title="Mettre dans Vercel">
-            <Path>Settings → Environment Variables</Path> → <code>CRON_SECRET=...</code>
+          <Step number={4} title="Mettre dans Vercel">
+            <Path>Settings → Environment Variables</Path> → ajouter <code>CRON_SECRET</code> avec la valeur générée.
           </Step>
-          <Step number={3} title="Tester manuellement">
+          <Step number={5} title="Tester">
             <pre className="mt-2 overflow-x-auto rounded-md bg-neutral-100 p-3 text-xs">{`curl -X POST https://ton-domaine.com/api/cron/run-schedules \\
   -H "Authorization: Bearer $CRON_SECRET"`}</pre>
-            Tu dois recevoir <code>{`{ "ok": true, "due": ..., "fired": ... }`}</code>.
+            Tu dois recevoir <code>{`{ "ok": true, "schedules": ..., "reminders": ... }`}</code>.
           </Step>
         </Steps>
       </GuideSection>

@@ -6,11 +6,7 @@
     },
     {
       "path": "/api/cron/run-schedules",
-      "schedule": "* * * * *"
-    },
-    {
-      "path": "/api/cron/send-reminders",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 7 * * *"
     }
   ]
 }
