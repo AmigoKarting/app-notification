@@ -75,6 +75,10 @@ export interface Database {
           id: string;
           role: AppRole;
           display_name: string | null;
+          first_name: string | null;
+          last_name: string | null;
+          phone: string | null;
+          phone_last4: string | null;
           email: string | null;
           created_at: string;
           updated_at: string;
@@ -83,6 +87,10 @@ export interface Database {
           id: string;
           role?: AppRole;
           display_name?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone?: string | null;
+          phone_last4?: string | null;
           email?: string | null;
           created_at?: string;
           updated_at?: string;

@@ -56,7 +56,13 @@ export default async function SettingsPage() {
           </div>
         </div>
 
-        <ProfileForm userId={user.id} initialName={profile?.display_name ?? ""} />
+        <ProfileForm
+          userId={user.id}
+          initialName={profile?.display_name ?? ""}
+          initialFirstName={profile?.first_name ?? ""}
+          initialLastName={profile?.last_name ?? ""}
+          initialPhone={profile?.phone ?? ""}
+        />
       </Card>
 
       {/* Section Apparence */}

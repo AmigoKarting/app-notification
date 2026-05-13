@@ -13,7 +13,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const profile = await getCurrentProfile();
   const branding = await getBranding();
   const isDev = profile?.role === "dev";
-  const displayLabel = profile?.display_name?.trim() || user.email || "";
+  const displayLabel =
+    (profile?.first_name && profile?.last_name
+      ? `${profile.first_name} ${profile.last_name}`
+      : profile?.display_name?.trim()) || user.email || "";
 
   // Garde côté serveur: un employee qui visite une route dev-only est
   // redirigé vers ses notifications. x-pathname est injecté par le middleware.

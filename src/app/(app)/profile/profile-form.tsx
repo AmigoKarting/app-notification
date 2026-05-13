@@ -2,18 +2,33 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, Field, FormError } from "@/components/ui";
+import { Button, FormError } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
+
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+}
 
 export function ProfileForm({
   userId,
   initialName,
+  initialFirstName,
+  initialLastName,
+  initialPhone,
 }: {
   userId: string;
   initialName: string;
+  initialFirstName: string;
+  initialLastName: string;
+  initialPhone: string;
 }) {
   const router = useRouter();
-  const [name, setName] = useState(initialName);
+  const [firstName, setFirstName] = useState(initialFirstName);
+  const [lastName, setLastName] = useState(initialLastName);
+  const [phone, setPhone] = useState(initialPhone);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -22,13 +37,35 @@ export function ProfileForm({
     e.preventDefault();
     setError(null);
     setSuccess(false);
+
+    const trimmedFirst = firstName.trim();
+    const trimmedLast = lastName.trim();
+    const phoneDigits = phone.replace(/\D/g, "");
+
+    if (!trimmedFirst) {
+      setError("Le prénom est obligatoire");
+      return;
+    }
+    if (!trimmedLast) {
+      setError("Le nom est obligatoire");
+      return;
+    }
+
+    const formattedPhone = formatPhone(phoneDigits);
+    const last4 = phoneDigits.slice(-4);
+
     setPending(true);
     try {
-      const trimmed = name.trim();
       const supabase = createClient();
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: trimmed === "" ? null : trimmed })
+        .update({
+          first_name: trimmedFirst,
+          last_name: trimmedLast,
+          phone: formattedPhone,
+          phone_last4: last4,
+          display_name: `${trimmedFirst} ${trimmedLast}`,
+        })
         .eq("id", userId);
 
       if (error) {
@@ -47,14 +84,42 @@ export function ProfileForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <Field
-        label="Nom affiché"
-        name="display_name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        maxLength={80}
-        hint="Ce nom remplace ton email un peu partout dans l'app."
-      />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">Prénom</span>
+          <input
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            maxLength={80}
+            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
+          />
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">Nom</span>
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            maxLength={80}
+            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
+          />
+        </label>
+      </div>
+
+      <label className="block">
+        <span className="mb-1 block text-sm font-medium">Téléphone</span>
+        <input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(formatPhone(e.target.value))}
+          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
+        />
+        <span className="mt-1 block text-xs text-neutral-500">
+          Les 4 derniers chiffres sont ton mot de passe.
+        </span>
+      </label>
 
       {error && <FormError message={error} />}
       {success && (

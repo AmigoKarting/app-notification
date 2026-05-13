@@ -4,48 +4,110 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+function formatPhone(raw: string): string {
+  // Garde seulement les chiffres
+  const digits = raw.replace(/\D/g, "");
+  // Format: XXX-XXX-XXXX
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+}
+
 export function SignupForm() {
   const router = useRouter();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Extrait les 4 derniers chiffres du téléphone
+  function getLast4(phoneValue: string): string {
+    const digits = phoneValue.replace(/\D/g, "");
+    return digits.slice(-4);
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
 
-    if (password.length < 8) {
-      setError("Mot de passe trop court (8 caractères minimum)");
+    const trimmedFirst = firstName.trim();
+    const trimmedLast = lastName.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const phoneDigits = phone.replace(/\D/g, "");
+
+    if (!trimmedFirst) {
+      setError("Le prénom est obligatoire");
       return;
     }
-    if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
-      setError("Le mot de passe doit contenir au moins une lettre et un chiffre");
+    if (!trimmedLast) {
+      setError("Le nom est obligatoire");
       return;
     }
+    if (phoneDigits.length < 10) {
+      setError("Numéro de téléphone invalide (10 chiffres minimum)");
+      return;
+    }
+    if (!trimmedEmail) {
+      setError("L'adresse courriel est obligatoire");
+      return;
+    }
+
+    const last4 = getLast4(phone);
+    if (last4.length < 4) {
+      setError("Le numéro de téléphone doit avoir au moins 4 chiffres");
+      return;
+    }
+
+    // Le mot de passe = préfixe + 4 derniers chiffres (Supabase exige 6 chars min)
+    const password = `pin-${last4}`;
+    const formattedPhone = formatPhone(phoneDigits);
 
     setPending(true);
     try {
       const supabase = createClient();
       const { data, error } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
+        email: trimmedEmail,
         password,
+        options: {
+          data: {
+            first_name: trimmedFirst,
+            last_name: trimmedLast,
+            phone: formattedPhone,
+            phone_last4: last4,
+          },
+        },
       });
 
       if (error) {
-        setError(error.message);
+        if (error.message.includes("password")) {
+          setError("Erreur lors de la création du compte. Vérifie tes informations.");
+        } else {
+          setError(error.message);
+        }
         return;
       }
 
       if (!data.session) {
-        // Email confirmation activée
-        setSuccess("Compte créé. Vérifie ton email pour confirmer ton inscription.");
+        setSuccess("Compte créé. Vérifie ton courriel pour confirmer ton inscription.");
         return;
       }
 
-      // "/" laisse la homepage rediriger selon le rôle
+      // Mettre à jour le profil avec les infos supplémentaires
+      await supabase
+        .from("profiles")
+        .update({
+          first_name: trimmedFirst,
+          last_name: trimmedLast,
+          phone: formattedPhone,
+          phone_last4: last4,
+          display_name: `${trimmedFirst} ${trimmedLast}`,
+        })
+        .eq("id", data.user.id);
+
       router.replace("/");
       router.refresh();
     } catch (err) {
@@ -63,34 +125,67 @@ export function SignupForm() {
     );
   }
 
+  const last4Preview = getLast4(phone);
+
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">Prénom</span>
+          <input
+            type="text"
+            autoComplete="given-name"
+            required
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="Xavier"
+            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
+          />
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">Nom</span>
+          <input
+            type="text"
+            autoComplete="family-name"
+            required
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Poirier"
+            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
+          />
+        </label>
+      </div>
+
       <label className="block">
-        <span className="mb-1 block text-sm font-medium">Email</span>
+        <span className="mb-1 block text-sm font-medium">Numéro de téléphone</span>
+        <input
+          type="tel"
+          autoComplete="tel"
+          required
+          value={phone}
+          onChange={(e) => setPhone(formatPhone(e.target.value))}
+          placeholder="819-209-2895"
+          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
+        />
+        {last4Preview.length === 4 && (
+          <span className="mt-1 block text-xs text-neutral-500">
+            Ton mot de passe sera : <strong>{last4Preview}</strong> (4 derniers chiffres)
+          </span>
+        )}
+      </label>
+
+      <label className="block">
+        <span className="mb-1 block text-sm font-medium">Adresse courriel</span>
         <input
           type="email"
           autoComplete="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 outline-none transition focus:border-neutral-900"
+          placeholder="xavier@exemple.com"
+          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
         />
-      </label>
-
-      <label className="block">
-        <span className="mb-1 block text-sm font-medium">Mot de passe</span>
-        <input
-          type="password"
-          autoComplete="new-password"
-          minLength={8}
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 outline-none transition focus:border-neutral-900"
-        />
-        <span className="mt-1 block text-xs text-neutral-500">
-          8 caractères minimum, 1 lettre + 1 chiffre
-        </span>
       </label>
 
       {error && (

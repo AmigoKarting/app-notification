@@ -22,9 +22,12 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   const users = all.filter((u) => {
     if (roleFilter && u.role !== roleFilter) return false;
     if (!search) return true;
+    const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ").toLowerCase();
     return (
+      fullName.includes(search) ||
       (u.display_name?.toLowerCase().includes(search) ?? false) ||
-      (u.email?.toLowerCase().includes(search) ?? false)
+      (u.email?.toLowerCase().includes(search) ?? false) ||
+      (u.phone?.includes(search) ?? false)
     );
   });
 
@@ -93,6 +96,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
               <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
                 <tr>
                   <th className="px-4 py-2 font-medium">Nom</th>
+                  <th className="px-4 py-2 font-medium">Téléphone</th>
                   <th className="px-4 py-2 font-medium">Email</th>
                   <th className="px-4 py-2 font-medium">Rôle</th>
                   <th className="px-4 py-2 font-medium">Inscription</th>
@@ -106,12 +110,15 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                     <tr key={u.id} className="hover:bg-neutral-50">
                       <td className="px-4 py-3">
                         <p className="font-medium text-neutral-900">
-                          {u.display_name?.trim() || (
-                            <span className="italic text-neutral-400">Sans nom</span>
-                          )}
+                          {u.first_name && u.last_name
+                            ? `${u.first_name} ${u.last_name}`
+                            : u.display_name?.trim() || (
+                                <span className="italic text-neutral-400">Sans nom</span>
+                              )}
                         </p>
                         {isMe && <p className="text-xs text-neutral-500">(vous)</p>}
                       </td>
+                      <td className="px-4 py-3 text-neutral-700">{u.phone ?? "—"}</td>
                       <td className="px-4 py-3 text-neutral-700">{u.email ?? "—"}</td>
                       <td className="px-4 py-3">
                         <span
