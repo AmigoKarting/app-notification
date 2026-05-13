@@ -106,7 +106,9 @@ function isActive(href: string, pathname: string): boolean {
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // requireDev() can redirect (throws NEXT_REDIRECT) — do NOT wrap in try-catch.
   await requireDev();
+
   const pathname = headers().get("x-pathname") ?? "";
 
   // Dans /admin/aide/*, le sous-layout de l'aide gère sa propre sidebar.

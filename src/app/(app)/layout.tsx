@@ -9,25 +9,25 @@ import { requireUser } from "@/domain/auth/session";
 const DEV_ONLY_PREFIXES = ["/dashboard", "/employees", "/reminders", "/admin"];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  let user, profile, branding;
-  try {
-    user = await requireUser();
-  } catch (e) {
-    console.error("[LAYOUT] requireUser crashed:", e);
-    throw e;
-  }
+  // requireUser() can call redirect() which throws NEXT_REDIRECT.
+  // Do NOT wrap it in try-catch — let Next.js handle redirects natively.
+  const user = await requireUser();
+
+  let profile: Awaited<ReturnType<typeof getCurrentProfile>> = null;
   try {
     profile = await getCurrentProfile();
   } catch (e) {
-    console.error("[LAYOUT] getCurrentProfile crashed:", e);
-    profile = null;
+    console.error("[LAYOUT] getCurrentProfile error:", e);
   }
+
+  let branding: { app_name: string; app_tagline: string | null; logo_url: string | null };
   try {
     branding = await getBranding();
   } catch (e) {
-    console.error("[LAYOUT] getBranding crashed:", e);
+    console.error("[LAYOUT] getBranding error:", e);
     branding = { app_name: "App Notification", app_tagline: null, logo_url: null };
   }
+
   const isDev = profile?.role === "dev";
   const displayLabel =
     (profile?.first_name && profile?.last_name
@@ -106,7 +106,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             )}
             <form action={logoutAction}>
               <button className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50">
-                Déconnexion
+                Deconnexion
               </button>
             </form>
           </div>
