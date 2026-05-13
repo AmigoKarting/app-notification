@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { serverEnv } from "@/lib/env";
 import type { Database } from "@/lib/supabase/database.types";
@@ -27,20 +27,18 @@ export async function updateSession(request: NextRequest) {
     serverEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll();
+        get(name) {
+          return request.cookies.get(name)?.value;
         },
-        setAll(cookiesToSet) {
-          // 1. Applique au request pour que les Server Components en aval voient les cookies à jour
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          // 2. Recrée la response pour inclure les headers + cookies mis à jour
+        set(name, value, options: CookieOptions) {
+          request.cookies.set({ name, value, ...options });
           response = NextResponse.next({ request: { headers: requestHeaders } });
-          // 3. Applique au response pour que le navigateur reçoive les cookies
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
+          response.cookies.set({ name, value, ...options });
+        },
+        remove(name, options: CookieOptions) {
+          request.cookies.set({ name, value: "", ...options });
+          response = NextResponse.next({ request: { headers: requestHeaders } });
+          response.cookies.set({ name, value: "", ...options });
         },
       },
     },
