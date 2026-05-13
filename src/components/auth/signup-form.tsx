@@ -138,7 +138,7 @@ export function SignupForm() {
             required
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            placeholder="Xavier"
+            placeholder="Jean"
             className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
           />
         </label>
@@ -151,7 +151,7 @@ export function SignupForm() {
             required
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            placeholder="Poirier"
+            placeholder="Tremblay"
             className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
           />
         </label>
@@ -165,7 +165,7 @@ export function SignupForm() {
           required
           value={phone}
           onChange={(e) => setPhone(formatPhone(e.target.value))}
-          placeholder="819-209-2895"
+          placeholder="514-555-1234"
           className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
         />
         {last4Preview.length === 4 && (
@@ -183,7 +183,7 @@ export function SignupForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="xavier@exemple.com"
+          placeholder="jean@exemple.com"
           className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
         />
       </label>
