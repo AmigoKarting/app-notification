@@ -14,7 +14,12 @@ import { listActiveSessions } from "@/domain/sessions/repository";
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverviewPage() {
-  let feed, categories, activeSessions, schedules;
+  let feed: Awaited<ReturnType<typeof listFeedItems>> = [];
+  let categories: Awaited<ReturnType<typeof listCategories>> = [];
+  let activeSessions: Awaited<ReturnType<typeof listActiveSessions>> = [];
+  let schedules: Awaited<ReturnType<typeof listSchedules>> = [];
+  let loadError: string | null = null;
+
   try {
     [feed, categories, activeSessions, schedules] = await Promise.all([
       listFeedItems({ limit: 5 }),
@@ -23,8 +28,9 @@ export default async function AdminOverviewPage() {
       listSchedules(),
     ]);
   } catch (e) {
-    console.error("[ADMIN PAGE] Data fetch crashed:", e);
-    throw e;
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[ADMIN PAGE] Data fetch crashed:", msg, e);
+    loadError = msg;
   }
 
   const activeSchedules = schedules.filter((s) => s.is_active).length;
@@ -35,6 +41,13 @@ export default async function AdminOverviewPage() {
         title="Aperçu"
         description="Tout ce qui compte au même endroit."
       />
+
+      {loadError && (
+        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
+          <p className="font-semibold">Erreur de chargement :</p>
+          <pre className="mt-1 whitespace-pre-wrap text-xs">{loadError}</pre>
+        </div>
+      )}
 
       {/* Actions principales — gros boutons cliquables */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
