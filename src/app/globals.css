@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  /* Brand color en triplets RGB (modifiables via JS pour le theming) */
+  --brand-50: 245 243 255;
+  --brand-100: 237 233 254;
+  --brand-200: 221 214 254;
+  --brand-300: 196 181 253;
+  --brand-400: 167 139 250;
+  --brand-500: 139 92 246;
+  --brand-600: 124 58 237;
+  --brand-700: 109 40 217;
+  --brand-800: 91 33 182;
+  --brand-900: 76 29 149;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background-color: #fafafa;
+  color: #171717;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input,
+textarea,
+select {
+  background-color: #ffffff;
+  color: #171717;
+}
+
+/* Backgrounds qui suivent le thème */
+.bg-app-gradient {
+  background:
+    radial-gradient(at 0% 0%, rgb(var(--brand-500) / 0.10) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgb(var(--brand-400) / 0.08) 0px, transparent 50%),
+    #fafafa;
+}
+
+.bg-brand-gradient {
+  background: linear-gradient(135deg, rgb(var(--brand-700)) 0%, rgb(var(--brand-500)) 100%);
+}
+
+.btn-brand-gradient {
+  background: linear-gradient(135deg, rgb(var(--brand-600)) 0%, rgb(var(--brand-700)) 100%);
+}
+.btn-brand-gradient:hover {
+  background: linear-gradient(135deg, rgb(var(--brand-700)) 0%, rgb(var(--brand-800)) 100%);
+}
+
+.shadow-soft {
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.04),
+    0 4px 20px -4px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-soft-lg {
+  box-shadow:
+    0 10px 40px -10px rgb(var(--brand-600) / 0.15),
+    0 2px 8px -1px rgba(0, 0, 0, 0.05);
+}
+
+.card-hover {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -8px rgb(var(--brand-600) / 0.18);
+}
