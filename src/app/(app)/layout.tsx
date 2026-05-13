@@ -9,9 +9,25 @@ import { requireUser } from "@/domain/auth/session";
 const DEV_ONLY_PREFIXES = ["/dashboard", "/employees", "/reminders", "/admin"];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const user = await requireUser();
-  const profile = await getCurrentProfile();
-  const branding = await getBranding();
+  let user, profile, branding;
+  try {
+    user = await requireUser();
+  } catch (e) {
+    console.error("[LAYOUT] requireUser crashed:", e);
+    throw e;
+  }
+  try {
+    profile = await getCurrentProfile();
+  } catch (e) {
+    console.error("[LAYOUT] getCurrentProfile crashed:", e);
+    profile = null;
+  }
+  try {
+    branding = await getBranding();
+  } catch (e) {
+    console.error("[LAYOUT] getBranding crashed:", e);
+    branding = { app_name: "App Notification", app_tagline: null, logo_url: null };
+  }
   const isDev = profile?.role === "dev";
   const displayLabel =
     (profile?.first_name && profile?.last_name

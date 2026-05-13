@@ -14,12 +14,18 @@ import { listActiveSessions } from "@/domain/sessions/repository";
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverviewPage() {
-  const [feed, categories, activeSessions, schedules] = await Promise.all([
-    listFeedItems({ limit: 5 }),
-    listCategories(),
-    listActiveSessions(),
-    listSchedules(),
-  ]);
+  let feed, categories, activeSessions, schedules;
+  try {
+    [feed, categories, activeSessions, schedules] = await Promise.all([
+      listFeedItems({ limit: 5 }),
+      listCategories(),
+      listActiveSessions(),
+      listSchedules(),
+    ]);
+  } catch (e) {
+    console.error("[ADMIN PAGE] Data fetch crashed:", e);
+    throw e;
+  }
 
   const activeSchedules = schedules.filter((s) => s.is_active).length;
 
