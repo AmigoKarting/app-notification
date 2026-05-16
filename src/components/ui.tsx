@@ -97,9 +97,10 @@ export function TextAreaField({ label, error, name, ...rest }: TextAreaFieldProp
 export interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   error?: string;
+  hint?: string;
 }
 
-export function SelectField({ label, error, name, children, ...rest }: SelectFieldProps) {
+export function SelectField({ label, error, hint, name, children, ...rest }: SelectFieldProps) {
   return (
     <label className="block">
       <span className="mb-1.5 block text-sm font-medium text-neutral-800">{label}</span>
@@ -111,7 +112,11 @@ export function SelectField({ label, error, name, children, ...rest }: SelectFie
       >
         {children}
       </select>
-      {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
+      {error ? (
+        <span className="mt-1 block text-xs text-red-600">{error}</span>
+      ) : hint ? (
+        <span className="mt-1 block text-xs text-neutral-500">{hint}</span>
+      ) : null}
     </label>
   );
 }
@@ -405,26 +410,32 @@ export function LogoMark({ className = "", size = 24 }: IconProps) {
     <svg
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox="0 0 512 512"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
       <defs>
-        <linearGradient id="logo-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#7c3aed" />
-          <stop offset="1" stopColor="#2563eb" />
+        <linearGradient id="logo-bell" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#6366f1" />
+          <stop offset="50%" stopColor="#8b5cf6" />
+          <stop offset="100%" stopColor="#06b6d4" />
+        </linearGradient>
+        <linearGradient id="logo-check" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f97316" />
+          <stop offset="100%" stopColor="#eab308" />
+        </linearGradient>
+        <linearGradient id="logo-bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#1e1b4b" />
+          <stop offset="100%" stopColor="#0f172a" />
         </linearGradient>
       </defs>
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#logo-grad)" />
-      <path
-        d="M8 10a4 4 0 0 1 8 0v3l1 2H7l1-2v-3Z"
-        fill="white"
-        stroke="white"
-        strokeWidth="0.5"
-        strokeLinejoin="round"
-      />
-      <path d="M10.5 17a1.5 1.5 0 0 0 3 0" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+      <rect width="512" height="512" rx="96" fill="url(#logo-bg)" />
+      <path d="M256 100c-8 0-16 6-16 14v18c-52 10-90 56-90 110v60l-24 32c-4 5-1 14 6 14h248c7 0 10-9 6-14l-24-32v-60c0-54-38-100-90-110v-18c0-8-8-14-16-14zm-30 268c0 17 13 30 30 30s30-13 30-30z" fill="url(#logo-bell)" />
+      <rect x="68" y="210" width="48" height="10" rx="5" fill="#818cf8" opacity=".7" />
+      <rect x="56" y="240" width="60" height="10" rx="5" fill="#818cf8" opacity=".5" />
+      <rect x="68" y="270" width="48" height="10" rx="5" fill="#818cf8" opacity=".3" />
+      <path d="M230 280l22 22 40-44" fill="none" stroke="url(#logo-check)" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
