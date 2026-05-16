@@ -139,14 +139,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                         href={entry.href}
                         className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition ${
                           active
-                            ? "bg-brand-50 font-medium text-brand-800"
+                            ? "bg-brand-100 font-semibold text-brand-900 ring-2 ring-brand-300 shadow-sm"
                             : "text-neutral-700 hover:bg-neutral-100"
                         }`}
                       >
                         <Icon
                           size={18}
                           className={
-                            active ? "text-brand-600" : "text-neutral-400 group-hover:text-neutral-700"
+                            active ? "text-brand-700" : "text-neutral-400 group-hover:text-neutral-700"
                           }
                         />
                         <span className="flex-1 truncate">{entry.label}</span>
@@ -171,7 +171,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                   href={entry.href}
                   className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 ${
                     active
-                      ? "bg-brand-50 font-medium text-brand-800"
+                      ? "bg-brand-100 font-semibold text-brand-900 ring-2 ring-brand-300"
                       : "text-neutral-700 hover:bg-neutral-100"
                   }`}
                 >
