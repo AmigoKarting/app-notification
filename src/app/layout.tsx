@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ThemeInitScript, ThemeProvider } from "@/components/theme-provider";
+import { NavProgress } from "@/components/nav-progress";
 import { getAppSettings } from "@/domain/branding/repository";
 import "./globals.css";
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeInitScript />
       </head>
       <body className="min-h-screen bg-neutral-50 text-neutral-900 antialiased">
+        <NavProgress />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
