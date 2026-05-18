@@ -8,6 +8,7 @@ import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
+import { InstallAppBanner, InstallAppButton } from "@/components/install-app";
 import { getServerDictionary } from "@/lib/i18n/server";
 
 const DEV_ONLY_PREFIXES = ["/dashboard", "/employees", "/reminders", "/admin"];
@@ -116,6 +117,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+
+      <footer className="border-t border-neutral-200 bg-white/60 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-900/60">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+          <p className="text-xs text-neutral-400 dark:text-neutral-500">
+            {branding.app_name}
+          </p>
+          <InstallAppButton />
+        </div>
+      </footer>
+
+      <InstallAppBanner />
       <OnboardingModal />
       <KeyboardShortcuts isDev={isDev} />
     </div>

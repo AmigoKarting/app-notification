@@ -809,6 +809,14 @@ const fr = {
     backHome: "Retour à l'accueil",
   },
 
+  install: {
+    title: "Installer l'application",
+    description: "Ajoute l'app sur ton écran d'accueil pour y accéder plus vite, même hors ligne.",
+    installBtn: "Installer",
+    later: "Plus tard",
+    downloadApp: "Télécharger l'app",
+  },
+
   shortcuts: {
     title: "Raccourcis clavier",
     goHome: "Aller à l'accueil",

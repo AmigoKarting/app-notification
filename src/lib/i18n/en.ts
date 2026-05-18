@@ -811,6 +811,14 @@ const en: Dictionary = {
     backHome: "Back to home",
   },
 
+  install: {
+    title: "Install the app",
+    description: "Add the app to your home screen for quick access, even offline.",
+    installBtn: "Install",
+    later: "Later",
+    downloadApp: "Download the app",
+  },
+
   shortcuts: {
     title: "Keyboard shortcuts",
     goHome: "Go to home",
