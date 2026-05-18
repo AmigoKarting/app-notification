@@ -108,6 +108,8 @@ const en: Dictionary = {
     markAsUnread: "Mark as unread",
     muted: "🔕 Muted",
     received: "🔔 Active",
+    searchPlaceholder: "Search notifications...",
+    noSearchResults: "No notifications match your search.",
   },
 
   adminOverview: {
@@ -742,8 +744,21 @@ const en: Dictionary = {
     adminBranding: "Customize the app name, logo, and tagline. These settings are visible to all users.",
   },
 
+  pagination: {
+    previous: "Previous",
+    next: "Next",
+    pageOf: "Page {page} of {total}",
+    showing: "{from}-{to} of {total}",
+  },
+
   meta: {
     defaultDescription: "Notification and reminder management",
+  },
+
+  notFound: {
+    title: "Page not found",
+    description: "The page you're looking for doesn't exist or has been moved.",
+    backHome: "Back to home",
   },
 } as const;
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, EmptyState, PageHeader, PageTip, formatDateTime } from "@/components/ui";
+import { Pagination } from "@/components/pagination";
 import { channelRegistry } from "@/lib/messaging";
 import { getDeliveryCounts, listDeliveries } from "@/domain/deliveries/repository";
 import type { DeliveryStatus, MessageChannel } from "@/lib/supabase/database.types";
@@ -10,8 +11,10 @@ export const dynamic = "force-dynamic";
 const CHANNELS: MessageChannel[] = ["email", "sms", "whatsapp"];
 const STATUSES: DeliveryStatus[] = ["queued", "sent", "failed", "skipped"];
 
+const PER_PAGE = 20;
+
 interface PageProps {
-  searchParams?: { channel?: string; status?: string };
+  searchParams?: { channel?: string; status?: string; page?: string };
 }
 
 export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
@@ -27,10 +30,20 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
       ? (searchParams.status as DeliveryStatus)
       : undefined;
 
-  const [deliveries, counts] = await Promise.all([
-    listDeliveries({ channel, status, limit: 200 }),
+  const page = Math.max(1, Number(searchParams?.page) || 1);
+
+  const [allDeliveries, counts] = await Promise.all([
+    listDeliveries({ channel, status, limit: 1000 }),
     getDeliveryCounts(),
   ]);
+
+  const totalPages = Math.ceil(allDeliveries.length / PER_PAGE);
+  const deliveries = allDeliveries.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  // Build extra params for pagination links
+  const paginationParams: Record<string, string> = {};
+  if (channel) paginationParams.channel = channel;
+  if (status) paginationParams.status = status;
 
   const registered = channelRegistry.list();
 
@@ -85,9 +98,10 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
         ))}
       </div>
 
-      {deliveries.length === 0 ? (
+      {allDeliveries.length === 0 ? (
         <EmptyState title={t.adminDeliveries.noDeliveries} description={t.adminDeliveries.noDeliveriesDesc} />
       ) : (
+        <>
         <Card>
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
@@ -140,6 +154,17 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
             </tbody>
           </table>
         </Card>
+
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          baseUrl="/admin/deliveries"
+          extraParams={paginationParams}
+          labels={t.pagination}
+          totalItems={allDeliveries.length}
+          perPage={PER_PAGE}
+        />
+        </>
       )}
       <PageTip>{t.pageTips.adminDeliveries}</PageTip>
     </div>

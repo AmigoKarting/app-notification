@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, EmptyState, LinkButton, PageHeader, PageTip, formatDateTime } from "@/components/ui";
+import { Pagination } from "@/components/pagination";
 import { CategoryChip } from "@/components/feed-card";
 import { duplicateFeedItemAction, toggleFeedItemPinAction } from "@/domain/feed/actions";
 import { listFeedItems } from "@/domain/feed/repository";
@@ -12,8 +13,10 @@ export const dynamic = "force-dynamic";
 
 const KINDS: FeedItemKind[] = ["notification", "reminder"];
 
+const PER_PAGE = 20;
+
 interface PageProps {
-  searchParams?: { kind?: string; q?: string; author?: string };
+  searchParams?: { kind?: string; q?: string; author?: string; page?: string };
 }
 
 export default async function AdminFeedPage({ searchParams }: PageProps) {
@@ -26,17 +29,26 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
       : undefined;
   const search = searchParams?.q?.trim() ?? "";
   const authorId = searchParams?.author?.trim() || undefined;
+  const page = Math.max(1, Number(searchParams?.page) || 1);
 
-  const [items, authors] = await Promise.all([
+  const [allItems, authors] = await Promise.all([
     listFeedItems({
       kind,
       search: search || undefined,
       authorId,
-      limit: 200,
+      limit: 1000,
     }),
     listProfilesWithEmail(),
   ]);
   const devs = authors.filter((a) => a.role === "dev");
+  const totalPages = Math.ceil(allItems.length / PER_PAGE);
+  const items = allItems.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  // Build extra params for pagination links
+  const paginationParams: Record<string, string> = {};
+  if (kind) paginationParams.kind = kind;
+  if (search) paginationParams.q = search;
+  if (authorId) paginationParams.author = authorId;
 
   // Conserve le filtre kind dans l'URL de recherche
   const baseParams = new URLSearchParams();
@@ -104,7 +116,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
         />
       </div>
 
-      {items.length === 0 ? (
+      {allItems.length === 0 ? (
         <EmptyState
           title={search ? t.adminFeed.noResults : t.adminFeed.noItems}
           description={
@@ -120,7 +132,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
         <>
           {search && (
             <p className="text-xs text-neutral-500">
-              {items.length} {items.length > 1 ? t.adminFeed.resultsPlural : t.adminFeed.results} {t.adminFeed.forQuery} {search} »
+              {allItems.length} {allItems.length > 1 ? t.adminFeed.resultsPlural : t.adminFeed.results} {t.adminFeed.forQuery} {search} »
             </p>
           )}
           {/* Mobile: card layout */}
@@ -259,6 +271,16 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
               </tbody>
             </table>
           </Card>
+
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            baseUrl="/admin/feed"
+            extraParams={paginationParams}
+            labels={t.pagination}
+            totalItems={allItems.length}
+            perPage={PER_PAGE}
+          />
         </>
       )}
       <PageTip>{t.pageTips.adminFeed}</PageTip>

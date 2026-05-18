@@ -8,6 +8,7 @@ import {
   StatusBadge,
   formatDateTime,
 } from "@/components/ui";
+import { Pagination } from "@/components/pagination";
 import { listReminders, type ReminderStatus } from "@/domain/reminders/repository";
 import { CancelReminderForm } from "./cancel-form";
 import { getServerDictionary, getLocale } from "@/lib/i18n/server";
@@ -15,9 +16,10 @@ import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 export const dynamic = "force-dynamic";
 
 const VALID_STATUSES: ReminderStatus[] = ["pending", "sent", "cancelled", "failed"];
+const PER_PAGE = 20;
 
 interface PageProps {
-  searchParams?: { status?: string };
+  searchParams?: { status?: string; page?: string };
 }
 
 export default async function RemindersPage({ searchParams }: PageProps) {
@@ -29,7 +31,14 @@ export default async function RemindersPage({ searchParams }: PageProps) {
       ? (requested as ReminderStatus)
       : undefined;
 
-  const reminders = await listReminders({ status });
+  const page = Math.max(1, Number(searchParams?.page) || 1);
+  const allReminders = await listReminders({ status, limit: 1000 });
+  const totalPages = Math.ceil(allReminders.length / PER_PAGE);
+  const reminders = allReminders.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  // Build extra params for pagination links
+  const paginationParams: Record<string, string> = {};
+  if (status) paginationParams.status = status;
 
   return (
     <div className="space-y-6">
@@ -51,7 +60,7 @@ export default async function RemindersPage({ searchParams }: PageProps) {
         />
       </div>
 
-      {reminders.length === 0 ? (
+      {allReminders.length === 0 ? (
         <EmptyState
           title={t.reminders.noReminders}
           description={
@@ -62,6 +71,7 @@ export default async function RemindersPage({ searchParams }: PageProps) {
           action={!status && <LinkButton href="/reminders/new">{t.reminders.createReminder}</LinkButton>}
         />
       ) : (
+        <>
         <Card>
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
@@ -105,6 +115,17 @@ export default async function RemindersPage({ searchParams }: PageProps) {
             </tbody>
           </table>
         </Card>
+
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          baseUrl="/reminders"
+          extraParams={paginationParams}
+          labels={t.pagination}
+          totalItems={allReminders.length}
+          perPage={PER_PAGE}
+        />
+        </>
       )}
 
       <PageTip>{t.pageTips.reminders}</PageTip>

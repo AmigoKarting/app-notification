@@ -106,6 +106,8 @@ const fr = {
     markAsUnread: "Marquer comme non lu",
     muted: "🔕 Masquée",
     received: "🔔 Reçue",
+    searchPlaceholder: "Rechercher dans les notifications...",
+    noSearchResults: "Aucune notification ne correspond à votre recherche.",
   },
 
   adminOverview: {
@@ -740,8 +742,21 @@ const fr = {
     adminBranding: "Personnalise le nom de l'app, le logo et la tagline. Ces réglages sont visibles par tous les utilisateurs.",
   },
 
+  pagination: {
+    previous: "Précédent",
+    next: "Suivant",
+    pageOf: "Page {page} sur {total}",
+    showing: "{from}-{to} sur {total}",
+  },
+
   meta: {
     defaultDescription: "Gestion de notifications et rappels",
+  },
+
+  notFound: {
+    title: "Page introuvable",
+    description: "La page que vous cherchez n'existe pas ou a été déplacée.",
+    backHome: "Retour à l'accueil",
   },
 } as const;
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ThemeInitScript, ThemeProvider } from "@/components/theme-provider";
+import { ToastProvider } from "@/components/toast";
 import { NavProgress } from "@/components/nav-progress";
 import { LocaleProvider } from "@/lib/i18n/context";
 import { getLocale, getServerDictionary } from "@/lib/i18n/server";
@@ -26,7 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-neutral-50 text-neutral-900 antialiased">
         <NavProgress />
         <ThemeProvider>
-          <LocaleProvider locale={locale}>{children}</LocaleProvider>
+          <ToastProvider>
+            <LocaleProvider locale={locale}>{children}</LocaleProvider>
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

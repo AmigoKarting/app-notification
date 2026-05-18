@@ -1,18 +1,28 @@
 import Link from "next/link";
 import { Card, EmptyState, LinkButton, PageHeader, PageTip } from "@/components/ui";
+import { Pagination } from "@/components/pagination";
 import { listEmployees } from "@/domain/employees/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
+const PER_PAGE = 20;
+
 interface PageProps {
-  searchParams?: { q?: string };
+  searchParams?: { q?: string; page?: string };
 }
 
 export default async function EmployeesPage({ searchParams }: PageProps) {
   const t = getServerDictionary();
   const search = searchParams?.q?.trim() ?? "";
-  const employees = await listEmployees({ search: search || undefined });
+  const page = Math.max(1, Number(searchParams?.page) || 1);
+  const allEmployees = await listEmployees({ search: search || undefined, limit: 1000 });
+  const totalPages = Math.ceil(allEmployees.length / PER_PAGE);
+  const employees = allEmployees.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  // Build extra params for pagination links
+  const paginationParams: Record<string, string> = {};
+  if (search) paginationParams.q = search;
 
   return (
     <div className="space-y-6">
@@ -40,7 +50,7 @@ export default async function EmployeesPage({ searchParams }: PageProps) {
         )}
       </form>
 
-      {employees.length === 0 ? (
+      {allEmployees.length === 0 ? (
         <EmptyState
           title={search ? t.employees.noResults : t.employees.noEmployees}
           description={
@@ -51,6 +61,7 @@ export default async function EmployeesPage({ searchParams }: PageProps) {
           action={!search && <LinkButton href="/employees/new">{t.employees.addEmployee}</LinkButton>}
         />
       ) : (
+        <>
         <Card>
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
@@ -80,6 +91,17 @@ export default async function EmployeesPage({ searchParams }: PageProps) {
             </tbody>
           </table>
         </Card>
+
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          baseUrl="/employees"
+          extraParams={paginationParams}
+          labels={t.pagination}
+          totalItems={allEmployees.length}
+          perPage={PER_PAGE}
+        />
+        </>
       )}
 
       <PageTip>{t.pageTips.employees}</PageTip>
