@@ -7,6 +7,7 @@ import { requireDev } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { RepositoryError } from "@/domain/errors";
 import { type FormState } from "@/domain/form-state";
+import { getServerDictionary } from "@/lib/i18n/server";
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 import { dispatchFeedItemExternal } from "./dispatcher";
@@ -26,10 +27,11 @@ function fieldErrorsFromZod(err: import("zod").ZodError<unknown>): Record<string
 }
 
 function mapError(err: unknown): FormState<FeedItem> {
+  const t = getServerDictionary();
   if (err instanceof RepositoryError) {
     return { status: "error", message: err.message };
   }
-  return { status: "error", message: "Erreur inattendue" };
+  return { status: "error", message: t.errors.unexpected };
 }
 
 function readForm(formData: FormData) {
@@ -60,11 +62,12 @@ export async function createFeedItemAction(
   formData: FormData,
 ): Promise<FormState<FeedItem>> {
   const profile = await requireDev();
+  const t = getServerDictionary();
   const parsed = createFeedItemSchema.safeParse(readForm(formData));
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -106,11 +109,12 @@ export async function updateFeedItemAction(
   formData: FormData,
 ): Promise<FormState<FeedItem>> {
   await requireDev();
+  const t = getServerDictionary();
   const parsed = updateFeedItemSchema.safeParse(readForm(formData));
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -122,7 +126,7 @@ export async function updateFeedItemAction(
   revalidatePath("/admin/feed");
   revalidatePath(`/admin/feed/${id}`);
   revalidatePath("/feed");
-  return { status: "success", message: "Élément mis à jour." };
+  return { status: "success", message: t.actionMessages.feedItemUpdated };
 }
 
 export async function deleteFeedItemAction(formData: FormData): Promise<void> {

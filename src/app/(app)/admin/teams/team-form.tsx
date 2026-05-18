@@ -5,6 +5,7 @@ import { Button, Field, FormError } from "@/components/ui";
 import { createTeamAction, updateTeamAction } from "@/domain/teams/actions";
 import { idleFormState, type FormState } from "@/domain/form-state";
 import type { Team } from "@/domain/teams/repository";
+import { useTranslation } from "@/lib/i18n";
 
 const PRESET_COLORS = [
   "#6b7280", "#dc2626", "#ea580c", "#ca8a04",
@@ -13,16 +14,17 @@ const PRESET_COLORS = [
 
 type Props = { mode: "create" } | { mode: "edit"; team: Team };
 
-function SubmitButton({ label }: { label: string }) {
+function SubmitButton({ label, savingLabel }: { label: string; savingLabel: string }) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Enregistrement..." : label}
+      {pending ? savingLabel : label}
     </Button>
   );
 }
 
 export function TeamForm(props: Props) {
+  const { t } = useTranslation();
   const action =
     props.mode === "create"
       ? createTeamAction
@@ -38,15 +40,15 @@ export function TeamForm(props: Props) {
   return (
     <form action={formAction} className="space-y-4" noValidate>
       <Field
-        label="Slug"
+        label={t.adminTeams.slug}
         name="slug"
         defaultValue={initial?.slug ?? ""}
         required
-        hint="Identifiant technique. Ex: 'commerciaux', 'tech'"
+        hint={t.adminTeams.slugHint}
         error={errors?.slug}
       />
       <Field
-        label="Nom de l'équipe"
+        label={t.adminTeams.teamName}
         name="name"
         defaultValue={initial?.name ?? ""}
         required
@@ -54,7 +56,7 @@ export function TeamForm(props: Props) {
       />
 
       <fieldset>
-        <legend className="mb-1.5 block text-sm font-medium text-neutral-800">Couleur</legend>
+        <legend className="mb-1.5 block text-sm font-medium text-neutral-800">{t.adminTeams.color}</legend>
         <div className="flex flex-wrap gap-2">
           {PRESET_COLORS.map((c) => (
             <label key={c} className="cursor-pointer">
@@ -83,7 +85,7 @@ export function TeamForm(props: Props) {
       )}
 
       <div className="flex justify-end pt-2">
-        <SubmitButton label={props.mode === "create" ? "Créer" : "Enregistrer"} />
+        <SubmitButton label={props.mode === "create" ? t.common.create : t.common.save} savingLabel={t.common.saving} />
       </div>
     </form>
   );

@@ -4,16 +4,20 @@ import {
   EmptyState,
   LinkButton,
   PageHeader,
+  PageTip,
   PlusIcon,
 } from "@/components/ui";
 import { listCategories } from "@/domain/categories/repository";
 import { listFeedItems } from "@/domain/feed/repository";
 import { listSchedules } from "@/domain/notification-schedules/repository";
 import { listActiveSessions } from "@/domain/sessions/repository";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverviewPage() {
+  const t = getServerDictionary();
+  const locale = getLocale();
   let feed: Awaited<ReturnType<typeof listFeedItems>> = [];
   let categories: Awaited<ReturnType<typeof listCategories>> = [];
   let activeSessions: Awaited<ReturnType<typeof listActiveSessions>> = [];
@@ -38,13 +42,12 @@ export default async function AdminOverviewPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Aperçu"
-        description="Tout ce qui compte au même endroit."
+        title={t.adminOverview.title}
+        description={t.adminOverview.description}
       />
-
       {loadError && (
         <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
-          <p className="font-semibold">Erreur de chargement :</p>
+          <p className="font-semibold">{t.adminOverview.loadError}</p>
           <pre className="mt-1 whitespace-pre-wrap text-xs">{loadError}</pre>
         </div>
       )}
@@ -53,54 +56,54 @@ export default async function AdminOverviewPage() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <ActionCard
           href="/admin/feed/new"
-          title="Envoyer une notification"
-          description="Un message ponctuel, maintenant ou à une date précise."
+          title={t.adminOverview.sendNotification}
+          description={t.adminOverview.sendNotificationDesc}
         />
         <ActionCard
           href="/admin/schedules/new"
-          title="Planifier un message récurrent"
-          description="Choisis des heures et des jours — l'envoi est automatique."
+          title={t.adminOverview.planRecurring}
+          description={t.adminOverview.planRecurringDesc}
         />
       </section>
 
       {/* Stats compactes */}
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
-          label="Notifications publiées"
+          label={t.adminOverview.publishedNotifications}
           value={feed.length}
           href="/admin/feed"
         />
         <Stat
-          label="Planifications actives"
+          label={t.adminOverview.activeSchedules}
           value={activeSchedules}
-          hint={`${schedules.length} au total`}
+          hint={`${schedules.length} ${t.adminOverview.total}`}
           href="/admin/schedules"
         />
         <Stat
-          label="Périodes en cours"
+          label={t.adminOverview.activePeriods}
           value={activeSessions.length}
           href="/admin/sessions"
         />
-        <Stat label="Catégories" value={categories.length} href="/admin/categories" />
+        <Stat label={t.adminOverview.categories} value={categories.length} href="/admin/categories" />
       </section>
 
       {/* Listes */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold">Dernières notifications</h2>
+            <h2 className="text-base font-semibold">{t.adminOverview.latestNotifications}</h2>
             <Link
               href="/admin/feed"
               className="text-sm font-medium text-brand-700 hover:underline"
             >
-              Tout voir →
+              {t.adminOverview.viewAll}
             </Link>
           </div>
           {feed.length === 0 ? (
             <EmptyState
-              title="Rien encore"
-              description="Publie ta première notification."
-              action={<LinkButton href="/admin/feed/new">Envoyer maintenant</LinkButton>}
+              title={t.adminOverview.nothingYet}
+              description={t.adminOverview.publishFirst}
+              action={<LinkButton href="/admin/feed/new">{t.adminOverview.sendNow}</LinkButton>}
             />
           ) : (
             <Card>
@@ -115,7 +118,7 @@ export default async function AdminOverviewPage() {
                         {it.title}
                       </p>
                       <p className="text-xs text-neutral-500">
-                        {it.kind === "reminder" ? "Rappel" : "Notification"}
+                        {it.kind === "reminder" ? t.feed.reminder : t.feed.notification}
                         {it.category && ` • ${it.category.name}`}
                       </p>
                     </div>
@@ -123,7 +126,7 @@ export default async function AdminOverviewPage() {
                       href={`/admin/feed/${it.id}`}
                       className="text-xs font-medium text-neutral-700 hover:underline"
                     >
-                      Ouvrir
+                      {t.common.edit}
                     </Link>
                   </li>
                 ))}
@@ -134,19 +137,19 @@ export default async function AdminOverviewPage() {
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold">Prochains envois automatiques</h2>
+            <h2 className="text-base font-semibold">{t.adminOverview.upcomingAutoSends}</h2>
             <Link
               href="/admin/schedules"
               className="text-sm font-medium text-brand-700 hover:underline"
             >
-              Tout voir →
+              {t.adminOverview.viewAll}
             </Link>
           </div>
           {schedules.length === 0 ? (
             <EmptyState
-              title="Aucune planification"
-              description="Automatise tes notifications récurrentes."
-              action={<LinkButton href="/admin/schedules/new">Créer</LinkButton>}
+              title={t.adminOverview.noSchedules}
+              description={t.adminOverview.automateNotifications}
+              action={<LinkButton href="/admin/schedules/new">{t.adminOverview.create}</LinkButton>}
             />
           ) : (
             <Card>
@@ -162,12 +165,12 @@ export default async function AdminOverviewPage() {
                       </p>
                       <p className="text-xs text-neutral-500">
                         {s.is_active && s.next_run_at
-                          ? `Prochain : ${new Date(s.next_run_at).toLocaleString("fr-FR", {
+                          ? `${t.adminOverview.next} ${new Date(s.next_run_at).toLocaleString(locale === "en" ? "en-US" : "fr-FR", {
                               dateStyle: "short",
                               timeStyle: "short",
                               timeZone: s.timezone,
                             })}`
-                          : "En pause"}
+                          : t.adminOverview.paused}
                       </p>
                     </div>
                     <span
@@ -177,7 +180,7 @@ export default async function AdminOverviewPage() {
                           : "bg-neutral-100 text-neutral-700 ring-neutral-200"
                       }`}
                     >
-                      {s.is_active ? "Actif" : "Pause"}
+                      {s.is_active ? t.adminOverview.active : t.adminOverview.paused}
                     </span>
                   </li>
                 ))}
@@ -186,6 +189,8 @@ export default async function AdminOverviewPage() {
           )}
         </div>
       </section>
+
+      <PageTip>{t.pageTips.adminOverview}</PageTip>
     </div>
   );
 }

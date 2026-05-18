@@ -2,8 +2,9 @@
 
 import { useFormStatus } from "react-dom";
 import { cancelReminderAction } from "@/domain/reminders/actions";
+import { useTranslation } from "@/lib/i18n";
 
-function CancelButton() {
+function CancelButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -11,21 +12,22 @@ function CancelButton() {
       disabled={pending}
       className="text-sm text-neutral-600 hover:underline disabled:opacity-50"
     >
-      {pending ? "..." : "Annuler"}
+      {pending ? "..." : label}
     </button>
   );
 }
 
 export function CancelReminderForm({ id }: { id: string }) {
+  const { t } = useTranslation();
   return (
     <form
       action={cancelReminderAction}
       onSubmit={(e) => {
-        if (!window.confirm("Annuler ce rappel ?")) e.preventDefault();
+        if (!window.confirm(t.reminders.cancelConfirm)) e.preventDefault();
       }}
     >
       <input type="hidden" name="id" value={id} />
-      <CancelButton />
+      <CancelButton label={t.reminders.cancel} />
     </form>
   );
 }

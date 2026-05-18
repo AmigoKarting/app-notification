@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card, PageHeader } from "@/components/ui";
-import { GUIDE_CATEGORIES } from "./layout";
+import { GUIDE_CATEGORIES } from "./guides";
 
 export default function HelpIndexPage() {
   return (

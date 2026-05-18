@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Card, EmptyState, LinkButton, PageHeader, formatDateTime } from "@/components/ui";
+import { Card, EmptyState, LinkButton, PageHeader, PageTip, formatDateTime } from "@/components/ui";
 import { CategoryChip } from "@/components/feed-card";
 import { duplicateFeedItemAction, toggleFeedItemPinAction } from "@/domain/feed/actions";
 import { listFeedItems } from "@/domain/feed/repository";
 import { listProfilesWithEmail } from "@/domain/users/repository";
 import type { FeedItemKind } from "@/lib/supabase/database.types";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 import { AuthorFilter } from "./author-filter";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,9 @@ interface PageProps {
 }
 
 export default async function AdminFeedPage({ searchParams }: PageProps) {
+  const t = getServerDictionary();
+  const locale = getLocale();
+  const dateFmt = locale === "en" ? "en-US" : "fr-FR";
   const kind =
     searchParams?.kind && (KINDS as string[]).includes(searchParams.kind)
       ? (searchParams.kind as FeedItemKind)
@@ -49,11 +53,10 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Notifications & rappels"
-        description="Tous les éléments publiés (visibles ou non)."
-        action={<LinkButton href="/admin/feed/new">Nouvel élément</LinkButton>}
+        title={t.adminFeed.title}
+        description={t.adminFeed.description}
+        action={<LinkButton href="/admin/feed/new">{t.adminFeed.newItem}</LinkButton>}
       />
-
       {/* Barre de recherche */}
       <form
         action="/admin/feed"
@@ -65,7 +68,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
           type="search"
           name="q"
           defaultValue={search}
-          placeholder="Rechercher par titre ou contenu…"
+          placeholder={t.adminFeed.searchPlaceholder}
           className="w-full max-w-md rounded-lg border border-neutral-300 bg-white px-3.5 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
         />
         {search && (
@@ -73,22 +76,22 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
             href={baseQs ? `/admin/feed?${baseQs}` : "/admin/feed"}
             className="text-sm font-medium text-neutral-600 hover:text-neutral-900 hover:underline"
           >
-            Effacer
+            {t.common.clear}
           </Link>
         )}
       </form>
 
       <div className="flex flex-wrap gap-2 text-sm">
-        <Filter href={filterHref(undefined)} active={!kind} label="Tous" />
+        <Filter href={filterHref(undefined)} active={!kind} label={t.adminFeed.all} />
         <Filter
           href={filterHref("notification")}
           active={kind === "notification"}
-          label="Notifications"
+          label={t.adminFeed.notifications}
         />
         <Filter
           href={filterHref("reminder")}
           active={kind === "reminder"}
-          label="Rappels"
+          label={t.adminFeed.reminders}
         />
         <AuthorFilter
           authors={devs.map((d) => ({
@@ -103,32 +106,80 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
 
       {items.length === 0 ? (
         <EmptyState
-          title={search ? "Aucun résultat" : "Aucun élément"}
+          title={search ? t.adminFeed.noResults : t.adminFeed.noItems}
           description={
             search
-              ? "Aucune notification ne contient ce texte. Essaie une autre recherche."
-              : "Crée une première notification ou un rappel."
+              ? t.adminFeed.noResultsDesc
+              : t.adminFeed.noItemsDesc
           }
           action={
-            !search && <LinkButton href="/admin/feed/new">Nouvel élément</LinkButton>
+            !search && <LinkButton href="/admin/feed/new">{t.adminFeed.newItem}</LinkButton>
           }
         />
       ) : (
         <>
           {search && (
             <p className="text-xs text-neutral-500">
-              {items.length} résultat{items.length > 1 ? "s" : ""} pour « {search} »
+              {items.length} {items.length > 1 ? t.adminFeed.resultsPlural : t.adminFeed.results} {t.adminFeed.forQuery} {search} »
             </p>
           )}
-          <Card>
+          {/* Mobile: card layout */}
+          <div className="space-y-3 md:hidden">
+            {items.map((it) => (
+              <Card key={it.id} className="p-4">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {it.is_pinned && (
+                    <span className="rounded-full bg-brand-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-brand-700 ring-1 ring-brand-200">
+                      📌 {t.feed.pinned}
+                    </span>
+                  )}
+                  {it.is_draft && (
+                    <span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-700 ring-1 ring-amber-200">
+                      ✏ {t.feed.draft}
+                    </span>
+                  )}
+                  <span className="text-xs capitalize text-neutral-500">
+                    {it.kind === "reminder" ? t.feed.reminder : t.feed.notification}
+                  </span>
+                  <CategoryChip category={it.category} />
+                </div>
+                <p className="mt-1 font-medium text-neutral-900">{it.title}</p>
+                {it.priority === "high" && (
+                  <span className="text-xs text-red-600">{t.feed.highPriority}</span>
+                )}
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-xs text-neutral-500">{formatDateTime(it.published_at, dateFmt)}</span>
+                  <div className="flex items-center gap-3 text-sm">
+                    <form action={toggleFeedItemPinAction}>
+                      <input type="hidden" name="id" value={it.id} />
+                      <input type="hidden" name="is_pinned" value={String(it.is_pinned)} />
+                      <button type="submit" className={`hover:underline ${it.is_pinned ? "text-brand-700" : "text-neutral-500"}`}>
+                        📌
+                      </button>
+                    </form>
+                    <form action={duplicateFeedItemAction}>
+                      <input type="hidden" name="id" value={it.id} />
+                      <button type="submit" className="text-neutral-500 hover:text-neutral-900">📋</button>
+                    </form>
+                    <Link href={`/admin/feed/${it.id}`} className="font-medium text-brand-700 hover:underline">
+                      {t.adminFeed.edit}
+                    </Link>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Desktop: table layout */}
+          <Card className="hidden md:block">
             <table className="w-full text-sm">
               <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
                 <tr>
-                  <th className="px-4 py-2 font-medium">Titre</th>
-                  <th className="px-4 py-2 font-medium">Type</th>
-                  <th className="px-4 py-2 font-medium">Catégorie</th>
-                  <th className="px-4 py-2 font-medium">Session</th>
-                  <th className="px-4 py-2 font-medium">Publié</th>
+                  <th className="px-4 py-2 font-medium">{t.adminFeed.titleHeader}</th>
+                  <th className="px-4 py-2 font-medium">{t.adminFeed.typeHeader}</th>
+                  <th className="px-4 py-2 font-medium">{t.adminFeed.categoryHeader}</th>
+                  <th className="px-4 py-2 font-medium">{t.adminFeed.sessionHeader}</th>
+                  <th className="px-4 py-2 font-medium">{t.adminFeed.publishedHeader}</th>
                   <th className="px-4 py-2 font-medium text-right"></th>
                 </tr>
               </thead>
@@ -139,18 +190,18 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
                       <div className="flex flex-wrap items-center gap-1.5">
                         {it.is_pinned && (
                           <span className="rounded-full bg-brand-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-brand-700 ring-1 ring-brand-200">
-                            📌 Épinglé
+                            📌 {t.feed.pinned}
                           </span>
                         )}
                         {it.is_draft && (
                           <span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-700 ring-1 ring-amber-200">
-                            ✏ Brouillon
+                            ✏ {t.feed.draft}
                           </span>
                         )}
                         <p className="truncate font-medium text-neutral-900">{it.title}</p>
                       </div>
                       {it.priority === "high" && (
-                        <span className="text-xs text-red-600">Priorité haute</span>
+                        <span className="text-xs text-red-600">{t.feed.highPriority}</span>
                       )}
                       {it.send_channels && it.send_channels.length > 0 && (
                         <span className="block text-xs text-neutral-400">
@@ -159,7 +210,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
                       )}
                     </td>
                     <td className="px-4 py-3 align-top capitalize">
-                      {it.kind === "reminder" ? "Rappel" : "Notification"}
+                      {it.kind === "reminder" ? t.feed.reminder : t.feed.notification}
                     </td>
                     <td className="px-4 py-3 align-top">
                       <CategoryChip category={it.category} />
@@ -168,7 +219,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
                       {it.session?.name ?? "—"}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 align-top text-neutral-700">
-                      {formatDateTime(it.published_at)}
+                      {formatDateTime(it.published_at, dateFmt)}
                     </td>
                     <td className="px-4 py-3 align-top text-right">
                       <div className="flex justify-end gap-3 text-sm">
@@ -180,7 +231,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
                             className={`font-medium hover:underline ${
                               it.is_pinned ? "text-brand-700" : "text-neutral-500"
                             }`}
-                            title={it.is_pinned ? "Désépingler" : "Épingler"}
+                            title={it.is_pinned ? t.adminFeed.unpin : t.adminFeed.pin}
                           >
                             📌
                           </button>
@@ -190,7 +241,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
                           <button
                             type="submit"
                             className="font-medium text-neutral-500 hover:text-neutral-900 hover:underline"
-                            title="Dupliquer"
+                            title={t.adminFeed.duplicate}
                           >
                             📋
                           </button>
@@ -199,7 +250,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
                           href={`/admin/feed/${it.id}`}
                           className="font-medium text-neutral-900 hover:underline"
                         >
-                          Modifier
+                          {t.adminFeed.edit}
                         </Link>
                       </div>
                     </td>
@@ -210,6 +261,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
           </Card>
         </>
       )}
+      <PageTip>{t.pageTips.adminFeed}</PageTip>
     </div>
   );
 }

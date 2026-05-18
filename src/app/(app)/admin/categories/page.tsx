@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { Card, EmptyState, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { countUnclaimedCategories, listCategories } from "@/domain/categories/repository";
+import { getServerDictionary } from "@/lib/i18n/server";
 import { ClaimSystemBanner } from "./claim-banner";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCategoriesPage() {
+  const t = getServerDictionary();
   const [categories, unclaimed] = await Promise.all([
     listCategories(),
     countUnclaimedCategories(),
@@ -14,15 +16,14 @@ export default async function AdminCategoriesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Catégories"
-        description="Tags pour classer les notifications et rappels."
-        action={<LinkButton href="/admin/categories/new">Nouvelle catégorie</LinkButton>}
+        title={t.adminCategories.title}
+        description={t.adminCategories.description}
+        action={<LinkButton href="/admin/categories/new">{t.adminCategories.newCategory}</LinkButton>}
       />
-
       {unclaimed > 0 && <ClaimSystemBanner count={unclaimed} />}
 
       {categories.length === 0 ? (
-        <EmptyState title="Aucune catégorie" description="Crée ta première catégorie." />
+        <EmptyState title={t.adminCategories.noCategories} description={t.adminCategories.noCategoriesDesc} />
       ) : (
         <Card>
           <ul className="divide-y divide-neutral-200">
@@ -50,13 +51,14 @@ export default async function AdminCategoriesPage() {
                   href={`/admin/categories/${c.id}`}
                   className="text-sm font-medium text-neutral-900 hover:underline"
                 >
-                  Modifier
+                  {t.adminCategories.edit}
                 </Link>
               </li>
             ))}
           </ul>
         </Card>
       )}
+      <PageTip>{t.pageTips.adminCategories}</PageTip>
     </div>
   );
 }

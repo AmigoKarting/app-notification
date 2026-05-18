@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, FormError } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslation } from "@/lib/i18n";
 
 function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, "");
@@ -26,6 +27,7 @@ export function ProfileForm({
   initialPhone: string;
 }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [firstName, setFirstName] = useState(initialFirstName);
   const [lastName, setLastName] = useState(initialLastName);
   const [phone, setPhone] = useState(initialPhone);
@@ -43,11 +45,11 @@ export function ProfileForm({
     const phoneDigits = phone.replace(/\D/g, "");
 
     if (!trimmedFirst) {
-      setError("Le prénom est obligatoire");
+      setError(t.profileForm.firstNameRequired);
       return;
     }
     if (!trimmedLast) {
-      setError("Le nom est obligatoire");
+      setError(t.profileForm.lastNameRequired);
       return;
     }
 
@@ -76,7 +78,7 @@ export function ProfileForm({
       setSuccess(true);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inattendue");
+      setError(err instanceof Error ? err.message : t.profileForm.unexpectedError);
     } finally {
       setPending(false);
     }
@@ -86,7 +88,7 @@ export function ProfileForm({
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Prénom</span>
+          <span className="mb-1 block text-sm font-medium">{t.profileForm.firstName}</span>
           <input
             type="text"
             value={firstName}
@@ -97,7 +99,7 @@ export function ProfileForm({
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Nom</span>
+          <span className="mb-1 block text-sm font-medium">{t.profileForm.lastName}</span>
           <input
             type="text"
             value={lastName}
@@ -109,7 +111,7 @@ export function ProfileForm({
       </div>
 
       <label className="block">
-        <span className="mb-1 block text-sm font-medium">Téléphone</span>
+        <span className="mb-1 block text-sm font-medium">{t.profileForm.phone}</span>
         <input
           type="tel"
           value={phone}
@@ -117,20 +119,20 @@ export function ProfileForm({
           className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
         />
         <span className="mt-1 block text-xs text-neutral-500">
-          Les 4 derniers chiffres sont ton mot de passe.
+          {t.profileForm.phoneHint}
         </span>
       </label>
 
       {error && <FormError message={error} />}
       {success && (
         <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-          Profil mis à jour.
+          {t.profileForm.updated}
         </p>
       )}
 
       <div className="flex justify-end">
         <Button type="submit" disabled={pending}>
-          {pending ? "Enregistrement..." : "Enregistrer"}
+          {pending ? t.common.saving : t.common.save}
         </Button>
       </div>
     </form>

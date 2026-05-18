@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Card, EmptyState, LinkButton, PageHeader, formatDateTime } from "@/components/ui";
+import { Card, EmptyState, LinkButton, PageHeader, PageTip, formatDateTime } from "@/components/ui";
 import { toggleSessionAction } from "@/domain/sessions/actions";
 import { isSessionActive, listSessions } from "@/domain/sessions/repository";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,35 +11,37 @@ interface PageProps {
 }
 
 export default async function AdminSessionsPage({ searchParams }: PageProps) {
+  const t = getServerDictionary();
+  const locale = getLocale();
+  const dateFmt = locale === "en" ? "en-US" : "fr-FR";
   const sessions = await listSessions({ categoryId: searchParams?.category });
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Sessions"
-        description="Périodes qui contrôlent la visibilité et l'envoi des notifications."
-        action={<LinkButton href="/admin/sessions/new">Nouvelle session</LinkButton>}
+        title={t.adminSessions.title}
+        description={t.adminSessions.description}
+        action={<LinkButton href="/admin/sessions/new">{t.adminSessions.newSession}</LinkButton>}
       />
-
       {sessions.length === 0 ? (
         <EmptyState
-          title="Aucune session"
+          title={t.adminSessions.noSessions}
           description={
             searchParams?.category
-              ? "Aucune session pour cette catégorie."
-              : "Crée une session pour faire varier les notifications selon la période."
+              ? t.adminCategories.noSessionDesc
+              : t.adminSessions.noSessionsDesc
           }
-          action={<LinkButton href="/admin/sessions/new">Créer une session</LinkButton>}
+          action={<LinkButton href="/admin/sessions/new">{t.adminSessions.newSession}</LinkButton>}
         />
       ) : (
         <Card>
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
               <tr>
-                <th className="px-4 py-2 font-medium">Nom</th>
-                <th className="px-4 py-2 font-medium">Catégorie</th>
-                <th className="px-4 py-2 font-medium">Période</th>
-                <th className="px-4 py-2 font-medium">Statut</th>
+                <th className="px-4 py-2 font-medium">{t.adminSessions.sessionName}</th>
+                <th className="px-4 py-2 font-medium">{t.adminCategories.title}</th>
+                <th className="px-4 py-2 font-medium">{t.feedForm.period}</th>
+                <th className="px-4 py-2 font-medium">{t.adminSchedules.state}</th>
                 <th className="px-4 py-2 font-medium text-right"></th>
               </tr>
             </thead>
@@ -69,7 +72,7 @@ export default async function AdminSessionsPage({ searchParams }: PageProps) {
                       )}
                     </td>
                     <td className="px-4 py-3 text-neutral-700">
-                      {formatDateTime(s.starts_at)} → {formatDateTime(s.ends_at)}
+                      {formatDateTime(s.starts_at, dateFmt)} → {formatDateTime(s.ends_at, dateFmt)}
                     </td>
                     <td className="px-4 py-3">
                       <form action={toggleSessionAction} className="inline-flex items-center gap-2">
@@ -77,7 +80,7 @@ export default async function AdminSessionsPage({ searchParams }: PageProps) {
                         <input type="hidden" name="is_active" value={String(s.is_active)} />
                         <button
                           type="submit"
-                          title={s.is_active ? "Désactiver" : "Activer"}
+                          title={s.is_active ? t.adminCategories.deactivate : t.adminCategories.activate}
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset transition hover:opacity-80 ${
                             !s.is_active
                               ? "bg-neutral-100 text-neutral-700 ring-neutral-200"
@@ -86,7 +89,7 @@ export default async function AdminSessionsPage({ searchParams }: PageProps) {
                                 : "bg-amber-50 text-amber-700 ring-amber-200"
                           }`}
                         >
-                          {!s.is_active ? "Désactivée" : inPeriod ? "En cours" : "Hors période"}
+                          {!s.is_active ? t.adminCategories.deactivated : inPeriod ? t.adminCategories.inProgress : t.adminCategories.outOfPeriod}
                         </button>
                       </form>
                     </td>
@@ -95,7 +98,7 @@ export default async function AdminSessionsPage({ searchParams }: PageProps) {
                         href={`/admin/sessions/${s.id}`}
                         className="text-sm font-medium text-neutral-900 hover:underline"
                       >
-                        Modifier
+                        {t.common.edit}
                       </Link>
                     </td>
                   </tr>
@@ -105,6 +108,7 @@ export default async function AdminSessionsPage({ searchParams }: PageProps) {
           </table>
         </Card>
       )}
+      <PageTip>{t.pageTips.adminSessions}</PageTip>
     </div>
   );
 }

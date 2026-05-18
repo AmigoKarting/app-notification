@@ -8,6 +8,7 @@ import {
 } from "@/domain/categories/actions";
 import { idleFormState, type FormState } from "@/domain/form-state";
 import type { Category } from "@/domain/categories/repository";
+import { useTranslation } from "@/lib/i18n";
 
 const PRESET_COLORS = [
   "#6b7280", "#dc2626", "#ea580c", "#ca8a04",
@@ -16,16 +17,17 @@ const PRESET_COLORS = [
 
 type Props = { mode: "create" } | { mode: "edit"; category: Category };
 
-function SubmitButton({ label }: { label: string }) {
+function SubmitButton({ label, savingLabel }: { label: string; savingLabel: string }) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Enregistrement..." : label}
+      {pending ? savingLabel : label}
     </Button>
   );
 }
 
 export function CategoryForm(props: Props) {
+  const { t } = useTranslation();
   const action =
     props.mode === "create"
       ? createCategoryAction
@@ -41,31 +43,31 @@ export function CategoryForm(props: Props) {
   return (
     <form action={formAction} className="space-y-4" noValidate>
       <Field
-        label="Slug"
+        label={t.adminCategories.slug}
         name="slug"
         defaultValue={initial?.slug ?? ""}
         required
-        hint="Identifiant technique. Ex: 'rh', 'urgent'"
+        hint={t.adminCategories.slugHint}
         error={errors?.slug}
       />
       <Field
-        label="Nom affiché"
+        label={t.adminCategories.displayName}
         name="name"
         defaultValue={initial?.name ?? ""}
         required
         error={errors?.name}
       />
       <Field
-        label="Icône (emoji optionnel)"
+        label={t.adminCategories.icon}
         name="icon"
         defaultValue={initial?.icon ?? ""}
         maxLength={4}
-        hint="Ex: 📢, 🚨, 🎓"
+        hint={t.adminCategories.iconHint}
         error={errors?.icon}
       />
 
       <fieldset>
-        <legend className="mb-1 block text-sm font-medium text-neutral-800">Couleur</legend>
+        <legend className="mb-1 block text-sm font-medium text-neutral-800">{t.adminCategories.color}</legend>
         <div className="flex flex-wrap gap-2">
           {PRESET_COLORS.map((c) => (
             <label key={c} className="cursor-pointer">
@@ -94,7 +96,7 @@ export function CategoryForm(props: Props) {
       )}
 
       <div className="flex justify-end pt-2">
-        <SubmitButton label={props.mode === "create" ? "Créer" : "Enregistrer"} />
+        <SubmitButton label={props.mode === "create" ? t.common.create : t.common.save} savingLabel={t.common.saving} />
       </div>
     </form>
   );

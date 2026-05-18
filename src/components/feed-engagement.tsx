@@ -7,6 +7,7 @@ import {
   markAsUnreadAction,
   toggleReactionAction,
 } from "@/domain/feed/actions";
+import { useTranslation } from "@/lib/i18n";
 
 const DEFAULT_EMOJIS = ["👍", "❤️", "😄", "🎉", "🚀"] as const;
 
@@ -41,6 +42,7 @@ export function ReactionBar({
   counts: Record<string, number>;
   myReactions: string[];
 }) {
+  const { t } = useTranslation();
   const mine = new Set(myReactions);
   // Tous les emojis existants (par défaut + ceux déjà utilisés)
   const allEmojis = Array.from(
@@ -60,7 +62,7 @@ export function ReactionBar({
             <input type="hidden" name="feed_item_id" value={feedItemId} />
             <input type="hidden" name="emoji" value={emoji} />
             <PendingButton
-              title={reacted ? "Retirer ma réaction" : "Réagir"}
+              title={reacted ? t.feed.removeReaction : t.feed.react}
               className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-sm transition ${
                 reacted
                   ? "border-brand-500 bg-brand-50 text-brand-800"
@@ -119,7 +121,7 @@ export function ReactionBar({
         <button
           type="button"
           onClick={() => setAdding(true)}
-          title="Ajouter une autre réaction"
+          title={t.feed.addReaction}
           className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-neutral-300 text-neutral-500 transition hover:border-neutral-400 hover:bg-neutral-50"
         >
           +
@@ -136,18 +138,19 @@ export function ReadToggle({
   feedItemId: string;
   isRead: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <form action={isRead ? markAsUnreadAction : markAsReadAction}>
       <input type="hidden" name="feed_item_id" value={feedItemId} />
       <PendingButton
-        title={isRead ? "Marquer comme non lu" : "Marquer comme lu"}
+        title={isRead ? t.feed.markAsUnread : t.feed.markAsRead}
         className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset transition ${
           isRead
             ? "bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100"
             : "bg-neutral-100 text-neutral-700 ring-neutral-200 hover:bg-neutral-200"
         }`}
       >
-        {isRead ? "✓ Lu" : "Marquer comme lu"}
+        {isRead ? t.feed.read : t.feed.markAsRead}
       </PendingButton>
     </form>
   );

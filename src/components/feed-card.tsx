@@ -4,16 +4,12 @@ import { ReactionBar, ReadToggle } from "@/components/feed-engagement";
 import type { CommentWithAuthor } from "@/domain/comments/repository";
 import type { FeedItemEngagement, FeedItemWithRelations } from "@/domain/feed/repository";
 import { renderMarkdown } from "@/lib/markdown";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 const PRIORITY_BORDER: Record<string, string> = {
   low: "border-l-neutral-200",
   normal: "border-l-blue-300",
   high: "border-l-red-400",
-};
-
-const KIND_LABEL: Record<string, string> = {
-  notification: "Notification",
-  reminder: "Rappel",
 };
 
 const KIND_BG: Record<string, string> = {
@@ -57,6 +53,9 @@ export function FeedCard({
   comments?: CommentWithAuthor[];
   currentUserId?: string;
 }) {
+  const t = getServerDictionary();
+  const locale = getLocale();
+  const dateFmt = locale === "en" ? "en-US" : "fr-FR";
   const isOverdue =
     item.kind === "reminder" &&
     item.due_date &&
@@ -76,7 +75,7 @@ export function FeedCard({
         <img
           src={item.image_url}
           alt={item.title}
-          className="h-44 w-full bg-neutral-100 object-cover"
+          className="h-40 w-full bg-neutral-100 object-cover sm:h-44"
         />
       )}
 
@@ -87,12 +86,12 @@ export function FeedCard({
               title="Épinglé en haut du fil"
               className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-brand-700 ring-1 ring-inset ring-brand-200"
             >
-              📌 Épinglé
+              📌 {t.feed.pinned}
             </span>
           )}
           {item.is_draft && (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-200">
-              ✏ Brouillon
+              ✏ {t.feed.draft}
             </span>
           )}
           <span
@@ -100,7 +99,7 @@ export function FeedCard({
               KIND_BG[item.kind] ?? KIND_BG.notification
             }`}
           >
-            {KIND_LABEL[item.kind] ?? item.kind}
+            {item.kind === "notification" ? t.feed.notification : item.kind === "reminder" ? t.feed.reminder : item.kind}
           </span>
           <CategoryChip category={item.category} />
           {item.session && (
@@ -110,7 +109,7 @@ export function FeedCard({
           )}
           {item.priority === "high" && (
             <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-200">
-              Priorité haute
+              {t.feed.highPriority}
             </span>
           )}
         </header>
@@ -157,21 +156,21 @@ export function FeedCard({
         )}
 
         <footer className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500">
-          <span>Publié le {formatDateTime(item.published_at)}</span>
+          <span>{t.feed.publishedOn} {formatDateTime(item.published_at, dateFmt)}</span>
           {authorLabel && (
             <span>
-              par <span className="font-medium text-neutral-700">{authorLabel}</span>
+              {t.feed.by} <span className="font-medium text-neutral-700">{authorLabel}</span>
             </span>
           )}
           {item.kind === "reminder" && item.due_date && (
             <span className={isOverdue ? "font-medium text-red-600" : "text-amber-700"}>
-              Échéance {formatDateTime(item.due_date)} {isOverdue && "(en retard)"}
+              {t.feed.deadline} {formatDateTime(item.due_date, dateFmt)} {isOverdue && t.feed.overdue}
             </span>
           )}
-          {item.expires_at && <span>Expire le {formatDateTime(item.expires_at)}</span>}
+          {item.expires_at && <span>{t.feed.expiresOn} {formatDateTime(item.expires_at, dateFmt)}</span>}
           {item.send_channels && item.send_channels.length > 0 && (
             <span className="text-neutral-400">
-              · Envoyé aussi par {item.send_channels.map((c) => c.toUpperCase()).join(" + ")}
+              · {t.feed.sentAlsoBy} {item.send_channels.map((c) => c.toUpperCase()).join(" + ")}
             </span>
           )}
         </footer>

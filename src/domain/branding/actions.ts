@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireDev } from "@/domain/auth/role";
 import { RepositoryError } from "@/domain/errors";
 import { type FormState } from "@/domain/form-state";
+import { getServerDictionary } from "@/lib/i18n/server";
 import { updateAppSettings, type AppSettings } from "./repository";
 import { updateBrandingSchema } from "./schema";
 
@@ -23,10 +24,11 @@ export async function updateBrandingAction(
     app_tagline: formData.get("app_tagline"),
     logo_url: formData.get("logo_url"),
   });
+  const t = getServerDictionary();
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -36,10 +38,10 @@ export async function updateBrandingAction(
     if (err instanceof RepositoryError) {
       return { status: "error", message: err.message };
     }
-    return { status: "error", message: "Erreur inattendue" };
+    return { status: "error", message: t.errors.unexpected };
   }
 
   // Invalidation large — le branding apparaît dans tous les layouts.
   revalidatePath("/", "layout");
-  return { status: "success", message: "Marque mise à jour." };
+  return { status: "success", message: t.actionMessages.brandingUpdated };
 }

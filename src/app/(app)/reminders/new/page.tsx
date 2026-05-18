@@ -1,39 +1,42 @@
-import Link from "next/link";
-import { Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { Card, EmptyState, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { listEmployees } from "@/domain/employees/repository";
 import { ReminderForm } from "../reminder-form";
+import { getServerDictionary } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewReminderPage() {
+  const t = getServerDictionary();
   const employees = await listEmployees({ limit: 500 });
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Nouveau rappel"
-        description="Planifie un message à envoyer à un employé."
+        title={t.reminders.newTitle}
+        description={t.reminders.newDesc}
         action={
           <LinkButton href="/reminders" variant="secondary">
-            Retour
+            {t.common.back}
           </LinkButton>
         }
       />
 
       {employees.length === 0 ? (
         <EmptyState
-          title="Aucun employé"
-          description="Crée d'abord un employé avant de pouvoir lui envoyer un rappel."
-          action={<LinkButton href="/employees/new">Ajouter un employé</LinkButton>}
+          title={t.reminders.noEmployees}
+          description={t.reminders.noEmployeesDesc}
+          action={<LinkButton href="/employees/new">{t.reminders.addEmployee}</LinkButton>}
         />
       ) : (
         <Card className="p-6">
           <ReminderForm
             mode="create"
-            employees={employees.map((e) => ({ id: e.id, name: e.name }))}
+            employees={employees.map((emp) => ({ id: emp.id, name: emp.name }))}
           />
         </Card>
       )}
+
+      <PageTip>{t.pageTips.reminderNew}</PageTip>
     </div>
   );
 }

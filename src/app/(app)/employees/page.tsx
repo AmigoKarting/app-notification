@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { Card, EmptyState, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { listEmployees } from "@/domain/employees/repository";
+import { getServerDictionary } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -9,15 +10,16 @@ interface PageProps {
 }
 
 export default async function EmployeesPage({ searchParams }: PageProps) {
+  const t = getServerDictionary();
   const search = searchParams?.q?.trim() ?? "";
   const employees = await listEmployees({ search: search || undefined });
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Employés"
-        description="Annuaire des personnes pour qui des rappels sont planifiés."
-        action={<LinkButton href="/employees/new">Nouvel employé</LinkButton>}
+        title={t.employees.title}
+        description={t.employees.description}
+        action={<LinkButton href="/employees/new">{t.employees.newEmployee}</LinkButton>}
       />
 
       <form className="flex gap-2" action="/employees">
@@ -25,7 +27,7 @@ export default async function EmployeesPage({ searchParams }: PageProps) {
           type="search"
           name="q"
           defaultValue={search}
-          placeholder="Rechercher par nom ou email..."
+          placeholder={t.employees.searchPlaceholder}
           className="w-full max-w-sm rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
         />
         {search && (
@@ -33,44 +35,44 @@ export default async function EmployeesPage({ searchParams }: PageProps) {
             href="/employees"
             className="inline-flex items-center px-2 text-sm text-neutral-600 hover:underline"
           >
-            Effacer
+            {t.employees.clear}
           </Link>
         )}
       </form>
 
       {employees.length === 0 ? (
         <EmptyState
-          title={search ? "Aucun résultat" : "Aucun employé"}
+          title={search ? t.employees.noResults : t.employees.noEmployees}
           description={
             search
-              ? "Modifie ta recherche ou efface le filtre pour voir tous les employés."
-              : "Commence par ajouter un employé. Tu pourras ensuite lui associer des rappels."
+              ? t.employees.noResultsDesc
+              : t.employees.noEmployeesDesc
           }
-          action={!search && <LinkButton href="/employees/new">Ajouter un employé</LinkButton>}
+          action={!search && <LinkButton href="/employees/new">{t.employees.addEmployee}</LinkButton>}
         />
       ) : (
         <Card>
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
               <tr>
-                <th className="px-4 py-2 font-medium">Nom</th>
-                <th className="px-4 py-2 font-medium">Email</th>
-                <th className="px-4 py-2 font-medium">Téléphone</th>
-                <th className="px-4 py-2 font-medium text-right">Actions</th>
+                <th className="px-4 py-2 font-medium">{t.employees.name}</th>
+                <th className="px-4 py-2 font-medium">{t.employees.email}</th>
+                <th className="px-4 py-2 font-medium">{t.employees.phone}</th>
+                <th className="px-4 py-2 font-medium text-right">{t.employees.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
-              {employees.map((e) => (
-                <tr key={e.id} className="hover:bg-neutral-50">
-                  <td className="px-4 py-3 font-medium text-neutral-900">{e.name}</td>
-                  <td className="px-4 py-3 text-neutral-700">{e.email}</td>
-                  <td className="px-4 py-3 text-neutral-700">{e.phone ?? "—"}</td>
+              {employees.map((emp) => (
+                <tr key={emp.id} className="hover:bg-neutral-50">
+                  <td className="px-4 py-3 font-medium text-neutral-900">{emp.name}</td>
+                  <td className="px-4 py-3 text-neutral-700">{emp.email}</td>
+                  <td className="px-4 py-3 text-neutral-700">{emp.phone ?? "—"}</td>
                   <td className="px-4 py-3 text-right">
                     <Link
-                      href={`/employees/${e.id}`}
+                      href={`/employees/${emp.id}`}
                       className="text-sm font-medium text-neutral-900 hover:underline"
                     >
-                      Modifier
+                      {t.employees.edit}
                     </Link>
                   </td>
                 </tr>
@@ -79,6 +81,8 @@ export default async function EmployeesPage({ searchParams }: PageProps) {
           </table>
         </Card>
       )}
+
+      <PageTip>{t.pageTips.employees}</PageTip>
     </div>
   );
 }

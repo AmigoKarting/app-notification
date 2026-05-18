@@ -1,38 +1,39 @@
-import { Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { Card, EmptyState, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { listCategories } from "@/domain/categories/repository";
+import { getServerDictionary } from "@/lib/i18n/server";
 import { SessionForm } from "../session-form";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewSessionPage() {
+  const t = getServerDictionary();
   const categories = await listCategories();
-  const editable = categories; // RLS filtre déjà : on ne voit ici que celles qu'on possède en écriture
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Nouvelle session"
+        title={t.adminSessions.newSession}
         action={
           <LinkButton href="/admin/sessions" variant="secondary">
-            Retour
+            {t.common.back}
           </LinkButton>
         }
       />
-
-      {editable.length === 0 ? (
+      {categories.length === 0 ? (
         <EmptyState
-          title="Aucune catégorie"
-          description="Crée d'abord une catégorie : une session vit toujours dans une catégorie."
-          action={<LinkButton href="/admin/categories/new">Créer une catégorie</LinkButton>}
+          title={t.adminSessions.noCategoryForSession}
+          description={t.adminSessions.noCategoryForSessionDesc}
+          action={<LinkButton href="/admin/categories/new">{t.adminSessions.createCategory}</LinkButton>}
         />
       ) : (
         <Card className="p-6">
           <SessionForm
             mode="create"
-            categories={editable.map((c) => ({ id: c.id, name: c.name }))}
+            categories={categories.map((c) => ({ id: c.id, name: c.name }))}
           />
         </Card>
       )}
+      <PageTip>{t.pageTips.adminSessionNew}</PageTip>
     </div>
   );
 }

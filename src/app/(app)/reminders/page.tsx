@@ -4,11 +4,13 @@ import {
   EmptyState,
   LinkButton,
   PageHeader,
+  PageTip,
   StatusBadge,
   formatDateTime,
 } from "@/components/ui";
 import { listReminders, type ReminderStatus } from "@/domain/reminders/repository";
 import { CancelReminderForm } from "./cancel-form";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,8 @@ interface PageProps {
 }
 
 export default async function RemindersPage({ searchParams }: PageProps) {
+  const t = getServerDictionary();
+  const locale = getLocale();
   const requested = searchParams?.status;
   const status =
     requested && (VALID_STATUSES as string[]).includes(requested)
@@ -30,43 +34,43 @@ export default async function RemindersPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Rappels"
-        description="Liste des rappels planifiés ou déjà envoyés."
-        action={<LinkButton href="/reminders/new">Nouveau rappel</LinkButton>}
+        title={t.reminders.title}
+        description={t.reminders.description}
+        action={<LinkButton href="/reminders/new">{t.reminders.newReminder}</LinkButton>}
       />
 
       <div className="flex gap-2 text-sm">
-        <FilterLink href="/reminders" active={!status} label="Tous" />
-        <FilterLink href="/reminders?status=pending" active={status === "pending"} label="En attente" />
-        <FilterLink href="/reminders?status=sent" active={status === "sent"} label="Envoyés" />
-        <FilterLink href="/reminders?status=failed" active={status === "failed"} label="Échec" />
+        <FilterLink href="/reminders" active={!status} label={t.reminders.all} />
+        <FilterLink href="/reminders?status=pending" active={status === "pending"} label={t.reminders.pending} />
+        <FilterLink href="/reminders?status=sent" active={status === "sent"} label={t.reminders.sent} />
+        <FilterLink href="/reminders?status=failed" active={status === "failed"} label={t.reminders.failed} />
         <FilterLink
           href="/reminders?status=cancelled"
           active={status === "cancelled"}
-          label="Annulés"
+          label={t.reminders.cancelled}
         />
       </div>
 
       {reminders.length === 0 ? (
         <EmptyState
-          title="Aucun rappel"
+          title={t.reminders.noReminders}
           description={
             status
-              ? "Aucun rappel ne correspond à ce filtre."
-              : "Crée un premier rappel pour le voir apparaître ici."
+              ? t.reminders.noRemindersFiltered
+              : t.reminders.noRemindersDesc
           }
-          action={!status && <LinkButton href="/reminders/new">Créer un rappel</LinkButton>}
+          action={!status && <LinkButton href="/reminders/new">{t.reminders.createReminder}</LinkButton>}
         />
       ) : (
         <Card>
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
               <tr>
-                <th className="px-4 py-2 font-medium">Employé</th>
-                <th className="px-4 py-2 font-medium">Message</th>
-                <th className="px-4 py-2 font-medium">Échéance</th>
-                <th className="px-4 py-2 font-medium">Statut</th>
-                <th className="px-4 py-2 font-medium text-right">Actions</th>
+                <th className="px-4 py-2 font-medium">{t.reminders.employee}</th>
+                <th className="px-4 py-2 font-medium">{t.reminders.message}</th>
+                <th className="px-4 py-2 font-medium">{t.reminders.deadline}</th>
+                <th className="px-4 py-2 font-medium">{t.reminders.status}</th>
+                <th className="px-4 py-2 font-medium text-right">{t.reminders.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
@@ -80,7 +84,7 @@ export default async function RemindersPage({ searchParams }: PageProps) {
                     <p className="line-clamp-2">{r.message}</p>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 align-top text-neutral-700">
-                    {formatDateTime(r.scheduled_at)}
+                    {formatDateTime(r.scheduled_at, locale === "en" ? "en-US" : "fr-FR")}
                   </td>
                   <td className="px-4 py-3 align-top">
                     <StatusBadge status={r.status} />
@@ -92,7 +96,7 @@ export default async function RemindersPage({ searchParams }: PageProps) {
                         href={`/reminders/${r.id}`}
                         className="text-sm font-medium text-neutral-900 hover:underline"
                       >
-                        Modifier
+                        {t.reminders.edit}
                       </Link>
                     </div>
                   </td>
@@ -102,6 +106,8 @@ export default async function RemindersPage({ searchParams }: PageProps) {
           </table>
         </Card>
       )}
+
+      <PageTip>{t.pageTips.reminders}</PageTip>
     </div>
   );
 }

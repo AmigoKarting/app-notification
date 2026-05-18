@@ -3,6 +3,7 @@ import { AuthCard } from "@/components/auth/auth-card";
 import { AppLogo, getBranding } from "@/components/app-brand";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { getCurrentUser } from "@/domain/auth/session";
+import { getServerDictionary } from "@/lib/i18n/server";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -11,10 +12,9 @@ export default async function HomePage() {
     redirect(profile?.role === "dev" ? "/admin" : "/feed");
   }
 
+  const t = getServerDictionary();
   const branding = await getBranding();
-  const tagline =
-    branding.app_tagline ??
-    "Catégories, sessions, rappels programmés et envois multi-canaux — tout au même endroit.";
+  const tagline = branding.app_tagline ?? t.landing.taglineDefault;
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-2">
@@ -32,16 +32,16 @@ export default async function HomePage() {
 
         <div className="relative max-w-md space-y-6">
           <h2 className="text-4xl font-semibold leading-tight tracking-tight">
-            Bienvenue sur
+            {t.landing.welcome}
             <br />
             <span className="text-white/80">{branding.app_name}.</span>
           </h2>
           <p className="text-base leading-relaxed text-white/80">{tagline}</p>
           <ul className="space-y-3 text-sm">
-            <Feature label="Notifications & rappels avec dates programmées" />
-            <Feature label="Catégories personnalisables, codes couleur" />
-            <Feature label="Sessions activables pour faire varier le contenu" />
-            <Feature label="Email et SMS — extensible vers WhatsApp" />
+            <Feature label={t.landing.feature1} />
+            <Feature label={t.landing.feature2} />
+            <Feature label={t.landing.feature3} />
+            <Feature label={t.landing.feature4} />
           </ul>
         </div>
 
@@ -62,10 +62,10 @@ export default async function HomePage() {
 
           <header className="mb-8">
             <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">
-              Bienvenue
+              {t.landing.heroWelcome}
             </h1>
             <p className="mt-2 text-sm text-neutral-600">
-              Crée ton compte en quelques secondes.
+              {t.landing.heroSubtitle}
             </p>
           </header>
 

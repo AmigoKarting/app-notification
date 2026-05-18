@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslation } from "@/lib/i18n";
 
 export function ImageUpload({
   initialUrl,
@@ -10,6 +11,7 @@ export function ImageUpload({
   initialUrl?: string | null;
   name?: string;
 }) {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(initialUrl ?? null);
   const [uploading, setUploading] = useState(false);
@@ -21,11 +23,11 @@ export function ImageUpload({
     setError(null);
 
     if (!file.type.startsWith("image/")) {
-      setError("Le fichier doit être une image.");
+      setError(t.imageUpload.notImage);
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError("Image trop lourde (max 5 Mo).");
+      setError(t.imageUpload.tooLarge);
       return;
     }
 
@@ -42,7 +44,7 @@ export function ImageUpload({
           upsert: false,
         });
       if (uploadError) {
-        setError(`Échec de l'upload : ${uploadError.message}`);
+        setError(`${t.imageUpload.uploadFailed} : ${uploadError.message}`);
         return;
       }
       const {
@@ -50,7 +52,7 @@ export function ImageUpload({
       } = supabase.storage.from("notifications").getPublicUrl(data.path);
       setImageUrl(publicUrl);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inattendue");
+      setError(err instanceof Error ? err.message : t.imageUpload.unexpectedError);
     } finally {
       setUploading(false);
     }
@@ -63,7 +65,7 @@ export function ImageUpload({
 
   return (
     <div>
-      <p className="mb-1.5 text-sm font-medium text-neutral-800">Image (optionnel)</p>
+      <p className="mb-1.5 text-sm font-medium text-neutral-800">{t.imageUpload.label}</p>
       {/* Hidden field that the form submission picks up */}
       <input type="hidden" name={name} value={imageUrl ?? ""} />
 
@@ -72,17 +74,17 @@ export function ImageUpload({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={imageUrl}
-            alt="Aperçu"
+            alt={t.imageUpload.preview}
             className="h-24 w-24 rounded-lg border border-neutral-200 object-cover"
           />
         ) : (
           <div className="flex h-24 w-24 items-center justify-center rounded-lg border border-dashed border-neutral-300 bg-white text-xs text-neutral-400">
-            Aucune
+            {t.imageUpload.noImage}
           </div>
         )}
         <div className="flex-1">
           <p className="text-xs text-neutral-500">
-            PNG, JPG ou WebP. 5 Mo max. Affichée en tête de la notification.
+            {t.imageUpload.hint}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <label className="cursor-pointer">
@@ -95,7 +97,7 @@ export function ImageUpload({
                 disabled={uploading}
               />
               <span className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50">
-                {uploading ? "Upload..." : imageUrl ? "Changer" : "Choisir une image"}
+                {uploading ? t.imageUpload.uploading : imageUrl ? t.imageUpload.change : t.imageUpload.choose}
               </span>
             </label>
             {imageUrl && (
@@ -104,7 +106,7 @@ export function ImageUpload({
                 onClick={clearImage}
                 className="rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
               >
-                Retirer
+                {t.imageUpload.remove}
               </button>
             )}
           </div>

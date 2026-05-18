@@ -3,6 +3,7 @@ import {
   Card,
   LinkButton,
   PageHeader,
+  PageTip,
   StatusBadge,
   formatDateTime,
 } from "@/components/ui";
@@ -10,12 +11,17 @@ import { listEmployees } from "@/domain/employees/repository";
 import { getReminder } from "@/domain/reminders/repository";
 import { ReminderForm } from "../reminder-form";
 import { DeleteReminderForm } from "./delete-form";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 interface PageProps {
   params: { id: string };
 }
 
 export default async function ReminderDetailPage({ params }: PageProps) {
+  const t = getServerDictionary();
+  const locale = getLocale();
+  const dateFmt = locale === "en" ? "en-US" : "fr-FR";
+
   const [reminder, employees] = await Promise.all([
     getReminder(params.id),
     listEmployees({ limit: 500 }),
@@ -23,14 +29,18 @@ export default async function ReminderDetailPage({ params }: PageProps) {
 
   if (!reminder) notFound();
 
+  const descText = t.reminders.detailDesc
+    .replace("{name}", reminder.employee?.name ?? "—")
+    .replace("{date}", formatDateTime(reminder.scheduled_at, dateFmt));
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Détail du rappel"
-        description={`Pour ${reminder.employee?.name ?? "—"} • Échéance ${formatDateTime(reminder.scheduled_at)}`}
+        title={t.reminders.detailTitle}
+        description={descText}
         action={
           <LinkButton href="/reminders" variant="secondary">
-            Retour
+            {t.common.back}
           </LinkButton>
         }
       />
@@ -40,7 +50,7 @@ export default async function ReminderDetailPage({ params }: PageProps) {
           <StatusBadge status={reminder.status} />
           {reminder.attempts != null && reminder.attempts > 0 && (
             <span className="text-neutral-500">
-              {reminder.attempts} tentative{reminder.attempts > 1 ? "s" : ""}
+              {reminder.attempts} {reminder.attempts > 1 ? t.reminders.attemptsPlural : t.reminders.attempts}
             </span>
           )}
         </div>
@@ -55,19 +65,21 @@ export default async function ReminderDetailPage({ params }: PageProps) {
         <ReminderForm
           mode="edit"
           reminder={reminder}
-          employees={employees.map((e) => ({ id: e.id, name: e.name }))}
+          employees={employees.map((emp) => ({ id: emp.id, name: emp.name }))}
         />
       </Card>
 
       <Card className="flex items-center justify-between p-6">
         <div>
-          <p className="font-medium text-neutral-900">Zone de danger</p>
+          <p className="font-medium text-neutral-900">{t.dangerZone.title}</p>
           <p className="text-sm text-neutral-600">
-            La suppression est irréversible.
+            {t.reminders.dangerDesc}
           </p>
         </div>
         <DeleteReminderForm id={reminder.id} />
       </Card>
+
+      <PageTip>{t.pageTips.reminderDetail}</PageTip>
     </div>
   );
 }

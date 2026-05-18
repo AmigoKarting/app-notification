@@ -2,6 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 import { toggleCategoryMuteAction } from "@/domain/category-mutes/actions";
+import { useTranslation } from "@/lib/i18n";
 
 interface Category {
   id: string;
@@ -17,6 +18,7 @@ interface Props {
 
 function ToggleButton({ muted }: { muted: boolean }) {
   const { pending } = useFormStatus();
+  const { t } = useTranslation();
   return (
     <button
       type="submit"
@@ -27,18 +29,19 @@ function ToggleButton({ muted }: { muted: boolean }) {
           : "bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100"
       }`}
     >
-      {muted ? "🔕 Masquée" : "🔔 Reçue"}
+      {muted ? t.feed.muted : t.feed.received}
     </button>
   );
 }
 
 export function MuteSection({ categories, mutedIds }: Props) {
+  const { t } = useTranslation();
   const muted = new Set(mutedIds);
 
   if (categories.length === 0) {
     return (
       <p className="text-sm text-neutral-500">
-        Aucune catégorie pour l'instant. Les notifications sans catégorie ne peuvent pas être masquées.
+        {t.settings.noCategoriesYet}
       </p>
     );
   }

@@ -1,5 +1,5 @@
 import { Callout, GuideNav, GuidePage, GuideSection, Path, Step, Steps } from "@/components/guide";
-import { FLAT_GUIDES } from "../layout";
+import { FLAT_GUIDES } from "../guides";
 
 export default function GuideTemplatesPage() {
   return (

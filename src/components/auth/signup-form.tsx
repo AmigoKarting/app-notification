@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslation } from "@/lib/i18n";
 
 function formatPhone(raw: string): string {
   // Garde seulement les chiffres
@@ -14,6 +15,7 @@ function formatPhone(raw: string): string {
 }
 
 export function SignupForm() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -40,25 +42,25 @@ export function SignupForm() {
     const phoneDigits = phone.replace(/\D/g, "");
 
     if (!trimmedFirst) {
-      setError("Le prénom est obligatoire");
+      setError(t.auth.firstNameRequired);
       return;
     }
     if (!trimmedLast) {
-      setError("Le nom est obligatoire");
+      setError(t.auth.lastNameRequired);
       return;
     }
     if (phoneDigits.length < 10) {
-      setError("Numéro de téléphone invalide (10 chiffres minimum)");
+      setError(t.auth.phoneInvalid);
       return;
     }
     if (!trimmedEmail) {
-      setError("L'adresse courriel est obligatoire");
+      setError(t.auth.emailRequired);
       return;
     }
 
     const last4 = getLast4(phone);
     if (last4.length < 4) {
-      setError("Le numéro de téléphone doit avoir au moins 4 chiffres");
+      setError(t.auth.phoneTooShort);
       return;
     }
 
@@ -84,15 +86,15 @@ export function SignupForm() {
 
       if (error) {
         if (error.message.includes("password")) {
-          setError("Erreur lors de la création du compte. Vérifie tes informations.");
+          setError(t.auth.signupError);
         } else {
           setError(error.message);
         }
         return;
       }
 
-      if (!data.session) {
-        setSuccess("Compte créé. Vérifie ton courriel pour confirmer ton inscription.");
+      if (!data.session || !data.user) {
+        setSuccess(t.auth.signupSuccess);
         return;
       }
 
@@ -111,7 +113,7 @@ export function SignupForm() {
       router.replace("/");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inattendue");
+      setError(err instanceof Error ? err.message : t.auth.unexpectedError);
     } finally {
       setPending(false);
     }
@@ -129,61 +131,61 @@ export function SignupForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Prénom</span>
+          <span className="mb-1 block text-sm font-medium">{t.auth.firstName}</span>
           <input
             type="text"
             autoComplete="given-name"
             required
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            placeholder="Jean"
+            placeholder={t.auth.firstNamePlaceholder}
             className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
           />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Nom</span>
+          <span className="mb-1 block text-sm font-medium">{t.auth.lastName}</span>
           <input
             type="text"
             autoComplete="family-name"
             required
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            placeholder="Tremblay"
+            placeholder={t.auth.lastNamePlaceholder}
             className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
           />
         </label>
       </div>
 
       <label className="block">
-        <span className="mb-1 block text-sm font-medium">Numéro de téléphone</span>
+        <span className="mb-1 block text-sm font-medium">{t.auth.phone}</span>
         <input
           type="tel"
           autoComplete="tel"
           required
           value={phone}
           onChange={(e) => setPhone(formatPhone(e.target.value))}
-          placeholder="514-555-1234"
+          placeholder={t.auth.phonePlaceholder}
           className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
         />
         {last4Preview.length === 4 && (
           <span className="mt-1 block text-xs text-neutral-500">
-            Ton mot de passe sera : <strong>{last4Preview}</strong> (4 derniers chiffres)
+            {t.auth.passwordPreview} <strong>{last4Preview}</strong>
           </span>
         )}
       </label>
 
       <label className="block">
-        <span className="mb-1 block text-sm font-medium">Adresse courriel</span>
+        <span className="mb-1 block text-sm font-medium">{t.auth.email}</span>
         <input
           type="email"
           autoComplete="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="jean@exemple.com"
+          placeholder={t.auth.emailPlaceholder}
           className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
         />
       </label>
@@ -197,7 +199,7 @@ export function SignupForm() {
         disabled={pending}
         className="w-full rounded-md bg-neutral-900 py-2 font-medium text-white transition hover:bg-neutral-700 disabled:opacity-50"
       >
-        {pending ? "Création..." : "Créer mon compte"}
+        {pending ? t.auth.creating : t.auth.createAccount}
       </button>
     </form>
   );

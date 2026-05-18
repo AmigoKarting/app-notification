@@ -1,55 +1,62 @@
 import Link from "next/link";
-import { Card, EmptyState, LinkButton, PageHeader, formatDateTime } from "@/components/ui";
+import { Card, EmptyState, LinkButton, PageHeader, PageTip, formatDateTime } from "@/components/ui";
 import { listSchedules } from "@/domain/notification-schedules/repository";
 import { toggleScheduleAction } from "@/domain/notification-schedules/actions";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-const DAY_LABELS = ["", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-
-function summarizeDays(days: number[]): string {
-  if (days.length === 7) return "Tous les jours";
+function summarizeDays(
+  days: number[],
+  labels: readonly string[],
+  allDays: string,
+  weekdays: string,
+  weekend: string,
+): string {
+  if (days.length === 7) return allDays;
   if (
     days.length === 5 &&
     [1, 2, 3, 4, 5].every((d) => days.includes(d))
   ) {
-    return "Semaine";
+    return weekdays;
   }
   if (
     days.length === 2 &&
     [6, 7].every((d) => days.includes(d))
   ) {
-    return "Week-end";
+    return weekend;
   }
-  return days.map((d) => DAY_LABELS[d]).join(" · ");
+  return days.map((d) => labels[d]).join(" · ");
 }
 
 export default async function AdminSchedulesPage() {
+  const t = getServerDictionary();
+  const locale = getLocale();
+  const dateFmt = locale === "en" ? "en-US" : "fr-FR";
   const schedules = await listSchedules();
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Planifications"
-        description="Notifications récurrentes (heures + jours + fuseau)."
-        action={<LinkButton href="/admin/schedules/new">Nouvelle planification</LinkButton>}
+        title={t.adminSchedules.title}
+        description={t.adminSchedules.description}
+        action={<LinkButton href="/admin/schedules/new">{t.adminSchedules.newSchedule}</LinkButton>}
       />
-
       {schedules.length === 0 ? (
         <EmptyState
-          title="Aucune planification"
-          description="Crée une planification pour automatiser tes notifications."
-          action={<LinkButton href="/admin/schedules/new">Créer une planification</LinkButton>}
+          title={t.adminSchedules.noSchedules}
+          description={t.adminSchedules.noSchedulesDesc}
+          action={<LinkButton href="/admin/schedules/new">{t.adminSchedules.createSchedule}</LinkButton>}
         />
       ) : (
         <Card>
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
               <tr>
-                <th className="px-4 py-2 font-medium">Titre</th>
-                <th className="px-4 py-2 font-medium">Récurrence</th>
-                <th className="px-4 py-2 font-medium">Prochaine exécution</th>
-                <th className="px-4 py-2 font-medium">État</th>
+                <th className="px-4 py-2 font-medium">{t.feedForm.title}</th>
+                <th className="px-4 py-2 font-medium">{t.adminSchedules.recurrence}</th>
+                <th className="px-4 py-2 font-medium">{t.adminSchedules.nextRun}</th>
+                <th className="px-4 py-2 font-medium">{t.adminSchedules.state}</th>
                 <th className="px-4 py-2 font-medium text-right"></th>
               </tr>
             </thead>
@@ -59,20 +66,20 @@ export default async function AdminSchedulesPage() {
                   <td className="px-4 py-3 align-top">
                     <p className="font-medium text-neutral-900">{s.title}</p>
                     <p className="text-xs text-neutral-500">
-                      {s.kind === "reminder" ? "Rappel" : "Notification"}
+                      {s.kind === "reminder" ? t.feed.reminder : t.feed.notification}
                       {s.category && ` • ${s.category.name}`}
                     </p>
                   </td>
                   <td className="px-4 py-3 align-top text-neutral-700">
                     <p>{s.times.join(" · ")}</p>
                     <p className="text-xs text-neutral-500">
-                      {summarizeDays(s.days_of_week)} • {s.timezone}
+                      {summarizeDays(s.days_of_week, t.adminSchedules.dayLabels, t.adminSchedules.allDays, t.adminSchedules.weekdays, t.adminSchedules.weekend)} • {s.timezone}
                     </p>
                   </td>
                   <td className="px-4 py-3 align-top text-neutral-700">
                     {s.is_active && s.next_run_at ? (
                       <span title={s.timezone}>
-                        {new Date(s.next_run_at).toLocaleString("fr-FR", {
+                        {new Date(s.next_run_at).toLocaleString(locale, {
                           dateStyle: "short",
                           timeStyle: "short",
                           timeZone: s.timezone,
@@ -83,7 +90,7 @@ export default async function AdminSchedulesPage() {
                     )}
                     {s.last_run_at && (
                       <p className="text-xs text-neutral-500">
-                        Dernier : {formatDateTime(s.last_run_at)}
+                        {t.adminSchedules.lastRun} {formatDateTime(s.last_run_at, dateFmt)}
                       </p>
                     )}
                   </td>
@@ -98,9 +105,9 @@ export default async function AdminSchedulesPage() {
                             ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
                             : "bg-neutral-100 text-neutral-700 ring-neutral-200"
                         }`}
-                        title="Basculer l'état"
+                        title={t.adminSchedules.toggleState}
                       >
-                        {s.is_active ? "Actif" : "Pausé"}
+                        {s.is_active ? t.adminSchedules.active : t.adminSchedules.paused}
                       </button>
                     </form>
                   </td>
@@ -109,7 +116,7 @@ export default async function AdminSchedulesPage() {
                       href={`/admin/schedules/${s.id}`}
                       className="text-sm font-medium text-neutral-900 hover:underline"
                     >
-                      Modifier
+                      {t.adminSchedules.edit}
                     </Link>
                   </td>
                 </tr>
@@ -118,6 +125,7 @@ export default async function AdminSchedulesPage() {
           </table>
         </Card>
       )}
+      <PageTip>{t.pageTips.adminSchedules}</PageTip>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
 } from "@/domain/sessions/actions";
 import { idleFormState, type FormState } from "@/domain/form-state";
 import type { AppSession } from "@/domain/sessions/repository";
+import { useTranslation } from "@/lib/i18n";
 
 type CategoryOption = { id: string; name: string };
 
@@ -15,16 +16,17 @@ type Props =
   | { mode: "create"; categories: CategoryOption[] }
   | { mode: "edit"; categories: CategoryOption[]; session: AppSession };
 
-function SubmitButton({ label }: { label: string }) {
+function SubmitButton({ label, savingLabel }: { label: string; savingLabel: string }) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Enregistrement..." : label}
+      {pending ? savingLabel : label}
     </Button>
   );
 }
 
 export function SessionForm(props: Props) {
+  const { t } = useTranslation();
   const action =
     props.mode === "create"
       ? createSessionAction
@@ -40,14 +42,14 @@ export function SessionForm(props: Props) {
   return (
     <form action={formAction} className="space-y-4" noValidate>
       <SelectField
-        label="Catégorie"
+        label={t.feedForm.category}
         name="category_id"
         defaultValue={initial?.category_id ?? ""}
         required
         error={errors?.category_id}
       >
         <option value="" disabled>
-          Sélectionner une catégorie...
+          {t.adminSessions.selectCategory}
         </option>
         {props.categories.map((c) => (
           <option key={c.id} value={c.id}>
@@ -57,25 +59,25 @@ export function SessionForm(props: Props) {
       </SelectField>
 
       <Field
-        label="Slug"
+        label={t.adminSessions.slug}
         name="slug"
         defaultValue={initial?.slug ?? ""}
         required
-        hint="Identifiant technique. Ex: 'ete-2026'"
+        hint={t.adminSessions.slugHint}
         error={errors?.slug}
       />
       <Field
-        label="Nom de la session"
+        label={t.adminSessions.sessionName}
         name="name"
         defaultValue={initial?.name ?? ""}
         required
-        hint="Ex: Été 2026, Onboarding semaine 1"
+        hint={t.adminSessions.sessionNameHint}
         error={errors?.name}
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field
-          label="Début"
+          label={t.adminSessions.start}
           name="starts_at"
           type="datetime-local"
           defaultValue={initial?.starts_at ? toDatetimeLocal(initial.starts_at) : ""}
@@ -83,7 +85,7 @@ export function SessionForm(props: Props) {
           error={errors?.starts_at}
         />
         <Field
-          label="Fin"
+          label={t.adminSessions.end}
           name="ends_at"
           type="datetime-local"
           defaultValue={initial?.ends_at ? toDatetimeLocal(initial.ends_at) : ""}
@@ -99,7 +101,7 @@ export function SessionForm(props: Props) {
           defaultChecked={initial?.is_active ?? true}
           className="h-4 w-4 rounded border-neutral-300"
         />
-        Session active (les notifications liées s'envoient pendant la période)
+        {t.adminSessions.isActive}
       </label>
 
       {state.status === "error" && !errors && <FormError message={state.message} />}
@@ -110,7 +112,7 @@ export function SessionForm(props: Props) {
       )}
 
       <div className="flex justify-end pt-2">
-        <SubmitButton label={props.mode === "create" ? "Créer" : "Enregistrer"} />
+        <SubmitButton label={props.mode === "create" ? t.common.create : t.common.save} savingLabel={t.common.saving} />
       </div>
     </form>
   );

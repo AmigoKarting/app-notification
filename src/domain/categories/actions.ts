@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireDev } from "@/domain/auth/role";
 import { RepositoryError } from "@/domain/errors";
 import { type FormState } from "@/domain/form-state";
+import { getServerDictionary } from "@/lib/i18n/server";
 import {
   claimUnclaimedCategories,
   createCategory,
@@ -21,13 +22,14 @@ function fieldErrorsFromZod(err: import("zod").ZodError<unknown>): Record<string
 }
 
 function mapError(err: unknown): FormState<Category> {
+  const t = getServerDictionary();
   if (err instanceof RepositoryError) {
     if (err.code === "conflict") {
-      return { status: "error", message: "Slug déjà utilisé.", fieldErrors: { slug: "Déjà pris" } };
+      return { status: "error", message: t.errors.slugTaken, fieldErrors: { slug: t.errors.alreadyTaken } };
     }
     return { status: "error", message: err.message };
   }
-  return { status: "error", message: "Erreur inattendue" };
+  return { status: "error", message: t.errors.unexpected };
 }
 
 export async function createCategoryAction(
@@ -41,8 +43,9 @@ export async function createCategoryAction(
     color: formData.get("color") || undefined,
     icon: formData.get("icon"),
   });
+  const t = getServerDictionary();
   if (!parsed.success) {
-    return { status: "error", message: "Données invalides", fieldErrors: fieldErrorsFromZod(parsed.error) };
+    return { status: "error", message: t.errors.invalidData, fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
   try {
     await createCategory(profile.id, parsed.data);
@@ -60,6 +63,7 @@ export async function updateCategoryAction(
   formData: FormData,
 ): Promise<FormState<Category>> {
   await requireDev();
+  const t = getServerDictionary();
   const parsed = updateCategorySchema.safeParse({
     slug: formData.get("slug"),
     name: formData.get("name"),
@@ -67,7 +71,7 @@ export async function updateCategoryAction(
     icon: formData.get("icon"),
   });
   if (!parsed.success) {
-    return { status: "error", message: "Données invalides", fieldErrors: fieldErrorsFromZod(parsed.error) };
+    return { status: "error", message: t.errors.invalidData, fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
   try {
     await updateCategory(id, parsed.data);
@@ -77,7 +81,7 @@ export async function updateCategoryAction(
   revalidatePath("/admin/categories");
   revalidatePath(`/admin/categories/${id}`);
   revalidatePath("/feed");
-  return { status: "success", message: "Catégorie mise à jour." };
+  return { status: "success", message: t.actionMessages.categoryUpdated };
 }
 
 export async function claimSystemCategoriesAction(): Promise<void> {

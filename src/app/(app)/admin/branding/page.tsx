@@ -1,24 +1,25 @@
-import { Card, LinkButton, PageHeader } from "@/components/ui";
+import { Card, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { getAppSettings } from "@/domain/branding/repository";
+import { getServerDictionary } from "@/lib/i18n/server";
 import { BrandingForm } from "./branding-form";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminBrandingPage() {
+  const t = getServerDictionary();
   const settings = await getAppSettings();
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Marque"
-        description="Personnalise le nom et le logo de l'application. Idéal pour le white-label."
+        title={t.adminBranding.title}
+        description={t.adminBranding.description}
         action={
           <LinkButton href="/admin" variant="secondary">
-            Retour
+            {t.common.back}
           </LinkButton>
         }
       />
-
       <Card className="p-6">
         <BrandingForm
           initial={{
@@ -30,14 +31,15 @@ export default async function AdminBrandingPage() {
       </Card>
 
       <Card className="p-6">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-900">À propos du branding</h2>
+        <h2 className="mb-2 text-sm font-semibold text-neutral-900">{t.adminBranding.aboutTitle}</h2>
         <ul className="space-y-1 text-sm text-neutral-600">
-          <li>• Le logo apparaît dans le header de l'app, sur la page de connexion et sur la landing publique.</li>
-          <li>• Le nom remplace "App Notification" partout dans l'interface.</li>
-          <li>• La couleur d'accent se règle dans <strong>Réglages → Apparence</strong> (par utilisateur, mémorisée dans le navigateur).</li>
-          <li>• Le branding ici est <strong>global</strong> à toute l'installation — tous les utilisateurs le voient.</li>
+          <li>• {t.adminBranding.aboutLogo}</li>
+          <li>• {t.adminBranding.aboutName}</li>
+          <li>• {t.adminBranding.aboutAccent}</li>
+          <li>• {t.adminBranding.aboutGlobal}</li>
         </ul>
       </Card>
+      <PageTip>{t.pageTips.adminBranding}</PageTip>
     </div>
   );
 }

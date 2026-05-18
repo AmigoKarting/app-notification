@@ -4,6 +4,8 @@
  * les internes de Supabase.
  */
 
+import { getServerDictionary } from "@/lib/i18n/server";
+
 export type RepositoryErrorCode =
   | "unauthorized"
   | "not_found"
@@ -37,10 +39,11 @@ export function fromPostgrestError(err: {
   message?: string | null;
   details?: string | null;
 }): RepositoryError {
+  const t = getServerDictionary();
   const code = err.code ?? "";
-  if (code === "23505") return new RepositoryError("conflict", "Un enregistrement identique existe déjà.", err);
-  if (code === "23503") return new RepositoryError("validation", "Référence invalide (employé inconnu).", err);
-  if (code === "42501") return new RepositoryError("forbidden", "Action non autorisée.", err);
-  if (code === "PGRST116") return new RepositoryError("not_found", "Ressource introuvable.", err);
-  return new RepositoryError("database", err.message ?? "Erreur base de données", err);
+  if (code === "23505") return new RepositoryError("conflict", t.errors.conflict, err);
+  if (code === "23503") return new RepositoryError("validation", t.errors.invalidReference, err);
+  if (code === "42501") return new RepositoryError("forbidden", t.errors.unauthorized, err);
+  if (code === "PGRST116") return new RepositoryError("not_found", t.errors.notFound, err);
+  return new RepositoryError("database", err.message ?? t.errors.database, err);
 }

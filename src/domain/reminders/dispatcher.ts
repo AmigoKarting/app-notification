@@ -43,7 +43,7 @@ export async function dispatchReminders(
   const supabase = createAdminClient();
 
   // --- 1) CLAIM ----------------------------------------------------
-  const { data: claimed, error: claimError } = await supabase.rpc("claim_due_reminders" as never, {
+  const { data: claimed, error: claimError } = await supabase.rpc("claim_due_reminders", {
     batch_size: batchSize,
     max_attempts: maxAttempts,
     stale_after_minutes: staleAfterMinutes,

@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
-import { Card, LinkButton, PageHeader } from "@/components/ui";
+import { Card, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { listCategories } from "@/domain/categories/repository";
 import { getTemplate } from "@/domain/templates/repository";
+import { getServerDictionary } from "@/lib/i18n/server";
 import { TemplateForm } from "../template-form";
 import { DeleteTemplateForm } from "./delete-form";
 
@@ -12,6 +13,7 @@ interface PageProps {
 export const dynamic = "force-dynamic";
 
 export default async function EditTemplatePage({ params }: PageProps) {
+  const t = getServerDictionary();
   const [template, categories] = await Promise.all([getTemplate(params.id), listCategories()]);
   if (!template) notFound();
 
@@ -19,10 +21,10 @@ export default async function EditTemplatePage({ params }: PageProps) {
     <div className="space-y-6">
       <PageHeader
         title={template.name}
-        description="Modèle de notification."
+        description={t.engagement.templateDescription}
         action={
           <LinkButton href="/admin/templates" variant="secondary">
-            Retour
+            {t.common.back}
           </LinkButton>
         }
       />
@@ -35,11 +37,12 @@ export default async function EditTemplatePage({ params }: PageProps) {
       </Card>
       <Card className="flex items-center justify-between p-6">
         <div>
-          <p className="font-medium">Zone de danger</p>
-          <p className="text-sm text-neutral-600">La suppression est irréversible.</p>
+          <p className="font-medium">{t.dangerZone.title}</p>
+          <p className="text-sm text-neutral-600">{t.dangerZone.deleteIrreversible}</p>
         </div>
         <DeleteTemplateForm id={template.id} name={template.name} />
       </Card>
+      <PageTip>{t.pageTips.adminTemplateEdit}</PageTip>
     </div>
   );
 }

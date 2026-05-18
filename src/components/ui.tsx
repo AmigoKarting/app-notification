@@ -144,6 +144,15 @@ export function PageHeader({
   );
 }
 
+export function PageTip({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2.5 rounded-lg border border-brand-100 bg-brand-50/60 px-4 py-3 text-sm leading-relaxed text-brand-900/80">
+      <span className="mt-0.5 shrink-0 text-base">💡</span>
+      <p>{children}</p>
+    </div>
+  );
+}
+
 export function Card({
   children,
   className = "",
@@ -443,8 +452,11 @@ export function LogoMark({ className = "", size = 24 }: IconProps) {
 // ---------------------------------------------------------------------
 // Date helpers
 // ---------------------------------------------------------------------
-export function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("fr-FR", {
+export function formatDateTime(iso: string, locale?: string): string {
+  const loc = locale ?? (typeof document !== "undefined"
+    ? document.documentElement.lang === "en" ? "en-US" : "fr-FR"
+    : "fr-FR");
+  return new Date(iso).toLocaleString(loc, {
     dateStyle: "short",
     timeStyle: "short",
   });

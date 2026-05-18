@@ -2,18 +2,21 @@
 
 import { Button } from "@/components/ui";
 import { deleteCategoryAction } from "@/domain/categories/actions";
+import { useTranslation } from "@/lib/i18n";
 
 export function DeleteCategoryForm({ id, name }: { id: string; name: string }) {
+  const { t } = useTranslation();
+
   return (
     <form
       action={deleteCategoryAction}
       onSubmit={(e) => {
-        if (!window.confirm(`Supprimer la catégorie "${name}" ?`)) e.preventDefault();
+        if (!window.confirm(`${t.dangerZone.confirmDeleteCategory} "${name}" ?`)) e.preventDefault();
       }}
     >
       <input type="hidden" name="id" value={id} />
       <Button type="submit" variant="danger">
-        Supprimer
+        {t.dangerZone.deleteBtn}
       </Button>
     </form>
   );

@@ -1,16 +1,18 @@
 "use client";
 
 import { useTheme } from "@/components/theme-provider";
+import { useTranslation } from "@/lib/i18n";
 import { themes, type ThemeName } from "@/lib/themes";
 
 export function ThemeSection() {
   const { theme, setTheme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <div>
-      <p className="mb-1 text-sm font-medium text-neutral-800">Couleur d'accent</p>
+      <p className="mb-1 text-sm font-medium text-neutral-800">{t.settings.accentColor}</p>
       <p className="mb-4 text-xs text-neutral-500">
-        Le choix s'applique immédiatement et est mémorisé sur ce navigateur.
+        {t.settings.accentColorDesc}
       </p>
 
       <div className="flex flex-wrap gap-3">

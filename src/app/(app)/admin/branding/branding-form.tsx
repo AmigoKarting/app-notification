@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { Button, Field, FormError } from "@/components/ui";
 import { updateBrandingAction } from "@/domain/branding/actions";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslation } from "@/lib/i18n";
 
 interface Props {
   initial: {
@@ -16,6 +17,7 @@ interface Props {
 
 export function BrandingForm({ initial }: Props) {
   const router = useRouter();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [appName, setAppName] = useState(initial.app_name);
@@ -34,11 +36,11 @@ export function BrandingForm({ initial }: Props) {
     setSuccess(false);
 
     if (!file.type.startsWith("image/")) {
-      setError("Le fichier doit être une image (PNG, JPG ou SVG).");
+      setError(t.adminBranding.fileNotImage);
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      setError("Image trop lourde (max 2 Mo).");
+      setError(t.adminBranding.fileTooLarge);
       return;
     }
 
@@ -55,7 +57,7 @@ export function BrandingForm({ initial }: Props) {
           upsert: false,
         });
       if (uploadError) {
-        setError(`Échec de l'upload : ${uploadError.message}`);
+        setError(`${t.adminBranding.uploadFailed}: ${uploadError.message}`);
         return;
       }
       const {
@@ -63,7 +65,7 @@ export function BrandingForm({ initial }: Props) {
       } = supabase.storage.from("branding").getPublicUrl(uploadData.path);
       setLogoUrl(publicUrl);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inattendue");
+      setError(err instanceof Error ? err.message : t.profileForm.unexpectedError);
     } finally {
       setUploading(false);
     }
@@ -98,24 +100,24 @@ export function BrandingForm({ initial }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      {/* Aperçu du logo */}
+      {/* Logo preview */}
       <div className="flex items-center gap-4">
         <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-soft">
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={logoUrl}
-              alt="Logo actuel"
+              alt={t.adminBranding.logoLabel}
               className="h-full w-full object-contain"
             />
           ) : (
-            <span className="text-xs text-neutral-400">Aucun logo</span>
+            <span className="text-xs text-neutral-400">{t.adminBranding.noLogo}</span>
           )}
         </div>
         <div className="flex-1">
-          <p className="text-sm font-medium text-neutral-800">Logo</p>
+          <p className="text-sm font-medium text-neutral-800">{t.adminBranding.logoLabel}</p>
           <p className="text-xs text-neutral-500">
-            PNG, JPG ou SVG. 2 Mo max. Affiché en haut à gauche.
+            {t.adminBranding.logoHint}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <label className="cursor-pointer">
@@ -128,7 +130,7 @@ export function BrandingForm({ initial }: Props) {
                 disabled={uploading}
               />
               <span className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50">
-                {uploading ? "Upload..." : logoUrl ? "Changer" : "Choisir un fichier"}
+                {uploading ? t.adminBranding.uploading : logoUrl ? t.adminBranding.changeBtn : t.adminBranding.uploadBtn}
               </span>
             </label>
             {logoUrl && (
@@ -137,7 +139,7 @@ export function BrandingForm({ initial }: Props) {
                 onClick={clearLogo}
                 className="rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
               >
-                Retirer
+                {t.adminBranding.removeBtn}
               </button>
             )}
           </div>
@@ -145,34 +147,34 @@ export function BrandingForm({ initial }: Props) {
       </div>
 
       <Field
-        label="Nom de l'application"
+        label={t.adminBranding.appName}
         name="app_name"
         value={appName}
         onChange={(e) => setAppName(e.target.value)}
         required
         maxLength={80}
-        hint="Affiché à côté du logo dans le header."
+        hint={t.adminBranding.appNameHint}
       />
 
       <Field
-        label="Tagline (optionnel)"
+        label={t.adminBranding.tagline}
         name="app_tagline"
         value={tagline}
         onChange={(e) => setTagline(e.target.value)}
         maxLength={200}
-        hint="Sous-titre affiché sur la page d'accueil (sous le hero)."
+        hint={t.adminBranding.taglineHint}
       />
 
       {error && <FormError message={error} />}
       {success && (
         <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-          Marque mise à jour. Recharge n'importe quelle page pour voir le résultat.
+          {t.adminBranding.successMessage}
         </p>
       )}
 
       <div className="flex justify-end">
         <Button type="submit" disabled={saving || uploading}>
-          {saving ? "Enregistrement..." : "Enregistrer"}
+          {saving ? t.common.saving : t.common.save}
         </Button>
       </div>
     </form>

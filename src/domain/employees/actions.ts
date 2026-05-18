@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/domain/auth/session";
 import { RepositoryError } from "@/domain/errors";
 import { type FormState } from "@/domain/form-state";
+import { getServerDictionary } from "@/lib/i18n/server";
 import {
   createEmployee,
   deleteEmployee,
@@ -23,17 +24,18 @@ function fieldErrorsFromZod(err: import("zod").ZodError<unknown>): Record<string
 }
 
 function mapRepositoryError(err: unknown): FormState<Employee> {
+  const t = getServerDictionary();
   if (err instanceof RepositoryError) {
     if (err.code === "conflict") {
       return {
         status: "error",
-        message: "Un employé avec cet email existe déjà.",
-        fieldErrors: { email: "Email déjà utilisé" },
+        message: t.errors.employeeConflict,
+        fieldErrors: { email: t.errors.emailTaken },
       };
     }
     return { status: "error", message: err.message };
   }
-  return { status: "error", message: "Erreur inattendue" };
+  return { status: "error", message: t.errors.unexpected };
 }
 
 // ---------------------------------------------------------------------
@@ -50,10 +52,11 @@ export async function createEmployeeAction(
     email: formData.get("email"),
     phone: formData.get("phone"),
   });
+  const t = getServerDictionary();
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -79,6 +82,7 @@ export async function updateEmployeeAction(
 ): Promise<FormState<Employee>> {
   await requireUser();
 
+  const t = getServerDictionary();
   const parsed = updateEmployeeSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -87,7 +91,7 @@ export async function updateEmployeeAction(
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -100,7 +104,7 @@ export async function updateEmployeeAction(
 
   revalidatePath("/employees");
   revalidatePath(`/employees/${id}`);
-  return { status: "success", message: "Modifications enregistrées." };
+  return { status: "success", message: t.actionMessages.saved };
 }
 
 // ---------------------------------------------------------------------

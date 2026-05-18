@@ -3,8 +3,10 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslation } from "@/lib/i18n";
 
 export function LoginForm() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useSearchParams();
   const redirectTo = params.get("redirect") ?? "/";
@@ -28,14 +30,14 @@ export function LoginForm() {
       });
 
       if (error) {
-        setError("Identifiants invalides");
+        setError(t.auth.invalidCredentials);
         return;
       }
 
       router.replace(redirectTo);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inattendue");
+      setError(err instanceof Error ? err.message : t.auth.unexpectedError);
     } finally {
       setPending(false);
     }
@@ -44,31 +46,31 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <label className="block">
-        <span className="mb-1 block text-sm font-medium">Adresse courriel</span>
+        <span className="mb-1 block text-sm font-medium">{t.auth.email}</span>
         <input
           type="email"
           autoComplete="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="jean@exemple.com"
+          placeholder={t.auth.emailPlaceholder}
           className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
         />
       </label>
 
       <label className="block">
-        <span className="mb-1 block text-sm font-medium">Mot de passe</span>
+        <span className="mb-1 block text-sm font-medium">{t.auth.password}</span>
         <input
           type="password"
           autoComplete="current-password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="4 derniers chiffres de ton téléphone"
+          placeholder={t.auth.passwordPlaceholder}
           className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
         />
         <span className="mt-1 block text-xs text-neutral-500">
-          Les 4 derniers chiffres de ton numéro de téléphone
+          {t.auth.passwordHint}
         </span>
       </label>
 
@@ -81,7 +83,7 @@ export function LoginForm() {
         disabled={pending}
         className="w-full rounded-md bg-neutral-900 py-2 font-medium text-white transition hover:bg-neutral-700 disabled:opacity-50"
       >
-        {pending ? "Connexion..." : "Se connecter"}
+        {pending ? t.auth.loggingIn : t.auth.login}
       </button>
     </form>
   );

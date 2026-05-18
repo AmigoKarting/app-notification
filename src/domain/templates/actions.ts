@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireDev } from "@/domain/auth/role";
 import { RepositoryError } from "@/domain/errors";
 import { type FormState } from "@/domain/form-state";
+import { getServerDictionary } from "@/lib/i18n/server";
 import {
   createTemplate,
   deleteTemplate,
@@ -20,10 +21,11 @@ function fieldErrorsFromZod(err: import("zod").ZodError<unknown>): Record<string
 }
 
 function mapError(err: unknown): FormState<Template> {
+  const t = getServerDictionary();
   if (err instanceof RepositoryError) {
     return { status: "error", message: err.message };
   }
-  return { status: "error", message: "Erreur inattendue" };
+  return { status: "error", message: t.errors.unexpected };
 }
 
 function readForm(formData: FormData) {
@@ -45,11 +47,12 @@ export async function createTemplateAction(
   formData: FormData,
 ): Promise<FormState<Template>> {
   const profile = await requireDev();
+  const t = getServerDictionary();
   const parsed = createTemplateSchema.safeParse(readForm(formData));
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -68,11 +71,12 @@ export async function updateTemplateAction(
   formData: FormData,
 ): Promise<FormState<Template>> {
   await requireDev();
+  const t = getServerDictionary();
   const parsed = updateTemplateSchema.safeParse(readForm(formData));
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -83,7 +87,7 @@ export async function updateTemplateAction(
   }
   revalidatePath("/admin/templates");
   revalidatePath(`/admin/templates/${id}`);
-  return { status: "success", message: "Modèle mis à jour." };
+  return { status: "success", message: t.actionMessages.templateUpdated };
 }
 
 export async function deleteTemplateAction(formData: FormData): Promise<void> {

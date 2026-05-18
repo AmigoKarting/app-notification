@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Card, LinkButton, PageHeader, formatDateTime } from "@/components/ui";
+import { Card, LinkButton, PageHeader, PageTip, formatDateTime } from "@/components/ui";
 import { listCategories } from "@/domain/categories/repository";
 import { listSessions } from "@/domain/sessions/repository";
 import { listTeams } from "@/domain/teams/repository";
@@ -8,6 +8,7 @@ import {
   getSchedule,
   getScheduleTargets,
 } from "@/domain/notification-schedules/repository";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 import { ScheduleForm } from "../schedule-form";
 import { DeleteScheduleForm } from "./delete-form";
 
@@ -29,27 +30,30 @@ export default async function EditSchedulePage({ params }: PageProps) {
 
   if (!schedule) notFound();
 
+  const t = getServerDictionary();
+  const locale = getLocale();
+  const dateFmtLocale = locale === "en" ? "en-US" : "fr-FR";
+
   return (
     <div className="space-y-6">
       <PageHeader
         title={schedule.title}
-        description="Modifier la planification."
+        description={t.engagement.editDescription}
         action={
           <LinkButton href="/admin/schedules" variant="secondary">
-            Retour
+            {t.common.back}
           </LinkButton>
         }
       />
-
       {(schedule.next_run_at || schedule.last_run_at) && (
         <Card className="grid grid-cols-1 gap-3 p-4 text-sm sm:grid-cols-2">
           <div>
             <p className="text-xs uppercase tracking-wide text-neutral-500">
-              Prochaine exécution
+              {t.engagement.nextExecution}
             </p>
             <p className="font-medium text-neutral-900">
               {schedule.is_active && schedule.next_run_at
-                ? `${new Date(schedule.next_run_at).toLocaleString("fr-FR", {
+                ? `${new Date(schedule.next_run_at).toLocaleString(dateFmtLocale, {
                     dateStyle: "full",
                     timeStyle: "short",
                     timeZone: schedule.timezone,
@@ -59,10 +63,10 @@ export default async function EditSchedulePage({ params }: PageProps) {
           </div>
           <div>
             <p className="text-xs uppercase tracking-wide text-neutral-500">
-              Dernière exécution
+              {t.engagement.lastExecution}
             </p>
             <p className="text-neutral-700">
-              {schedule.last_run_at ? formatDateTime(schedule.last_run_at) : "—"}
+              {schedule.last_run_at ? formatDateTime(schedule.last_run_at, dateFmtLocale) : "—"}
             </p>
           </div>
         </Card>
@@ -75,7 +79,7 @@ export default async function EditSchedulePage({ params }: PageProps) {
           targets={targets}
           categories={categories.map((c) => ({ id: c.id, name: c.name }))}
           sessions={sessions.map((s) => ({ id: s.id, name: s.name }))}
-          teams={teams.map((t) => ({ id: t.id, name: t.name, color: t.color }))}
+          teams={teams.map((tm) => ({ id: tm.id, name: tm.name, color: tm.color }))}
           users={users.map((u) => ({
             id: u.id,
             name: u.display_name,
@@ -86,13 +90,14 @@ export default async function EditSchedulePage({ params }: PageProps) {
 
       <Card className="flex items-center justify-between p-6">
         <div>
-          <p className="font-medium">Zone de danger</p>
+          <p className="font-medium">{t.dangerZone.title}</p>
           <p className="text-sm text-neutral-600">
-            Supprimer arrête définitivement la planification. L'historique des envois passés reste.
+            {t.dangerZone.deleteScheduleDesc}
           </p>
         </div>
         <DeleteScheduleForm id={schedule.id} title={schedule.title} />
       </Card>
+      <PageTip>{t.pageTips.adminScheduleEdit}</PageTip>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import {
   AlertIcon,
   BellIcon,
   Card,
+  PageTip,
   CheckIcon,
   ClockIcon,
   EmptyState,
@@ -14,10 +15,15 @@ import {
   formatDateTime,
 } from "@/components/ui";
 import { getReminderCounts, listReminders } from "@/domain/reminders/repository";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
+  const t = getServerDictionary();
+  const locale = getLocale();
+  const dateFmt = locale === "en" ? "en-US" : "fr-FR";
+
   const [counts, upcoming] = await Promise.all([
     getReminderCounts(),
     listReminders({ status: "pending", upcomingOnly: true, limit: 5 }),
@@ -26,37 +32,37 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Dashboard"
-        description="Vue d'ensemble des rappels."
+        title={t.dashboard.title}
+        description={t.dashboard.description}
         action={
           <LinkButton href="/reminders/new">
             <PlusIcon size={14} />
-            Nouveau rappel
+            {t.dashboard.newReminder}
           </LinkButton>
         }
       />
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
-          label="Total"
+          label={t.dashboard.total}
           value={counts.total}
           icon={<BellIcon className="text-brand-600" size={18} />}
           ringClass="bg-brand-50"
         />
         <StatCard
-          label="En attente"
+          label={t.dashboard.pending}
           value={counts.pending}
           icon={<ClockIcon className="text-amber-600" size={18} />}
           ringClass="bg-amber-50"
         />
         <StatCard
-          label="Envoyés"
+          label={t.dashboard.sentLabel}
           value={counts.sent}
           icon={<CheckIcon className="text-emerald-600" size={18} />}
           ringClass="bg-emerald-50"
         />
         <StatCard
-          label="En retard"
+          label={t.dashboard.overdue}
           value={counts.overdue}
           icon={<AlertIcon className="text-red-600" size={18} />}
           ringClass="bg-red-50"
@@ -66,24 +72,24 @@ export default async function DashboardPage() {
 
       <section className="space-y-3">
         <div className="flex items-end justify-between">
-          <h2 className="text-lg font-semibold tracking-tight">Prochains rappels</h2>
+          <h2 className="text-lg font-semibold tracking-tight">{t.dashboard.upcomingReminders}</h2>
           <Link
             href="/reminders"
             className="text-sm font-medium text-brand-700 transition hover:text-brand-800 hover:underline"
           >
-            Voir tout →
+            {t.dashboard.viewAll}
           </Link>
         </div>
 
         {upcoming.length === 0 ? (
           <EmptyState
             icon={<SparkleIcon size={32} />}
-            title="Aucun rappel à venir"
-            description="Crée un rappel pour qu'il apparaisse ici."
+            title={t.dashboard.noUpcoming}
+            description={t.dashboard.noUpcomingDesc}
             action={
               <LinkButton href="/reminders/new">
                 <PlusIcon size={14} />
-                Créer un rappel
+                {t.dashboard.createReminder}
               </LinkButton>
             }
           />
@@ -99,11 +105,11 @@ export default async function DashboardPage() {
                     <p className="truncate font-medium text-neutral-900">{r.message}</p>
                     <p className="mt-0.5 flex items-center gap-1.5 text-xs text-neutral-500">
                       <span className="font-medium text-neutral-700">
-                        {r.employee?.name ?? "Employé inconnu"}
+                        {r.employee?.name ?? t.dashboard.unknownEmployee}
                       </span>
                       <span className="text-neutral-300">•</span>
                       <ClockIcon size={12} className="text-neutral-400" />
-                      {formatDateTime(r.scheduled_at)}
+                      {formatDateTime(r.scheduled_at, dateFmt)}
                     </p>
                   </div>
                   <StatusBadge status={r.status} />
@@ -111,7 +117,7 @@ export default async function DashboardPage() {
                     href={`/reminders/${r.id}`}
                     className="text-sm font-medium text-brand-700 hover:text-brand-800 hover:underline"
                   >
-                    Voir
+                    {t.dashboard.view}
                   </Link>
                 </li>
               ))}
@@ -119,6 +125,8 @@ export default async function DashboardPage() {
           </Card>
         )}
       </section>
+
+      <PageTip>{t.pageTips.dashboard}</PageTip>
     </div>
   );
 }

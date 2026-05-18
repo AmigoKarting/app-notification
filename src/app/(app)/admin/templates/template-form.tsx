@@ -15,6 +15,7 @@ import {
 import { idleFormState, type FormState } from "@/domain/form-state";
 import type { Template } from "@/domain/templates/repository";
 import { FormattingHelp } from "@/components/form-hints";
+import { useTranslation } from "@/lib/i18n";
 
 type Option = { id: string; name: string };
 
@@ -22,16 +23,17 @@ type Props =
   | { mode: "create"; categories: Option[] }
   | { mode: "edit"; categories: Option[]; template: Template };
 
-function SubmitButton({ label }: { label: string }) {
+function SubmitButton({ label, savingLabel }: { label: string; savingLabel: string }) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Enregistrement..." : label}
+      {pending ? savingLabel : label}
     </Button>
   );
 }
 
 export function TemplateForm(props: Props) {
+  const { t } = useTranslation();
   const action =
     props.mode === "create"
       ? createTemplateAction
@@ -48,61 +50,61 @@ export function TemplateForm(props: Props) {
   return (
     <form action={formAction} className="space-y-4" noValidate>
       <Field
-        label="Nom du modèle"
+        label={t.adminTemplates.templateName}
         name="name"
         defaultValue={initial?.name ?? ""}
         required
         maxLength={80}
-        placeholder="Ex: Annonce hebdo, Rappel paie"
-        hint="Pour t'y retrouver dans la liste des modèles"
+        placeholder={t.adminTemplates.templateNamePlaceholder}
+        hint={t.adminTemplates.templateNameHint}
         error={errors?.name}
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SelectField
-          label="Type"
+          label={t.adminTemplates.type}
           name="kind"
           defaultValue={initial?.kind ?? "notification"}
         >
-          <option value="notification">Notification</option>
-          <option value="reminder">Rappel</option>
+          <option value="notification">{t.feed.notification}</option>
+          <option value="reminder">{t.feed.reminder}</option>
         </SelectField>
         <SelectField
-          label="Priorité"
+          label={t.adminTemplates.priority}
           name="priority"
           defaultValue={initial?.priority ?? "normal"}
         >
-          <option value="low">Basse</option>
-          <option value="normal">Normale</option>
-          <option value="high">Haute</option>
+          <option value="low">{t.adminTemplates.priorityLow}</option>
+          <option value="normal">{t.adminTemplates.priorityNormal}</option>
+          <option value="high">{t.adminTemplates.priorityHigh}</option>
         </SelectField>
       </div>
 
       <Field
-        label="Titre"
+        label={t.adminTemplates.titleField}
         name="title"
         defaultValue={initial?.title ?? ""}
         required
         maxLength={160}
-        placeholder="Variables disponibles : {name}, {email}"
+        placeholder={t.adminTemplates.titlePlaceholder}
         error={errors?.title}
       />
       <TextAreaField
-        label="Message"
+        label={t.adminTemplates.message}
         name="body"
         rows={5}
         defaultValue={initial?.body ?? ""}
         maxLength={5000}
-        placeholder={"Tu peux utiliser {name} et {email} pour personnaliser.\n\nMarkdown : **gras**, *italique*, [lien](url)"}
+        placeholder={t.adminTemplates.messagePlaceholder}
       />
       <FormattingHelp />
 
       <SelectField
-        label="Catégorie par défaut"
+        label={t.adminTemplates.defaultCategory}
         name="category_id"
         defaultValue={initial?.category_id ?? ""}
       >
-        <option value="">Aucune</option>
+        <option value="">{t.adminTemplates.noneCategory}</option>
         {props.categories.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}
@@ -112,14 +114,14 @@ export function TemplateForm(props: Props) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field
-          label="Libellé du bouton (optionnel)"
+          label={t.adminTemplates.actionLabel}
           name="action_label"
           defaultValue={initial?.action_label ?? ""}
           maxLength={60}
-          placeholder="S'inscrire, En savoir plus…"
+          placeholder={t.adminTemplates.actionLabelPlaceholder}
         />
         <Field
-          label="URL du bouton"
+          label={t.adminTemplates.actionUrl}
           name="action_url"
           type="url"
           defaultValue={initial?.action_url ?? ""}
@@ -129,7 +131,7 @@ export function TemplateForm(props: Props) {
 
       <div>
         <p className="mb-1.5 text-sm font-medium text-neutral-800">
-          Canaux d'envoi par défaut
+          {t.adminTemplates.defaultChannels}
         </p>
         <div className="flex gap-2">
           <label className="cursor-pointer">
@@ -167,7 +169,10 @@ export function TemplateForm(props: Props) {
       )}
 
       <div className="flex justify-end pt-2">
-        <SubmitButton label={props.mode === "create" ? "Créer le modèle" : "Enregistrer"} />
+        <SubmitButton
+          label={props.mode === "create" ? t.adminTemplates.createBtn : t.common.save}
+          savingLabel={t.common.saving}
+        />
       </div>
     </form>
   );

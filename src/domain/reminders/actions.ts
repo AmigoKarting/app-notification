@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/domain/auth/session";
 import { RepositoryError } from "@/domain/errors";
 import { type FormState } from "@/domain/form-state";
+import { getServerDictionary } from "@/lib/i18n/server";
 import {
   createReminder,
   deleteReminder,
@@ -23,17 +24,18 @@ function fieldErrorsFromZod(err: import("zod").ZodError<unknown>): Record<string
 }
 
 function mapRepositoryError(err: unknown): FormState<Reminder> {
+  const t = getServerDictionary();
   if (err instanceof RepositoryError) {
     if (err.code === "validation") {
       return {
         status: "error",
-        message: "Employé invalide.",
-        fieldErrors: { employee_id: "Employé introuvable" },
+        message: t.errors.invalidEmployee,
+        fieldErrors: { employee_id: t.errors.employeeNotFound },
       };
     }
     return { status: "error", message: err.message };
   }
-  return { status: "error", message: "Erreur inattendue" };
+  return { status: "error", message: t.errors.unexpected };
 }
 
 // ---------------------------------------------------------------------
@@ -51,10 +53,11 @@ export async function createReminderAction(
     scheduled_at: formData.get("scheduled_at"),
     status: formData.get("status") || undefined,
   });
+  const t = getServerDictionary();
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -80,6 +83,7 @@ export async function updateReminderAction(
 ): Promise<FormState<Reminder>> {
   await requireUser();
 
+  const t = getServerDictionary();
   const parsed = updateReminderSchema.safeParse({
     employee_id: formData.get("employee_id"),
     message: formData.get("message"),
@@ -89,7 +93,7 @@ export async function updateReminderAction(
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -103,7 +107,7 @@ export async function updateReminderAction(
   revalidatePath("/reminders");
   revalidatePath(`/reminders/${id}`);
   revalidatePath("/dashboard");
-  return { status: "success", message: "Modifications enregistrées." };
+  return { status: "success", message: t.actionMessages.saved };
 }
 
 // ---------------------------------------------------------------------

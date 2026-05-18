@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getServerDictionary } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { type AuthFormState, loginSchema, signupSchema } from "./schema";
 
@@ -49,10 +50,11 @@ export async function loginAction(
     password: formData.get("password"),
   });
 
+  const t = getServerDictionary();
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -62,7 +64,7 @@ export async function loginAction(
 
   if (error) {
     // Message générique : ne révèle pas si l'email existe ou non
-    return { status: "error", message: "Identifiants invalides" };
+    return { status: "error", message: t.errors.invalidCredentials };
   }
 
   return { status: "success", redirect: safeRedirect(formData.get("redirect")) };
@@ -80,10 +82,11 @@ export async function signupAction(
     password: formData.get("password"),
   });
 
+  const t = getServerDictionary();
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -103,7 +106,7 @@ export async function signupAction(
   if (!data.session) {
     return {
       status: "success",
-      message: "Compte créé. Vérifiez votre email pour confirmer votre inscription.",
+      message: t.actionMessages.accountCreated,
     };
   }
 

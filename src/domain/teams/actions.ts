@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireDev } from "@/domain/auth/role";
 import { RepositoryError } from "@/domain/errors";
 import { type FormState } from "@/domain/form-state";
+import { getServerDictionary } from "@/lib/i18n/server";
 import {
   createTeam,
   deleteTeam,
@@ -22,13 +23,14 @@ function fieldErrorsFromZod(err: import("zod").ZodError<unknown>): Record<string
 }
 
 function mapError(err: unknown): FormState<Team> {
+  const t = getServerDictionary();
   if (err instanceof RepositoryError) {
     if (err.code === "conflict") {
-      return { status: "error", message: "Slug déjà utilisé.", fieldErrors: { slug: "Déjà pris" } };
+      return { status: "error", message: t.errors.slugTaken, fieldErrors: { slug: t.errors.alreadyTaken } };
     }
     return { status: "error", message: err.message };
   }
-  return { status: "error", message: "Erreur inattendue" };
+  return { status: "error", message: t.errors.unexpected };
 }
 
 export async function createTeamAction(
@@ -41,10 +43,11 @@ export async function createTeamAction(
     name: formData.get("name"),
     color: formData.get("color") || undefined,
   });
+  const t = getServerDictionary();
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -63,6 +66,7 @@ export async function updateTeamAction(
   formData: FormData,
 ): Promise<FormState<Team>> {
   await requireDev();
+  const t = getServerDictionary();
   const parsed = updateTeamSchema.safeParse({
     slug: formData.get("slug"),
     name: formData.get("name"),
@@ -71,7 +75,7 @@ export async function updateTeamAction(
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Données invalides",
+      message: t.errors.invalidData,
       fieldErrors: fieldErrorsFromZod(parsed.error),
     };
   }
@@ -82,7 +86,7 @@ export async function updateTeamAction(
   }
   revalidatePath("/admin/teams");
   revalidatePath(`/admin/teams/${id}`);
-  return { status: "success", message: "Équipe mise à jour." };
+  return { status: "success", message: t.actionMessages.teamUpdated };
 }
 
 export async function deleteTeamAction(formData: FormData): Promise<void> {

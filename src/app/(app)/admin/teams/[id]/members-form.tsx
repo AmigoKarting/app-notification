@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui";
 import { setTeamMembersAction } from "@/domain/teams/actions";
+import { useTranslation } from "@/lib/i18n";
 
 type UserOption = {
   id: string;
@@ -12,11 +13,11 @@ type UserOption = {
   role: string;
 };
 
-function SubmitButton() {
+function SubmitButton({ label, savingLabel }: { label: string; savingLabel: string }) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Enregistrement..." : "Enregistrer les membres"}
+      {pending ? savingLabel : label}
     </Button>
   );
 }
@@ -30,6 +31,7 @@ export function MembersForm({
   users: UserOption[];
   initialMemberIds: string[];
 }) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const initial = new Set(initialMemberIds);
 
@@ -49,7 +51,7 @@ export function MembersForm({
 
       <input
         type="search"
-        placeholder="Rechercher par nom ou email..."
+        placeholder={t.adminTeams.searchMembers}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="w-full rounded-lg border border-neutral-300 px-3.5 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
@@ -58,7 +60,7 @@ export function MembersForm({
       <div className="max-h-72 overflow-y-auto rounded-lg border border-neutral-200">
         {filtered.length === 0 ? (
           <p className="px-4 py-6 text-center text-sm text-neutral-500">
-            Aucun utilisateur ne correspond.
+            {t.adminTeams.noUserMatch}
           </p>
         ) : (
           <ul className="divide-y divide-neutral-100">
@@ -75,7 +77,7 @@ export function MembersForm({
                   <span className="flex-1">
                     <span className="block text-sm font-medium text-neutral-900">
                       {u.name?.trim() || (
-                        <span className="italic text-neutral-400">Sans nom</span>
+                        <span className="italic text-neutral-400">{t.common.noName}</span>
                       )}
                     </span>
                     <span className="block text-xs text-neutral-500">
@@ -90,7 +92,7 @@ export function MembersForm({
       </div>
 
       <div className="flex justify-end">
-        <SubmitButton />
+        <SubmitButton label={t.adminTeams.saveMembers} savingLabel={t.common.saving} />
       </div>
     </form>
   );

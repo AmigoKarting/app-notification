@@ -19,6 +19,7 @@ import type { FeedItem } from "@/domain/feed/repository";
 import type { FeedTargetMode } from "@/lib/supabase/database.types";
 import { FormattingHelp } from "@/components/form-hints";
 import { ImageUpload } from "./image-upload";
+import { useTranslation } from "@/lib/i18n";
 
 type Option = { id: string; name: string };
 type UserOption = { id: string; name: string | null; email: string | null };
@@ -39,16 +40,17 @@ type Props =
       targets: { team_ids: string[]; user_ids: string[] };
     });
 
-function SubmitButton({ label }: { label: string }) {
+function SubmitButton({ label, savingLabel }: { label: string; savingLabel: string }) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Enregistrement..." : label}
+      {pending ? savingLabel : label}
     </Button>
   );
 }
 
 export function FeedItemForm(props: Props) {
+  const { t } = useTranslation();
   const action =
     props.mode === "create"
       ? createFeedItemAction
@@ -74,22 +76,22 @@ export function FeedItemForm(props: Props) {
       {/* ---- 1. Contenu ---- */}
       <section className="space-y-4">
         <Field
-          label="Titre"
+          label={t.feedForm.title}
           name="title"
           defaultValue={initial?.title ?? ""}
           required
           maxLength={160}
-          placeholder="Ex: Réunion équipe — vendredi 14h"
+          placeholder={t.feedForm.titlePlaceholder}
           error={errors?.title}
         />
 
         <TextAreaField
-          label="Message"
+          label={t.feedForm.body}
           name="body"
           rows={4}
           defaultValue={initial?.body ?? ""}
           maxLength={5000}
-          placeholder="Détails du message…"
+          placeholder={t.feedForm.bodyPlaceholder}
         />
         <FormattingHelp />
 
@@ -97,21 +99,21 @@ export function FeedItemForm(props: Props) {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field
-            label="Libellé du bouton (optionnel)"
+            label={t.feedForm.actionLabel}
             name="action_label"
             defaultValue={initial?.action_label ?? ""}
             maxLength={60}
-            placeholder="Ex: S'inscrire, En savoir plus"
-            hint="Affiché en bas de la notification"
+            placeholder={t.feedForm.actionLabelPlaceholder}
+            hint={t.feedForm.actionLabelHint}
             error={errors?.action_label}
           />
           <Field
-            label="URL du bouton"
+            label={t.feedForm.actionUrl}
             name="action_url"
             type="url"
             defaultValue={initial?.action_url ?? ""}
-            placeholder="https://…"
-            hint="Renseigner les deux ou aucun"
+            placeholder={t.feedForm.actionUrlPlaceholder}
+            hint={t.feedForm.actionUrlHint}
             error={errors?.action_url}
           />
         </div>
@@ -120,9 +122,9 @@ export function FeedItemForm(props: Props) {
       {/* ---- 1.5. Diffusion (épinglé / brouillon / canaux externes) ---- */}
       <section className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5">
         <header>
-          <h3 className="text-sm font-semibold text-neutral-900">Diffusion</h3>
+          <h3 className="text-sm font-semibold text-neutral-900">{t.feedForm.broadcasting}</h3>
           <p className="text-xs text-neutral-600">
-            État de la publication et envois externes.
+            {t.feedForm.broadcastingDesc}
           </p>
         </header>
 
@@ -130,23 +132,23 @@ export function FeedItemForm(props: Props) {
           <ToggleOption
             name="is_draft"
             defaultChecked={initial?.is_draft ?? false}
-            label="Brouillon"
-            description="Pas publié — visible uniquement par toi."
+            label={t.feedForm.isDraft}
+            description={t.feedForm.isDraftDesc}
           />
           <ToggleOption
             name="is_pinned"
             defaultChecked={initial?.is_pinned ?? false}
-            label="Épingler en haut"
-            description="Toujours en tête du fil pour les destinataires."
+            label={t.feedForm.isPinned}
+            description={t.feedForm.isPinnedDesc}
           />
         </div>
 
         <div>
           <p className="mb-1.5 text-sm font-medium text-neutral-800">
-            Envoyer aussi par
+            {t.feedForm.sendAlsoBy}
           </p>
           <p className="mb-2 text-xs text-neutral-500">
-            En plus de l'affichage dans le fil. Nécessite un provider configuré (Resend pour email, Twilio pour SMS).
+            {t.feedForm.sendAlsoByDesc}
           </p>
           <div className="flex flex-wrap gap-2">
             <ChannelCheckbox
@@ -168,43 +170,43 @@ export function FeedItemForm(props: Props) {
       {/* ---- 2. Destinataires ---- */}
       <section className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5">
         <header>
-          <h3 className="text-sm font-semibold text-neutral-900">Destinataires</h3>
-          <p className="text-xs text-neutral-600">Qui verra cette notification ?</p>
+          <h3 className="text-sm font-semibold text-neutral-900">{t.feedForm.recipients}</h3>
+          <p className="text-xs text-neutral-600">{t.feedForm.recipientsQuestion}</p>
         </header>
 
-        <fieldset className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <fieldset className="grid grid-cols-1 gap-2 md:grid-cols-3">
           <TargetRadio
             mode={targetMode}
             value="all"
             onChange={setTargetMode}
-            title="Tout le monde"
-            description="Tous les utilisateurs."
+            title={t.feedForm.everyone}
+            description={t.feedForm.everyoneDesc}
           />
           <TargetRadio
             mode={targetMode}
             value="teams"
             onChange={setTargetMode}
-            title="Des équipes"
-            description="Membres des équipes choisies."
+            title={t.feedForm.selectedTeams}
+            description={t.feedForm.selectedTeamsDesc}
           />
           <TargetRadio
             mode={targetMode}
             value="users"
             onChange={setTargetMode}
-            title="Des personnes"
-            description="Personnes précises."
+            title={t.feedForm.selectedUsers}
+            description={t.feedForm.selectedUsersDesc}
           />
         </fieldset>
 
         {targetMode === "teams" && (
           <PickerList
-            label="Équipes"
+            label={t.feedForm.teams}
             error={errors?.target_team_ids}
-            emptyMessage="Aucune équipe. Crée-en une dans Admin → Équipes."
-            items={props.teams.map((t) => ({
-              id: t.id,
-              primary: t.name,
-              accentColor: t.color,
+            emptyMessage={t.feedForm.noTeams}
+            items={props.teams.map((tm) => ({
+              id: tm.id,
+              primary: tm.name,
+              accentColor: tm.color,
             }))}
             name="target_team_ids"
             initialSelected={initialTargets.team_ids}
@@ -213,12 +215,12 @@ export function FeedItemForm(props: Props) {
 
         {targetMode === "users" && (
           <PickerList
-            label="Personnes"
+            label={t.feedForm.users}
             error={errors?.target_user_ids}
-            emptyMessage="Aucun utilisateur inscrit."
+            emptyMessage={t.feedForm.noUsers}
             items={props.users.map((u) => ({
               id: u.id,
-              primary: u.name?.trim() || u.email || "Sans nom",
+              primary: u.name?.trim() || u.email || t.common.noName,
               secondary: u.name ? u.email ?? undefined : undefined,
             }))}
             name="target_user_ids"
@@ -231,41 +233,41 @@ export function FeedItemForm(props: Props) {
       {/* ---- 3. Classement (catégorie, période, priorité, type) ---- */}
       <section className="space-y-4 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5">
         <header>
-          <h3 className="text-sm font-semibold text-neutral-900">Classement</h3>
+          <h3 className="text-sm font-semibold text-neutral-900">{t.feedForm.classification}</h3>
           <p className="text-xs text-neutral-600">
-            Comment ranger et présenter cette notification.
+            {t.feedForm.classificationDesc}
           </p>
         </header>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SelectField
-            label="Type"
+            label={t.feedForm.type}
             name="kind"
             defaultValue={initial?.kind ?? "notification"}
             required
-            hint="Info pure, ou rappel avec date limite"
+            hint={t.feedForm.typeHint}
           >
-            <option value="notification">Notification (info)</option>
-            <option value="reminder">Rappel (avec date limite)</option>
+            <option value="notification">{t.feedForm.notificationType}</option>
+            <option value="reminder">{t.feedForm.reminderType}</option>
           </SelectField>
 
           <SelectField
-            label="Priorité"
+            label={t.feedForm.priority}
             name="priority"
             defaultValue={initial?.priority ?? "normal"}
           >
-            <option value="low">Basse</option>
-            <option value="normal">Normale</option>
-            <option value="high">Haute</option>
+            <option value="low">{t.feedForm.priorityLow}</option>
+            <option value="normal">{t.feedForm.priorityNormal}</option>
+            <option value="high">{t.feedForm.priorityHigh}</option>
           </SelectField>
 
           <SelectField
-            label="Catégorie"
+            label={t.feedForm.category}
             name="category_id"
             defaultValue={initial?.category_id ?? ""}
-            hint="Pour filtrer dans le fil"
+            hint={t.feedForm.categoryHint}
           >
-            <option value="">Aucune</option>
+            <option value="">{t.feedForm.noneCategory}</option>
             {props.categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -274,12 +276,12 @@ export function FeedItemForm(props: Props) {
           </SelectField>
 
           <SelectField
-            label="Période"
+            label={t.feedForm.period}
             name="session_id"
             defaultValue={initial?.session_id ?? ""}
-            hint="Visible seulement pendant la période"
+            hint={t.feedForm.periodHint}
           >
-            <option value="">Toujours visible</option>
+            <option value="">{t.feedForm.alwaysVisible}</option>
             {props.sessions.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -292,33 +294,33 @@ export function FeedItemForm(props: Props) {
       {/* ---- 4. Dates ---- */}
       <section className="space-y-4 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5">
         <header>
-          <h3 className="text-sm font-semibold text-neutral-900">Dates</h3>
+          <h3 className="text-sm font-semibold text-neutral-900">{t.feedForm.dates}</h3>
           <p className="text-xs text-neutral-600">
-            Quand publier, quand cacher (laisser vide = maintenant / jamais).
+            {t.feedForm.datesDesc}
           </p>
         </header>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Field
-            label="Publier le…"
+            label={t.feedForm.publishAt}
             name="published_at"
             type="datetime-local"
             defaultValue={initial?.published_at ? toDatetimeLocal(initial.published_at) : ""}
-            hint="Vide = maintenant"
+            hint={t.feedForm.publishAtHint}
           />
           <Field
-            label="Cacher après le…"
+            label={t.feedForm.hideAfter}
             name="expires_at"
             type="datetime-local"
             defaultValue={initial?.expires_at ? toDatetimeLocal(initial.expires_at) : ""}
-            hint="Vide = jamais"
+            hint={t.feedForm.hideAfterHint}
           />
           <Field
-            label="Date limite (si rappel)"
+            label={t.feedForm.dueDate}
             name="due_date"
             type="datetime-local"
             defaultValue={initial?.due_date ? toDatetimeLocal(initial.due_date) : ""}
-            hint="Pour les rappels"
+            hint={t.feedForm.dueDateHint}
             error={errors?.due_date}
           />
         </div>
@@ -332,7 +334,7 @@ export function FeedItemForm(props: Props) {
       )}
 
       <div className="flex justify-end pt-2">
-        <SubmitButton label={props.mode === "create" ? "Publier" : "Enregistrer"} />
+        <SubmitButton label={props.mode === "create" ? t.common.publish : t.common.save} savingLabel={t.common.saving} />
       </div>
     </form>
   );
@@ -455,6 +457,7 @@ function PickerList({
   const [search, setSearch] = useState("");
   const initial = new Set(initialSelected);
 
+  const { t } = useTranslation();
   const filtered =
     searchable && search
       ? items.filter((i) => {
@@ -472,7 +475,7 @@ function PickerList({
       {searchable && items.length > 0 && (
         <input
           type="search"
-          placeholder="Rechercher…"
+          placeholder={t.common.searchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="mb-2 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
@@ -485,7 +488,7 @@ function PickerList({
       ) : (
         <div className="max-h-56 overflow-y-auto rounded-lg border border-neutral-200 bg-white">
           {filtered.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-neutral-500">Aucun résultat.</p>
+            <p className="px-4 py-6 text-center text-sm text-neutral-500">{t.common.noResults}</p>
           ) : (
             <ul className="divide-y divide-neutral-100">
               {filtered.map((i) => (

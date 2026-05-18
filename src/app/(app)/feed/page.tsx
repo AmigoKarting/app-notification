@@ -1,9 +1,10 @@
-import { EmptyState, PageHeader, SparkleIcon } from "@/components/ui";
+import { EmptyState, PageHeader, PageTip, SparkleIcon } from "@/components/ui";
 import { FeedCard } from "@/components/feed-card";
 import { requireUser } from "@/domain/auth/session";
 import { listMutedCategoryIds } from "@/domain/category-mutes/repository";
 import { listComments } from "@/domain/comments/repository";
 import { getUserEngagement, listFeedItems } from "@/domain/feed/repository";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,8 @@ function startOfTomorrow(): Date {
 }
 
 export default async function FeedPage() {
+  const t = getServerDictionary();
+  const locale = getLocale();
   const user = await requireUser();
   const todayStart = startOfToday();
   const tomorrowStart = startOfTomorrow();
@@ -43,7 +46,7 @@ export default async function FeedPage() {
   ]);
   const commentsById = new Map(itemIds.map((id, idx) => [id, commentLists[idx]!]));
 
-  const todayLabel = todayStart.toLocaleDateString("fr-FR", {
+  const todayLabel = todayStart.toLocaleDateString(locale === "en" ? "en-US" : "fr-FR", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -53,20 +56,20 @@ export default async function FeedPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Notifications du jour"
+        title={t.feed.title}
         description={`${todayLabel.charAt(0).toUpperCase() + todayLabel.slice(1)} — ${items.length} ${
-          items.length > 1 ? "publications" : "publication"
+          items.length > 1 ? t.feed.publications : t.feed.publication
         }`}
       />
 
       {items.length === 0 ? (
         <EmptyState
           icon={<SparkleIcon size={32} />}
-          title="Rien de neuf aujourd'hui"
+          title={t.feed.nothingToday}
           description={
             mutedIds.length > 0
-              ? "Aucune notification visible. Tu peux gérer tes préférences dans Réglages → Mes notifications."
-              : "Aucune notification publiée aujourd'hui. Reviens plus tard !"
+              ? t.feed.noVisibleNotifications
+              : t.feed.noPublishedToday
           }
         />
       ) : (
@@ -83,6 +86,8 @@ export default async function FeedPage() {
           ))}
         </div>
       )}
+
+      <PageTip>{t.pageTips.feed}</PageTip>
     </div>
   );
 }

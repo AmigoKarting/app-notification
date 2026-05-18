@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { LoginForm } from "./login-form";
 import { SignupForm } from "./signup-form";
+import { useTranslation } from "@/lib/i18n";
 
 type Mode = "signup" | "login";
 
 export function AuthCard({ defaultMode = "signup" }: { defaultMode?: Mode }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>(defaultMode);
 
   return (
@@ -23,7 +25,7 @@ export function AuthCard({ defaultMode = "signup" }: { defaultMode?: Mode }) {
               : "text-neutral-600 hover:text-neutral-900"
           }`}
         >
-          Créer un compte
+          {t.auth.createAccount}
         </button>
         <button
           type="button"
@@ -36,7 +38,7 @@ export function AuthCard({ defaultMode = "signup" }: { defaultMode?: Mode }) {
               : "text-neutral-600 hover:text-neutral-900"
           }`}
         >
-          Se connecter
+          {t.auth.login}
         </button>
       </div>
 
@@ -45,24 +47,24 @@ export function AuthCard({ defaultMode = "signup" }: { defaultMode?: Mode }) {
       <p className="mt-6 text-center text-xs text-neutral-500">
         {mode === "signup" ? (
           <>
-            Déjà un compte ?{" "}
+            {t.auth.alreadyHaveAccount}{" "}
             <button
               type="button"
               onClick={() => setMode("login")}
               className="font-medium text-brand-700 hover:text-brand-800 hover:underline"
             >
-              Se connecter
+              {t.auth.login}
             </button>
           </>
         ) : (
           <>
-            Pas encore inscrit ?{" "}
+            {t.auth.noAccountYet}{" "}
             <button
               type="button"
               onClick={() => setMode("signup")}
               className="font-medium text-brand-700 hover:text-brand-800 hover:underline"
             >
-              Créer un compte
+              {t.auth.createAccount}
             </button>
           </>
         )}

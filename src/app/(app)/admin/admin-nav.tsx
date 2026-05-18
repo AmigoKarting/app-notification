@@ -14,6 +14,7 @@ import {
   UserIcon,
   UsersIcon,
 } from "@/components/ui";
+import { useTranslation, type Dictionary } from "@/lib/i18n";
 
 type NavEntry = {
   href: string;
@@ -23,40 +24,42 @@ type NavEntry = {
 
 type NavSection = { label: string; entries: NavEntry[] };
 
-const NAV: NavSection[] = [
-  {
-    label: "Aperçu",
-    entries: [{ href: "/admin", label: "Tableau de bord", icon: HomeIcon }],
-  },
-  {
-    label: "Contenu",
-    entries: [
-      { href: "/admin/feed", label: "Notifications", icon: BellIcon },
-      { href: "/admin/schedules", label: "Planifications", icon: ClockIcon },
-      { href: "/admin/templates", label: "Modèles", icon: TagIcon },
-    ],
-  },
-  {
-    label: "Structure",
-    entries: [
-      { href: "/admin/categories", label: "Catégories", icon: TagIcon },
-      { href: "/admin/sessions", label: "Sessions", icon: CalendarIcon },
-      { href: "/admin/teams", label: "Équipes", icon: UsersIcon },
-    ],
-  },
-  {
-    label: "Système",
-    entries: [
-      { href: "/admin/users", label: "Utilisateurs", icon: UserIcon },
-      { href: "/admin/deliveries", label: "Envois", icon: SendIcon },
-      { href: "/admin/branding", label: "Marque", icon: BrushIcon },
-    ],
-  },
-  {
-    label: "Aide",
-    entries: [{ href: "/admin/aide", label: "Guides", icon: SparkleIcon }],
-  },
-];
+function getNav(t: Dictionary["nav"]): NavSection[] {
+  return [
+    {
+      label: t.overview,
+      entries: [{ href: "/admin", label: t.dashboard, icon: HomeIcon }],
+    },
+    {
+      label: t.content,
+      entries: [
+        { href: "/admin/feed", label: t.notifications, icon: BellIcon },
+        { href: "/admin/schedules", label: t.schedules, icon: ClockIcon },
+        { href: "/admin/templates", label: t.templates, icon: TagIcon },
+      ],
+    },
+    {
+      label: t.structure,
+      entries: [
+        { href: "/admin/categories", label: t.categories, icon: TagIcon },
+        { href: "/admin/sessions", label: t.sessions, icon: CalendarIcon },
+        { href: "/admin/teams", label: t.teams, icon: UsersIcon },
+      ],
+    },
+    {
+      label: t.system,
+      entries: [
+        { href: "/admin/users", label: t.users, icon: UserIcon },
+        { href: "/admin/deliveries", label: t.deliveries, icon: SendIcon },
+        { href: "/admin/branding", label: t.branding, icon: BrushIcon },
+      ],
+    },
+    {
+      label: t.help,
+      entries: [{ href: "/admin/aide", label: t.guides, icon: SparkleIcon }],
+    },
+  ];
+}
 
 function isActive(href: string, pathname: string) {
   if (href === "/admin") return pathname === "/admin";
@@ -65,11 +68,13 @@ function isActive(href: string, pathname: string) {
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { t } = useTranslation();
+  const nav = getNav(t.nav);
 
   return (
     <aside className="hidden lg:block">
       <nav className="sticky top-20 space-y-6">
-        {NAV.map((section) => (
+        {nav.map((section) => (
           <div key={section.label}>
             <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
               {section.label}
@@ -107,11 +112,13 @@ export function AdminSidebar() {
 
 export function AdminMobileNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
+  const nav = getNav(t.nav);
 
   return (
-    <nav className="lg:hidden -mx-6 mb-2 overflow-x-auto border-y border-neutral-200 bg-white px-6">
+    <nav className="lg:hidden -mx-4 mb-2 overflow-x-auto border-y border-neutral-200 bg-white px-4 sm:-mx-6 sm:px-6">
       <ul className="flex gap-1 whitespace-nowrap py-2 text-sm">
-        {NAV.flatMap((s) => s.entries).map((entry) => {
+        {nav.flatMap((s) => s.entries).map((entry) => {
           const active = isActive(entry.href, pathname);
           return (
             <li key={entry.href}>

@@ -8,19 +8,21 @@ import {
 } from "@/domain/employees/actions";
 import { idleFormState, type FormState } from "@/domain/form-state";
 import type { Employee } from "@/domain/employees/repository";
+import { useTranslation } from "@/lib/i18n";
 
 type Props = { mode: "create" } | { mode: "edit"; employee: Employee };
 
-function SubmitButton({ label }: { label: string }) {
+function SubmitButton({ label, savingLabel }: { label: string; savingLabel: string }) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Enregistrement..." : label}
+      {pending ? savingLabel : label}
     </Button>
   );
 }
 
 export function EmployeeForm(props: Props) {
+  const { t } = useTranslation();
   const action =
     props.mode === "create"
       ? createEmployeeAction
@@ -37,7 +39,7 @@ export function EmployeeForm(props: Props) {
   return (
     <form action={formAction} className="space-y-4" noValidate>
       <Field
-        label="Nom"
+        label={t.employees.name}
         name="name"
         defaultValue={initial?.name ?? ""}
         autoComplete="name"
@@ -46,7 +48,7 @@ export function EmployeeForm(props: Props) {
         error={errors?.name}
       />
       <Field
-        label="Email"
+        label={t.employees.email}
         name="email"
         type="email"
         defaultValue={initial?.email ?? ""}
@@ -55,12 +57,12 @@ export function EmployeeForm(props: Props) {
         error={errors?.email}
       />
       <Field
-        label="Téléphone"
+        label={t.employees.phone}
         name="phone"
         type="tel"
         defaultValue={initial?.phone ?? ""}
         autoComplete="tel"
-        hint="Optionnel"
+        hint={t.employees.phoneHint}
         error={errors?.phone}
       />
 
@@ -72,7 +74,10 @@ export function EmployeeForm(props: Props) {
       )}
 
       <div className="flex items-center justify-end gap-2 pt-2">
-        <SubmitButton label={props.mode === "create" ? "Créer l'employé" : "Enregistrer"} />
+        <SubmitButton
+          label={props.mode === "create" ? t.employees.createEmployee : t.employees.save}
+          savingLabel={t.employees.saving}
+        />
       </div>
     </form>
   );

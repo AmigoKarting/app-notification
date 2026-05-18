@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Card, EmptyState, PageHeader, formatDateTime } from "@/components/ui";
+import { Card, EmptyState, PageHeader, PageTip, formatDateTime } from "@/components/ui";
 import { channelRegistry } from "@/lib/messaging";
 import { getDeliveryCounts, listDeliveries } from "@/domain/deliveries/repository";
 import type { DeliveryStatus, MessageChannel } from "@/lib/supabase/database.types";
+import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,9 @@ interface PageProps {
 }
 
 export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
+  const t = getServerDictionary();
+  const locale = getLocale();
+  const dateFmt = locale === "en" ? "en-US" : "fr-FR";
   const channel =
     searchParams?.channel && (CHANNELS as string[]).includes(searchParams.channel)
       ? (searchParams.channel as MessageChannel)
@@ -33,19 +37,18 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Envois"
-        description="Audit des messages partis (email, SMS, WhatsApp...)."
+        title={t.adminDeliveries.title}
+        description={t.adminDeliveries.description}
       />
-
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Total" value={counts.total} />
-        <Stat label="Envoyés" value={counts.sent} />
-        <Stat label="Échecs" value={counts.failed} tone={counts.failed > 0 ? "danger" : "default"} />
-        <Stat label="Ignorés" value={counts.skipped} />
+        <Stat label={t.adminDeliveries.total} value={counts.total} />
+        <Stat label={t.adminDeliveries.sent} value={counts.sent} />
+        <Stat label={t.adminDeliveries.failed} value={counts.failed} tone={counts.failed > 0 ? "danger" : "default"} />
+        <Stat label={t.adminDeliveries.skipped} value={counts.skipped} />
       </section>
 
       <Card className="p-4">
-        <p className="text-sm font-medium text-neutral-900">Canaux enregistrés</p>
+        <p className="text-sm font-medium text-neutral-900">{t.adminDeliveries.registeredChannels}</p>
         <div className="mt-2 flex flex-wrap gap-2">
           {registered.map((c) => (
             <span
@@ -56,14 +59,14 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
                   : "bg-neutral-100 text-neutral-600 ring-neutral-200"
               }`}
             >
-              {c.displayName} {c.isAvailable() ? "" : "(non configuré)"}
+              {c.displayName} {c.isAvailable() ? "" : t.adminDeliveries.notConfigured}
             </span>
           ))}
         </div>
       </Card>
 
       <div className="flex flex-wrap gap-2 text-sm">
-        <Filter href="/admin/deliveries" active={!channel && !status} label="Tout" />
+        <Filter href="/admin/deliveries" active={!channel && !status} label={t.adminDeliveries.everything} />
         {CHANNELS.map((c) => (
           <Filter
             key={c}
@@ -83,25 +86,25 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
       </div>
 
       {deliveries.length === 0 ? (
-        <EmptyState title="Aucun envoi" description="Aucun message ne correspond aux filtres." />
+        <EmptyState title={t.adminDeliveries.noDeliveries} description={t.adminDeliveries.noDeliveriesDesc} />
       ) : (
         <Card>
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
               <tr>
-                <th className="px-4 py-2 font-medium">Date</th>
-                <th className="px-4 py-2 font-medium">Canal</th>
-                <th className="px-4 py-2 font-medium">Destinataire</th>
-                <th className="px-4 py-2 font-medium">Sujet / Message</th>
-                <th className="px-4 py-2 font-medium">Statut</th>
-                <th className="px-4 py-2 font-medium">Provider</th>
+                <th className="px-4 py-2 font-medium">{t.adminDeliveries.date}</th>
+                <th className="px-4 py-2 font-medium">{t.adminDeliveries.channel}</th>
+                <th className="px-4 py-2 font-medium">{t.adminDeliveries.recipient}</th>
+                <th className="px-4 py-2 font-medium">{t.adminDeliveries.subjectMessage}</th>
+                <th className="px-4 py-2 font-medium">{t.adminDeliveries.status}</th>
+                <th className="px-4 py-2 font-medium">{t.adminDeliveries.provider}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
               {deliveries.map((d) => (
                 <tr key={d.id} className="hover:bg-neutral-50">
                   <td className="whitespace-nowrap px-4 py-3 align-top text-neutral-700">
-                    {formatDateTime(d.created_at)}
+                    {formatDateTime(d.created_at, dateFmt)}
                   </td>
                   <td className="px-4 py-3 align-top">
                     <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium uppercase">
@@ -138,6 +141,7 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
           </table>
         </Card>
       )}
+      <PageTip>{t.pageTips.adminDeliveries}</PageTip>
     </div>
   );
 }

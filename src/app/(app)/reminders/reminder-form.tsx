@@ -15,6 +15,7 @@ import {
 } from "@/domain/reminders/actions";
 import { idleFormState, type FormState } from "@/domain/form-state";
 import type { Reminder } from "@/domain/reminders/repository";
+import { useTranslation } from "@/lib/i18n";
 
 type EmployeeOption = { id: string; name: string };
 
@@ -22,16 +23,17 @@ type Props =
   | { mode: "create"; employees: EmployeeOption[] }
   | { mode: "edit"; employees: EmployeeOption[]; reminder: Reminder };
 
-function SubmitButton({ label }: { label: string }) {
+function SubmitButton({ label, savingLabel }: { label: string; savingLabel: string }) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Enregistrement..." : label}
+      {pending ? savingLabel : label}
     </Button>
   );
 }
 
 export function ReminderForm(props: Props) {
+  const { t } = useTranslation();
   const action =
     props.mode === "create"
       ? createReminderAction
@@ -49,24 +51,24 @@ export function ReminderForm(props: Props) {
   return (
     <form action={formAction} className="space-y-4" noValidate>
       <SelectField
-        label="Employé"
+        label={t.reminders.employee}
         name="employee_id"
         defaultValue={initial?.employee_id ?? ""}
         required
         error={errors?.employee_id}
       >
         <option value="" disabled>
-          Sélectionner un employé...
+          {t.reminders.selectEmployee}
         </option>
-        {props.employees.map((e) => (
-          <option key={e.id} value={e.id}>
-            {e.name}
+        {props.employees.map((emp) => (
+          <option key={emp.id} value={emp.id}>
+            {emp.name}
           </option>
         ))}
       </SelectField>
 
       <TextAreaField
-        label="Message"
+        label={t.reminders.messageLabel}
         name="message"
         rows={4}
         defaultValue={initial?.message ?? ""}
@@ -76,7 +78,7 @@ export function ReminderForm(props: Props) {
       />
 
       <Field
-        label="Date et heure d'envoi"
+        label={t.reminders.scheduledAt}
         name="scheduled_at"
         type="datetime-local"
         defaultValue={initialDate}
@@ -86,15 +88,15 @@ export function ReminderForm(props: Props) {
 
       {props.mode === "edit" && (
         <SelectField
-          label="Statut"
+          label={t.reminders.status}
           name="status"
           defaultValue={initial?.status ?? "pending"}
           error={errors?.status}
         >
-          <option value="pending">En attente</option>
-          <option value="sent">Envoyé</option>
-          <option value="cancelled">Annulé</option>
-          <option value="failed">Échec</option>
+          <option value="pending">{t.reminders.statusPending}</option>
+          <option value="sent">{t.reminders.statusSent}</option>
+          <option value="cancelled">{t.reminders.statusCancelled}</option>
+          <option value="failed">{t.reminders.statusFailed}</option>
         </SelectField>
       )}
 
@@ -106,7 +108,10 @@ export function ReminderForm(props: Props) {
       )}
 
       <div className="flex items-center justify-end gap-2 pt-2">
-        <SubmitButton label={props.mode === "create" ? "Créer le rappel" : "Enregistrer"} />
+        <SubmitButton
+          label={props.mode === "create" ? t.reminders.createBtn : t.reminders.save}
+          savingLabel={t.reminders.saving}
+        />
       </div>
     </form>
   );

@@ -1,14 +1,16 @@
 import { notFound } from "next/navigation";
-import { Card, LinkButton, PageHeader } from "@/components/ui";
+import { Card, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { getEmployee } from "@/domain/employees/repository";
 import { EmployeeForm } from "../employee-form";
 import { DeleteEmployeeForm } from "./delete-form";
+import { getServerDictionary } from "@/lib/i18n/server";
 
 interface PageProps {
   params: { id: string };
 }
 
 export default async function EmployeeDetailPage({ params }: PageProps) {
+  const t = getServerDictionary();
   const employee = await getEmployee(params.id);
   if (!employee) notFound();
 
@@ -16,10 +18,10 @@ export default async function EmployeeDetailPage({ params }: PageProps) {
     <div className="space-y-6">
       <PageHeader
         title={employee.name}
-        description="Modifier les informations de l'employé."
+        description={t.employees.editDesc}
         action={
           <LinkButton href="/employees" variant="secondary">
-            Retour
+            {t.common.back}
           </LinkButton>
         }
       />
@@ -30,13 +32,15 @@ export default async function EmployeeDetailPage({ params }: PageProps) {
 
       <Card className="flex items-center justify-between p-6">
         <div>
-          <p className="font-medium text-neutral-900">Zone de danger</p>
+          <p className="font-medium text-neutral-900">{t.dangerZone.title}</p>
           <p className="text-sm text-neutral-600">
-            La suppression est irréversible et entraîne la suppression des rappels associés.
+            {t.employees.dangerDesc}
           </p>
         </div>
         <DeleteEmployeeForm id={employee.id} name={employee.name} />
       </Card>
+
+      <PageTip>{t.pageTips.employeeEdit}</PageTip>
     </div>
   );
 }
