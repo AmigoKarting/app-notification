@@ -35,15 +35,15 @@ export default async function SettingsPage() {
       <Card className="p-4 sm:p-6">
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-semibold text-neutral-900">{t.settings.profile}</h2>
-            <p className="text-sm text-neutral-600">{t.settings.profileDesc}</p>
+            <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t.settings.profile}</h2>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">{t.settings.profileDesc}</p>
           </div>
           {profile && (
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
                 profile.role === "dev"
-                  ? "bg-brand-50 text-brand-700 ring-brand-200"
-                  : "bg-neutral-100 text-neutral-700 ring-neutral-200"
+                  ? "bg-brand-50 text-brand-700 ring-brand-200 dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700"
+                  : "bg-neutral-100 text-neutral-700 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:ring-neutral-600"
               }`}
             >
               {profile.role}
@@ -53,7 +53,7 @@ export default async function SettingsPage() {
 
         <div className="mb-6 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
           <div>
-            <p className="text-xs uppercase tracking-wide text-neutral-500">{t.settings.emailLabel}</p>
+            <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">{t.settings.emailLabel}</p>
             <p className="font-medium">{user.email}</p>
           </div>
         </div>
@@ -70,8 +70,8 @@ export default async function SettingsPage() {
       {/* Section Apparence */}
       <Card className="p-4 sm:p-6">
         <div className="mb-5">
-          <h2 className="text-base font-semibold text-neutral-900">{t.settings.appearance}</h2>
-          <p className="text-sm text-neutral-600">
+          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t.settings.appearance}</h2>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
             {t.settings.appearanceDesc}
           </p>
         </div>
@@ -81,8 +81,8 @@ export default async function SettingsPage() {
       {/* Section Notifications — silencieuses par catégorie */}
       <Card className="p-4 sm:p-6">
         <div className="mb-5">
-          <h2 className="text-base font-semibold text-neutral-900">{t.settings.myNotifications}</h2>
-          <p className="text-sm text-neutral-600">
+          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t.settings.myNotifications}</h2>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
             {t.settings.myNotificationsDesc}
           </p>
         </div>

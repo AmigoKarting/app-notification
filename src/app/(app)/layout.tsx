@@ -7,6 +7,7 @@ import { logoutAction } from "@/domain/auth/actions";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { OnboardingModal } from "@/components/onboarding-modal";
+import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { getServerDictionary } from "@/lib/i18n/server";
 
 const DEV_ONLY_PREFIXES = ["/dashboard", "/employees", "/reminders", "/admin"];
@@ -43,7 +44,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/85 backdrop-blur-md">
+      <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/85 backdrop-blur-md transition-colors duration-300 dark:border-neutral-700/50 dark:bg-neutral-900/85">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6">
           <nav className="flex items-center gap-1 text-sm">
             <Link
@@ -51,14 +52,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               className="mr-3 flex items-center gap-2 font-semibold tracking-tight"
             >
               <AppLogo size={28} />
-              <span className="hidden sm:inline">{branding.app_name}</span>
+              <span className="hidden sm:inline dark:text-neutral-100">{branding.app_name}</span>
             </Link>
 
             <NavLink href="/feed" label={t.nav.notifications} />
             {isDev && (
               <Link
                 href="/admin"
-                className="ml-2 inline-flex items-center gap-1 rounded-md bg-brand-50 px-2.5 py-1.5 text-sm font-medium text-brand-700 ring-1 ring-brand-200 transition hover:bg-brand-100 hover:text-brand-800"
+                className="ml-2 inline-flex items-center gap-1 rounded-md bg-brand-50 px-2.5 py-1.5 text-sm font-medium text-brand-700 ring-1 ring-brand-200 transition hover:bg-brand-100 hover:text-brand-800 dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700 dark:hover:bg-brand-900/50"
               >
                 {t.nav.admin}
               </Link>
@@ -71,7 +72,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <Link
                 href="/admin/aide"
                 title={t.nav.helpTooltip}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-600 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-brand-700"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-600 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-brand-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-brand-400"
                 aria-label={t.nav.help}
               >
                 <svg
@@ -92,7 +93,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             )}
             <Link
               href="/settings"
-              className="flex items-center gap-2 rounded-lg px-2 py-1 text-neutral-700 transition hover:bg-neutral-100 hover:text-neutral-900"
+              className="flex items-center gap-2 rounded-lg px-2 py-1 text-neutral-700 transition hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
               title={user.email ?? undefined}
             >
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-xs font-semibold text-white shadow-sm">
@@ -101,12 +102,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <span className="hidden font-medium sm:inline">{displayLabel}</span>
             </Link>
             {profile && isDev && (
-              <span className="hidden rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200 sm:inline">
+              <span className="hidden rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200 sm:inline dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700">
                 {profile.role}
               </span>
             )}
             <form action={logoutAction}>
-              <button className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50">
+              <button className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-700">
                 {t.auth.logout}
               </button>
             </form>
@@ -116,6 +117,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>
       <OnboardingModal />
+      <KeyboardShortcuts isDev={isDev} />
     </div>
   );
 }
@@ -124,7 +126,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="rounded-md px-3 py-1.5 text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900"
+      className="rounded-md px-3 py-1.5 text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
     >
       {label}
     </Link>

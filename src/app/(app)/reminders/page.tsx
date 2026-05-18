@@ -50,7 +50,7 @@ export default async function RemindersPage({ searchParams }: PageProps) {
             <a
               href="/api/export/reminders"
               download
-              className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
             >
               {t.reminders.exportCsv}
             </a>
@@ -85,7 +85,7 @@ export default async function RemindersPage({ searchParams }: PageProps) {
         <>
         <Card>
           <table className="w-full text-sm">
-            <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
+            <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500 dark:bg-neutral-800/50 dark:text-neutral-400">
               <tr>
                 <th className="px-4 py-2 font-medium">{t.reminders.employee}</th>
                 <th className="px-4 py-2 font-medium">{t.reminders.message}</th>
@@ -94,17 +94,17 @@ export default async function RemindersPage({ searchParams }: PageProps) {
                 <th className="px-4 py-2 font-medium text-right">{t.reminders.actions}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200">
+            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-700">
               {reminders.map((r) => (
-                <tr key={r.id} className="hover:bg-neutral-50">
+                <tr key={r.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700/30">
                   <td className="px-4 py-3 align-top">
-                    <p className="font-medium text-neutral-900">{r.employee?.name ?? "—"}</p>
-                    <p className="text-xs text-neutral-500">{r.employee?.email ?? ""}</p>
+                    <p className="font-medium text-neutral-900 dark:text-neutral-100">{r.employee?.name ?? "—"}</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">{r.employee?.email ?? ""}</p>
                   </td>
-                  <td className="max-w-md px-4 py-3 align-top text-neutral-700">
+                  <td className="max-w-md px-4 py-3 align-top text-neutral-700 dark:text-neutral-300">
                     <p className="line-clamp-2">{r.message}</p>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 align-top text-neutral-700">
+                  <td className="whitespace-nowrap px-4 py-3 align-top text-neutral-700 dark:text-neutral-300">
                     {formatDateTime(r.scheduled_at, locale === "en" ? "en-US" : "fr-FR")}
                   </td>
                   <td className="px-4 py-3 align-top">
@@ -115,7 +115,7 @@ export default async function RemindersPage({ searchParams }: PageProps) {
                       {r.status === "pending" && <CancelReminderForm id={r.id} />}
                       <Link
                         href={`/reminders/${r.id}`}
-                        className="text-sm font-medium text-neutral-900 hover:underline"
+                        className="text-sm font-medium text-neutral-900 hover:underline dark:text-neutral-100"
                       >
                         {t.reminders.edit}
                       </Link>
@@ -158,8 +158,8 @@ function FilterLink({
       href={href}
       className={`rounded-full px-3 py-1 transition ${
         active
-          ? "bg-neutral-900 text-white"
-          : "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+          ? "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900"
+          : "border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
       }`}
     >
       {label}

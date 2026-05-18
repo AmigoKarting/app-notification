@@ -50,9 +50,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 }
 
 const variantStyles: Record<ToastVariant, string> = {
-  success: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  error: "border-red-200 bg-red-50 text-red-800",
-  info: "border-brand-200 bg-brand-50 text-brand-800",
+  success: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300",
+  error: "border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950/80 dark:text-red-300",
+  info: "border-brand-200 bg-brand-50 text-brand-800 dark:border-brand-800 dark:bg-brand-950/80 dark:text-brand-300",
 };
 
 const variantIcons: Record<ToastVariant, string> = {
@@ -67,7 +67,7 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
       className={`animate-slide-in-right flex items-center gap-3 rounded-lg border px-4 py-3 shadow-lg backdrop-blur-sm ${variantStyles[toast.variant]}`}
       role="alert"
     >
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/80 text-xs font-bold">
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/80 text-xs font-bold dark:bg-white/20">
         {variantIcons[toast.variant]}
       </span>
       <p className="text-sm font-medium">{toast.message}</p>

@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="theme-color" content="#6366f1" />
         <link rel="apple-touch-icon" href="/icon.svg" />
       </head>
-      <body className="min-h-screen bg-neutral-50 text-neutral-900 antialiased">
+      <body className="min-h-screen antialiased transition-colors duration-300">
         <NavProgress />
         <ServiceWorkerRegister />
         <ThemeProvider>

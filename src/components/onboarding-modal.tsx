@@ -46,20 +46,20 @@ export function OnboardingModal() {
   const current = steps[step];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in">
+      <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl animate-scale-in dark:bg-neutral-900 dark:shadow-black/50">
         {step === 0 && (
           <div className="mb-6 text-center">
             <p className="text-4xl">{"\u{1F44B}"}</p>
-            <h2 className="mt-3 text-xl font-bold text-neutral-900">{t.onboarding.welcome}</h2>
-            <p className="mt-1 text-sm text-neutral-600">{t.onboarding.welcomeDesc}</p>
+            <h2 className="mt-3 text-xl font-bold text-neutral-900 dark:text-neutral-100">{t.onboarding.welcome}</h2>
+            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">{t.onboarding.welcomeDesc}</p>
           </div>
         )}
 
         <div className="text-center">
           <p className="text-4xl">{STEP_ICONS[step]}</p>
-          <h3 className="mt-3 text-lg font-semibold text-neutral-900">{current.title}</h3>
-          <p className="mt-2 text-sm leading-relaxed text-neutral-600">{current.desc}</p>
+          <h3 className="mt-3 text-lg font-semibold text-neutral-900 dark:text-neutral-100">{current.title}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{current.desc}</p>
         </div>
 
         {/* Step indicators */}
@@ -67,8 +67,8 @@ export function OnboardingModal() {
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`h-2 w-2 rounded-full transition ${
-                i === step ? "bg-brand-600 w-6" : "bg-neutral-200"
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i === step ? "bg-brand-600 w-6" : "bg-neutral-200 w-2 dark:bg-neutral-700"
               }`}
             />
           ))}
@@ -78,7 +78,7 @@ export function OnboardingModal() {
         <div className="mt-6 flex items-center justify-between">
           <button
             onClick={complete}
-            className="text-sm text-neutral-500 hover:text-neutral-700 hover:underline"
+            className="text-sm text-neutral-500 hover:text-neutral-700 hover:underline dark:text-neutral-400 dark:hover:text-neutral-200"
           >
             {t.onboarding.skipTour}
           </button>
@@ -91,7 +91,7 @@ export function OnboardingModal() {
         </div>
 
         {/* Step counter */}
-        <p className="mt-4 text-center text-xs text-neutral-400">
+        <p className="mt-4 text-center text-xs text-neutral-400 dark:text-neutral-500">
           {step + 1} {t.onboarding.stepOf} {steps.length}
         </p>
       </div>

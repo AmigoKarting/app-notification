@@ -45,18 +45,18 @@ export function ConfirmModal({
     <dialog
       ref={dialogRef}
       onKeyDown={handleKeyDown}
-      className="fixed inset-0 z-50 m-auto max-w-md rounded-xl border border-neutral-200 bg-white p-0 shadow-2xl backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+      className="fixed inset-0 z-50 m-auto max-w-md rounded-xl border border-neutral-200 bg-white p-0 shadow-2xl backdrop:bg-black/40 backdrop:backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-900"
     >
-      <div className="p-6">
-        <h3 className="text-lg font-semibold text-neutral-900">{title}</h3>
+      <div className="p-6 animate-scale-in">
+        <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{title}</h3>
         {description && (
-          <p className="mt-2 text-sm text-neutral-600">{description}</p>
+          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">{description}</p>
         )}
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+            className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
           >
             {cancelLabel}
           </button>

@@ -10,10 +10,10 @@ const buttonVariants: Record<ButtonVariant, string> = {
   primary:
     "btn-brand-gradient text-white shadow-sm shadow-brand-600/20 hover:shadow-brand-600/30",
   secondary:
-    "border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 hover:border-neutral-400",
+    "border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 hover:border-neutral-400 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700 dark:hover:border-neutral-500",
   danger:
-    "border border-red-200 bg-white text-red-700 hover:bg-red-50 hover:border-red-300",
-  ghost: "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
+    "border border-red-200 bg-white text-red-700 hover:bg-red-50 hover:border-red-300 dark:border-red-800 dark:bg-red-950/50 dark:text-red-400 dark:hover:bg-red-950 dark:hover:border-red-700",
+  ghost: "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100",
 };
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -47,7 +47,7 @@ export function LinkButton({ variant = "primary", className = "", ...rest }: Lin
 // Form fields
 // ---------------------------------------------------------------------
 const fieldClass =
-  "w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm outline-none transition-all duration-200 placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100";
+  "w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm outline-none transition-all duration-200 placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:bg-neutral-800 dark:placeholder:text-neutral-500 dark:focus:ring-brand-900/50";
 
 export interface FieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -58,17 +58,17 @@ export interface FieldProps extends React.InputHTMLAttributes<HTMLInputElement> 
 export function Field({ label, error, hint, name, ...rest }: FieldProps) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-neutral-800">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-neutral-200">{label}</span>
       <input
         {...rest}
         name={name}
         aria-invalid={Boolean(error) || undefined}
-        className={`${fieldClass} ${error ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-neutral-300"}`}
+        className={`${fieldClass} ${error ? "border-red-300 focus:border-red-500 focus:ring-red-100 dark:border-red-700 dark:focus:ring-red-900/50" : "border-neutral-300 dark:border-neutral-600"}`}
       />
       {error ? (
-        <span className="mt-1 block text-xs text-red-600">{error}</span>
+        <span className="mt-1 block text-xs text-red-600 dark:text-red-400">{error}</span>
       ) : hint ? (
-        <span className="mt-1 block text-xs text-neutral-500">{hint}</span>
+        <span className="mt-1 block text-xs text-neutral-500 dark:text-neutral-400">{hint}</span>
       ) : null}
     </label>
   );
@@ -82,14 +82,14 @@ export interface TextAreaFieldProps extends React.TextareaHTMLAttributes<HTMLTex
 export function TextAreaField({ label, error, name, ...rest }: TextAreaFieldProps) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-neutral-800">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-neutral-200">{label}</span>
       <textarea
         {...rest}
         name={name}
         aria-invalid={Boolean(error) || undefined}
-        className={`${fieldClass} ${error ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-neutral-300"}`}
+        className={`${fieldClass} ${error ? "border-red-300 focus:border-red-500 focus:ring-red-100 dark:border-red-700 dark:focus:ring-red-900/50" : "border-neutral-300 dark:border-neutral-600"}`}
       />
-      {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
+      {error && <span className="mt-1 block text-xs text-red-600 dark:text-red-400">{error}</span>}
     </label>
   );
 }
@@ -103,19 +103,19 @@ export interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectE
 export function SelectField({ label, error, hint, name, children, ...rest }: SelectFieldProps) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-neutral-800">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-neutral-800 dark:text-neutral-200">{label}</span>
       <select
         {...rest}
         name={name}
         aria-invalid={Boolean(error) || undefined}
-        className={`${fieldClass} ${error ? "border-red-300 focus:border-red-500 focus:ring-red-100" : "border-neutral-300"}`}
+        className={`${fieldClass} ${error ? "border-red-300 focus:border-red-500 focus:ring-red-100 dark:border-red-700 dark:focus:ring-red-900/50" : "border-neutral-300 dark:border-neutral-600"}`}
       >
         {children}
       </select>
       {error ? (
-        <span className="mt-1 block text-xs text-red-600">{error}</span>
+        <span className="mt-1 block text-xs text-red-600 dark:text-red-400">{error}</span>
       ) : hint ? (
-        <span className="mt-1 block text-xs text-neutral-500">{hint}</span>
+        <span className="mt-1 block text-xs text-neutral-500 dark:text-neutral-400">{hint}</span>
       ) : null}
     </label>
   );
@@ -134,10 +134,10 @@ export function PageHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-4">
+    <header className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">{title}</h1>
-        {description && <p className="mt-1 text-sm text-neutral-600">{description}</p>}
+        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">{title}</h1>
+        {description && <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">{description}</p>}
       </div>
       {action}
     </header>
@@ -146,7 +146,7 @@ export function PageHeader({
 
 export function PageTip({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-2.5 rounded-lg border border-brand-100 bg-brand-50/60 px-4 py-3 text-sm leading-relaxed text-brand-900/80">
+    <div className="flex items-start gap-2.5 rounded-lg border border-brand-100 bg-brand-50/60 px-4 py-3 text-sm leading-relaxed text-brand-900/80 dark:border-brand-800/50 dark:bg-brand-950/30 dark:text-brand-200/80 animate-fade-in">
       <span className="mt-0.5 shrink-0 text-base">💡</span>
       <p>{children}</p>
     </div>
@@ -161,7 +161,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <div className={`rounded-xl border border-neutral-200 bg-white shadow-soft ${className}`}>
+    <div className={`rounded-xl border border-neutral-200 bg-white shadow-soft dark:border-neutral-700/50 dark:bg-neutral-800/80 animate-fade-in-up ${className}`}>
       {children}
     </div>
   );
@@ -179,10 +179,10 @@ export function EmptyState({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-white px-6 py-14 text-center">
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-white px-6 py-14 text-center dark:border-neutral-600 dark:bg-neutral-800/50 animate-fade-in-up">
       {icon && <div className="mb-3 text-brand-500">{icon}</div>}
-      <p className="text-base font-medium text-neutral-900">{title}</p>
-      {description && <p className="mt-1 max-w-md text-sm text-neutral-600">{description}</p>}
+      <p className="text-base font-medium text-neutral-900 dark:text-neutral-100">{title}</p>
+      {description && <p className="mt-1 max-w-md text-sm text-neutral-600 dark:text-neutral-400">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
@@ -192,7 +192,7 @@ export function FormError({ message }: { message?: string }) {
   if (!message) return null;
   return (
     <p
-      className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-inset ring-red-200"
+      className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-inset ring-red-200 dark:bg-red-950/50 dark:text-red-400 dark:ring-red-800"
       role="alert"
     >
       {message}
@@ -204,10 +204,10 @@ export function FormError({ message }: { message?: string }) {
 // Status badges
 // ---------------------------------------------------------------------
 const reminderStatusStyles: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-800 ring-amber-200",
-  sent: "bg-emerald-50 text-emerald-800 ring-emerald-200",
-  cancelled: "bg-neutral-100 text-neutral-700 ring-neutral-200",
-  failed: "bg-red-50 text-red-700 ring-red-200",
+  pending: "bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:ring-amber-800",
+  sent: "bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:ring-emerald-800",
+  cancelled: "bg-neutral-100 text-neutral-700 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:ring-neutral-600",
+  failed: "bg-red-50 text-red-700 ring-red-200 dark:bg-red-950/50 dark:text-red-400 dark:ring-red-800",
 };
 
 const reminderStatusLabels: Record<string, string> = {

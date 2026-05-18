@@ -9,12 +9,12 @@ export default function NotFound() {
       <Link href="/" className="mb-8 flex items-center gap-2 transition hover:opacity-80">
         <LogoMark size={32} />
       </Link>
-      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-8 shadow-soft-lg">
+      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-8 shadow-soft-lg animate-scale-in dark:border-neutral-700 dark:bg-neutral-900">
         <p className="text-6xl font-semibold text-brand-600">404</p>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-neutral-900">
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
           {t.notFound.title}
         </h1>
-        <p className="mt-2 text-sm text-neutral-600">
+        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
           {t.notFound.description}
         </p>
         <Link

@@ -140,7 +140,14 @@ export const themes: Record<ThemeName, ThemeDefinition> = {
 
 export const DEFAULT_THEME: ThemeName = "violet";
 export const THEME_STORAGE_KEY = "app-theme";
+export const DARK_MODE_STORAGE_KEY = "app-dark-mode";
+
+export type DarkMode = "light" | "dark" | "system";
 
 export function isThemeName(value: unknown): value is ThemeName {
   return typeof value === "string" && value in themes;
+}
+
+export function isDarkMode(value: unknown): value is DarkMode {
+  return value === "light" || value === "dark" || value === "system";
 }
