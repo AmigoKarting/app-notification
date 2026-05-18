@@ -72,6 +72,7 @@ const en: Dictionary = {
     users: "Users",
     deliveries: "Deliveries",
     branding: "Branding",
+    analytics: "Analytics",
     guides: "Guides",
   },
 
@@ -398,6 +399,7 @@ const en: Dictionary = {
     subjectMessage: "Subject / Message",
     status: "Status",
     provider: "Provider",
+    exportCsv: "Export CSV",
   },
 
   settings: {
@@ -594,6 +596,31 @@ const en: Dictionary = {
     uploadFailed: "Upload failed",
   },
 
+  analytics: {
+    title: "Analytics",
+    description: "Overview of application activity.",
+    content: "Content",
+    notifications: "Notifications",
+    reminders: "Reminders",
+    drafts: "Drafts",
+    published: "Published",
+    deliveries: "External deliveries",
+    sent: "Sent",
+    failed: "Failed",
+    skipped: "Skipped",
+    engagement: "Engagement",
+    reads: "Reads",
+    reactions: "Reactions",
+    comments: "Comments",
+    users: "Users",
+    admins: "Admins",
+    employees: "Employees",
+    last7days: "Last 7 days",
+    recentNotifications: "New notifications",
+    recentDeliveries: "Recent deliveries",
+    successRate: "Success rate",
+  },
+
   employees: {
     title: "Employees",
     description: "Directory of people for whom reminders are scheduled.",
@@ -620,6 +647,7 @@ const en: Dictionary = {
     dangerDesc: "Deletion is irreversible and will also delete associated reminders.",
     deleteConfirm: "Delete \"{name}\"? All associated reminders will also be deleted.",
     deleteBtn: "Delete",
+    exportCsv: "Export CSV",
   },
 
   reminders: {
@@ -665,6 +693,7 @@ const en: Dictionary = {
     dangerDesc: "Deletion is irreversible.",
     deleteConfirm: "Delete this reminder? This action is irreversible.",
     deleteBtn: "Delete",
+    exportCsv: "Export CSV",
   },
 
   dashboard: {
@@ -742,6 +771,7 @@ const en: Dictionary = {
     adminDeliveries: "Log of all messages sent via email, SMS, or WhatsApp. Check send statuses, errors, and providers used.",
     adminUsers: "List of registered users. You can promote an employee to dev (admin access) or demote a dev to employee.",
     adminBranding: "Customize the app name, logo, and tagline. These settings are visible to all users.",
+    adminAnalytics: "Find here the global statistics of your application: published content, deliveries, user engagement, and recent activity.",
   },
 
   pagination: {
@@ -753,6 +783,21 @@ const en: Dictionary = {
 
   meta: {
     defaultDescription: "Notification and reminder management",
+  },
+
+  onboarding: {
+    welcome: "Welcome!",
+    welcomeDesc: "Here's a quick overview of what you can do here.",
+    step1Title: "Your notifications",
+    step1Desc: "Find important messages from your team every day in the notification feed.",
+    step2Title: "React and comment",
+    step2Desc: "You can react with emojis, comment, and mark notifications as read.",
+    step3Title: "Your preferences",
+    step3Desc: "In settings, customize your notifications and choose your theme (light or dark).",
+    gotIt: "Let's go!",
+    skipTour: "Skip",
+    nextStep: "Next",
+    stepOf: "of",
   },
 
   notFound: {

@@ -52,6 +52,15 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
       <PageHeader
         title={t.adminDeliveries.title}
         description={t.adminDeliveries.description}
+        action={
+          <a
+            href="/api/export/deliveries"
+            download
+            className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+          >
+            {t.adminDeliveries.exportCsv}
+          </a>
+        }
       />
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat label={t.adminDeliveries.total} value={counts.total} />

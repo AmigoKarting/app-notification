@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BarChartIcon,
   BellIcon,
   BrushIcon,
   CalendarIcon,
@@ -51,6 +52,7 @@ function getNav(t: Dictionary["nav"]): NavSection[] {
       entries: [
         { href: "/admin/users", label: t.users, icon: UserIcon },
         { href: "/admin/deliveries", label: t.deliveries, icon: SendIcon },
+        { href: "/admin/analytics", label: t.analytics, icon: BarChartIcon },
         { href: "/admin/branding", label: t.branding, icon: BrushIcon },
       ],
     },

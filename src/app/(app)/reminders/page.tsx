@@ -45,7 +45,18 @@ export default async function RemindersPage({ searchParams }: PageProps) {
       <PageHeader
         title={t.reminders.title}
         description={t.reminders.description}
-        action={<LinkButton href="/reminders/new">{t.reminders.newReminder}</LinkButton>}
+        action={
+          <div className="flex items-center gap-2">
+            <a
+              href="/api/export/reminders"
+              download
+              className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+            >
+              {t.reminders.exportCsv}
+            </a>
+            <LinkButton href="/reminders/new">{t.reminders.newReminder}</LinkButton>
+          </div>
+        }
       />
 
       <div className="flex gap-2 text-sm">

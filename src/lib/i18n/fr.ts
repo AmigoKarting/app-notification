@@ -70,6 +70,7 @@ const fr = {
     users: "Utilisateurs",
     deliveries: "Envois",
     branding: "Marque",
+    analytics: "Statistiques",
     guides: "Guides",
   },
 
@@ -396,6 +397,7 @@ const fr = {
     subjectMessage: "Sujet / Message",
     status: "Statut",
     provider: "Provider",
+    exportCsv: "Exporter CSV",
   },
 
   settings: {
@@ -592,6 +594,31 @@ const fr = {
     uploadFailed: "Échec de l'upload",
   },
 
+  analytics: {
+    title: "Statistiques",
+    description: "Vue d'ensemble de l'activité de l'application.",
+    content: "Contenu",
+    notifications: "Notifications",
+    reminders: "Rappels",
+    drafts: "Brouillons",
+    published: "Publiés",
+    deliveries: "Envois externes",
+    sent: "Envoyés",
+    failed: "Échoués",
+    skipped: "Ignorés",
+    engagement: "Engagement",
+    reads: "Lectures",
+    reactions: "Réactions",
+    comments: "Commentaires",
+    users: "Utilisateurs",
+    admins: "Administrateurs",
+    employees: "Employés",
+    last7days: "7 derniers jours",
+    recentNotifications: "Nouvelles notifications",
+    recentDeliveries: "Envois récents",
+    successRate: "Taux de succès",
+  },
+
   employees: {
     title: "Employés",
     description: "Annuaire des personnes pour qui des rappels sont planifiés.",
@@ -618,6 +645,7 @@ const fr = {
     dangerDesc: "La suppression est irréversible et entraîne la suppression des rappels associés.",
     deleteConfirm: "Supprimer \"{name}\" ? Tous les rappels associés seront aussi supprimés.",
     deleteBtn: "Supprimer",
+    exportCsv: "Exporter CSV",
   },
 
   reminders: {
@@ -663,6 +691,7 @@ const fr = {
     dangerDesc: "La suppression est irréversible.",
     deleteConfirm: "Supprimer ce rappel ? Cette action est irréversible.",
     deleteBtn: "Supprimer",
+    exportCsv: "Exporter CSV",
   },
 
   dashboard: {
@@ -740,6 +769,7 @@ const fr = {
     adminDeliveries: "Journal de tous les messages envoyés par email, SMS ou WhatsApp. Vérifie les statuts d'envoi, les erreurs et les providers utilisés.",
     adminUsers: "Liste des utilisateurs inscrits. Tu peux promouvoir un employé en dev (accès admin) ou rétrograder un dev en employé.",
     adminBranding: "Personnalise le nom de l'app, le logo et la tagline. Ces réglages sont visibles par tous les utilisateurs.",
+    adminAnalytics: "Retrouvez ici les statistiques globales de votre application : contenu publié, envois, engagement des utilisateurs et activité récente.",
   },
 
   pagination: {
@@ -751,6 +781,21 @@ const fr = {
 
   meta: {
     defaultDescription: "Gestion de notifications et rappels",
+  },
+
+  onboarding: {
+    welcome: "Bienvenue !",
+    welcomeDesc: "Voici un rapide aperçu de ce que tu peux faire ici.",
+    step1Title: "Tes notifications",
+    step1Desc: "Retrouve chaque jour les messages importants de ton équipe dans le fil de notifications.",
+    step2Title: "Réagis et commente",
+    step2Desc: "Tu peux réagir avec des emojis, commenter et marquer les notifications comme lues.",
+    step3Title: "Tes préférences",
+    step3Desc: "Dans les réglages, personnalise tes notifications et choisis ton thème (clair ou sombre).",
+    gotIt: "C'est parti !",
+    skipTour: "Passer",
+    nextStep: "Suivant",
+    stepOf: "sur",
   },
 
   notFound: {

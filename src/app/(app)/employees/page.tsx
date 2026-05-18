@@ -29,7 +29,18 @@ export default async function EmployeesPage({ searchParams }: PageProps) {
       <PageHeader
         title={t.employees.title}
         description={t.employees.description}
-        action={<LinkButton href="/employees/new">{t.employees.newEmployee}</LinkButton>}
+        action={
+          <div className="flex items-center gap-2">
+            <a
+              href="/api/export/employees"
+              download
+              className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+            >
+              {t.employees.exportCsv}
+            </a>
+            <LinkButton href="/employees/new">{t.employees.newEmployee}</LinkButton>
+          </div>
+        }
       />
 
       <form className="flex gap-2" action="/employees">

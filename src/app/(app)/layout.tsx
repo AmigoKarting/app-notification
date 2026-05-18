@@ -6,6 +6,7 @@ import { LanguageToggle } from "@/components/language-toggle";
 import { logoutAction } from "@/domain/auth/actions";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
+import { OnboardingModal } from "@/components/onboarding-modal";
 import { getServerDictionary } from "@/lib/i18n/server";
 
 const DEV_ONLY_PREFIXES = ["/dashboard", "/employees", "/reminders", "/admin"];
@@ -114,6 +115,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+      <OnboardingModal />
     </div>
   );
 }
