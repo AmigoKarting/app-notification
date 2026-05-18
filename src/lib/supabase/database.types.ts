@@ -38,6 +38,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["employees"]["Insert"]>;
+        Relationships: [];
       };
       reminders: {
         Row: {
@@ -69,6 +70,15 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["reminders"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "reminders_employee_id_fkey";
+            columns: ["employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       profiles: {
         Row: {
@@ -96,6 +106,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: [];
       };
       categories: {
         Row: {
@@ -119,6 +130,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["categories"]["Insert"]>;
+        Relationships: [];
       };
       sessions: {
         Row: {
@@ -146,6 +158,15 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["sessions"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "sessions_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       feed_items: {
         Row: {
@@ -195,11 +216,28 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["feed_items"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "feed_items_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "feed_items_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "sessions";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       feed_item_reads: {
         Row: { feed_item_id: string; user_id: string; read_at: string };
         Insert: { feed_item_id: string; user_id: string; read_at?: string };
         Update: Partial<Database["public"]["Tables"]["feed_item_reads"]["Insert"]>;
+        Relationships: [];
       };
       feed_item_reactions: {
         Row: {
@@ -215,6 +253,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["feed_item_reactions"]["Insert"]>;
+        Relationships: [];
       };
       notification_templates: {
         Row: {
@@ -248,11 +287,13 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["notification_templates"]["Insert"]>;
+        Relationships: [];
       };
       category_mutes: {
         Row: { user_id: string; category_id: string; created_at: string };
         Insert: { user_id: string; category_id: string; created_at?: string };
         Update: Partial<Database["public"]["Tables"]["category_mutes"]["Insert"]>;
+        Relationships: [];
       };
       feed_item_comments: {
         Row: {
@@ -272,6 +313,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["feed_item_comments"]["Insert"]>;
+        Relationships: [];
       };
       teams: {
         Row: {
@@ -293,6 +335,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["teams"]["Insert"]>;
+        Relationships: [];
       };
       team_members: {
         Row: {
@@ -306,16 +349,19 @@ export interface Database {
           added_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["team_members"]["Insert"]>;
+        Relationships: [];
       };
       feed_item_target_teams: {
         Row: { feed_item_id: string; team_id: string };
         Insert: { feed_item_id: string; team_id: string };
         Update: Partial<Database["public"]["Tables"]["feed_item_target_teams"]["Insert"]>;
+        Relationships: [];
       };
       feed_item_target_users: {
         Row: { feed_item_id: string; user_id: string };
         Insert: { feed_item_id: string; user_id: string };
         Update: Partial<Database["public"]["Tables"]["feed_item_target_users"]["Insert"]>;
+        Relationships: [];
       };
       notification_schedules: {
         Row: {
@@ -357,16 +403,50 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["notification_schedules"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "notification_schedules_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notification_schedules_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "sessions";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       schedule_target_teams: {
         Row: { schedule_id: string; team_id: string };
         Insert: { schedule_id: string; team_id: string };
         Update: Partial<Database["public"]["Tables"]["schedule_target_teams"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "schedule_target_teams_schedule_id_fkey";
+            columns: ["schedule_id"];
+            isOneToOne: false;
+            referencedRelation: "notification_schedules";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       schedule_target_users: {
         Row: { schedule_id: string; user_id: string };
         Insert: { schedule_id: string; user_id: string };
         Update: Partial<Database["public"]["Tables"]["schedule_target_users"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "schedule_target_users_schedule_id_fkey";
+            columns: ["schedule_id"];
+            isOneToOne: false;
+            referencedRelation: "notification_schedules";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       schedule_runs: {
         Row: {
@@ -382,6 +462,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["schedule_runs"]["Insert"]>;
+        Relationships: [];
       };
       app_settings: {
         Row: {
@@ -401,6 +482,7 @@ export interface Database {
           updated_by?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["app_settings"]["Insert"]>;
+        Relationships: [];
       };
       notification_deliveries: {
         Row: {
@@ -440,6 +522,7 @@ export interface Database {
         Update: Partial<
           Database["public"]["Tables"]["notification_deliveries"]["Insert"]
         >;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
@@ -454,6 +537,14 @@ export interface Database {
         };
         Returns: string | null;
       };
+      claim_due_reminders: {
+        Args: {
+          batch_size?: number;
+          max_attempts?: number;
+          stale_after_minutes?: number;
+        };
+        Returns: Database["public"]["Tables"]["reminders"]["Row"][];
+      };
     };
     Enums: {
       reminder_status: ReminderStatus;
@@ -465,5 +556,6 @@ export interface Database {
       message_channel: MessageChannel;
       delivery_status: DeliveryStatus;
     };
+    CompositeTypes: Record<string, never>;
   };
 }

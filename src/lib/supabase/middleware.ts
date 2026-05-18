@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/employees", "/reminders", "/feed", "/admin"];
+const PROTECTED_PREFIXES = ["/dashboard", "/employees", "/reminders", "/feed", "/admin", "/settings", "/profile"];
 const AUTH_PREFIXES = ["/login", "/register"];
 
 const SAFE_REDIRECT = /^\/(?!\/)[A-Za-z0-9_\-./?=&%]*$/;
@@ -35,15 +35,15 @@ export async function updateSession(request: NextRequest) {
       SUPABASE_ANON_KEY,
       {
         cookies: {
-          get(name) {
+          get(name: string) {
             return request.cookies.get(name)?.value;
           },
-          set(name, value, options: CookieOptions) {
+          set(name: string, value: string, options: CookieOptions) {
             request.cookies.set({ name, value, ...options });
             response = NextResponse.next({ request: { headers: requestHeaders } });
             response.cookies.set({ name, value, ...options });
           },
-          remove(name, options: CookieOptions) {
+          remove(name: string, options: CookieOptions) {
             request.cookies.set({ name, value: "", ...options });
             response = NextResponse.next({ request: { headers: requestHeaders } });
             response.cookies.set({ name, value: "", ...options });
