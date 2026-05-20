@@ -1,2 +1,2 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Force LF everywhere (avoid CRLF diffs on Windows)
+* text=auto eol=lf
