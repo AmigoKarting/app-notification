@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const setRoleSchema = z.object({
   user_id: z.string().uuid(),
-  role: z.enum(["employee", "dev"]),
+  role: z.enum(["employee", "dev", "caissiere"]),
 });
 
 export async function setUserRoleAction(formData: FormData): Promise<void> {
