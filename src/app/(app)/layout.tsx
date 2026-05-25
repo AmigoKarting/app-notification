@@ -28,12 +28,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     console.error("[LAYOUT] getCurrentProfile error:", e);
   }
 
-  let branding: { app_name: string; app_tagline: string | null; logo_url: string | null };
+  let branding: Awaited<ReturnType<typeof getBranding>>;
   try {
     branding = await getBranding();
   } catch (e) {
     console.error("[LAYOUT] getBranding error:", e);
-    branding = { app_name: "App Notification", app_tagline: null, logo_url: null };
+    branding = {
+      id: 1,
+      app_name: "App Notification",
+      app_tagline: null,
+      logo_url: null,
+      cashier_banner_enabled: true,
+      cashier_banner_message: null,
+      cashier_banner_cta: null,
+      updated_at: new Date(0).toISOString(),
+      updated_by: null,
+    };
   }
 
   const isDev = profile?.role === "dev";
@@ -138,7 +148,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </header>
 
       {showCashierBanner && (
-        <CashierChecklistBanner alreadySubmitted={cashierChecklistDone} />
+        <CashierChecklistBanner
+          alreadySubmitted={cashierChecklistDone}
+          enabled={branding.cashier_banner_enabled}
+          customMessage={branding.cashier_banner_message}
+          customCta={branding.cashier_banner_cta}
+        />
       )}
 
       <main className="mx-auto max-w-6xl px-4 py-4 pb-20 sm:px-6 sm:py-8 md:pb-8">{children}</main>

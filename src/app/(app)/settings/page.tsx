@@ -1,11 +1,13 @@
 import { Card, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
+import { getAppSettings } from "@/domain/branding/repository";
 import { listCategories } from "@/domain/categories/repository";
 import { listMutedCategoryIds } from "@/domain/category-mutes/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { PushToggle } from "@/components/push-toggle";
 import { ProfileForm } from "../profile/profile-form";
+import { CashierBannerForm } from "./cashier-banner-form";
 import { MuteSection } from "./mute-section";
 import { ThemeSection } from "./theme-section";
 
@@ -18,10 +20,11 @@ const CASHIER_CATEGORY_SLUG = "checklist-caisse";
 export default async function SettingsPage() {
   const t = getServerDictionary();
   const user = await requireUser();
-  const [profile, allCategories, mutedIds] = await Promise.all([
+  const [profile, allCategories, mutedIds, appSettings] = await Promise.all([
     getCurrentProfile(),
     listCategories(),
     listMutedCategoryIds(user.id),
+    getAppSettings(),
   ]);
 
   const isCashier = profile?.role === "caissiere";
@@ -101,6 +104,23 @@ export default async function SettingsPage() {
           On ne laisse pas les employés couper leurs notifications. */}
       {isDev && (
         <>
+          {/* Bannière de rappel caissière : configurable par les devs */}
+          <Card className="p-4 sm:p-6">
+            <div className="mb-5">
+              <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+                {t.settings.cashierBanner}
+              </h2>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                {t.settings.cashierBannerDesc}
+              </p>
+            </div>
+            <CashierBannerForm
+              initialEnabled={appSettings.cashier_banner_enabled}
+              initialMessage={appSettings.cashier_banner_message}
+              initialCta={appSettings.cashier_banner_cta}
+            />
+          </Card>
+
           <Card className="p-4 sm:p-6">
             <div className="mb-5">
               <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t.settings.pushNotifications}</h2>

@@ -4,7 +4,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import { fromPostgrestError, RepositoryError } from "@/domain/errors";
-import { updateBrandingSchema } from "./schema";
+import { updateBrandingSchema, updateCashierBannerSchema } from "./schema";
 
 export type AppSettings = Database["public"]["Tables"]["app_settings"]["Row"];
 
@@ -13,6 +13,9 @@ const DEFAULTS: AppSettings = {
   app_name: "App Notification",
   app_tagline: null,
   logo_url: null,
+  cashier_banner_enabled: true,
+  cashier_banner_message: null,
+  cashier_banner_cta: null,
   updated_at: new Date(0).toISOString(),
   updated_by: null,
 };
@@ -55,6 +58,33 @@ export async function updateAppSettings(
       app_name: parsed.data.app_name,
       app_tagline: parsed.data.app_tagline,
       logo_url: parsed.data.logo_url,
+      updated_by: updatedBy,
+    })
+    .eq("id", 1)
+    .select("*")
+    .single();
+  if (error) throw fromPostgrestError(error);
+  return data;
+}
+
+export async function updateCashierBannerSettings(
+  updatedBy: string,
+  input: unknown,
+): Promise<AppSettings> {
+  const parsed = updateCashierBannerSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new RepositoryError(
+      "validation",
+      parsed.error.issues[0]?.message ?? "Données invalides",
+    );
+  }
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("app_settings")
+    .update({
+      cashier_banner_enabled: parsed.data.cashier_banner_enabled,
+      cashier_banner_message: parsed.data.cashier_banner_message,
+      cashier_banner_cta: parsed.data.cashier_banner_cta,
       updated_by: updatedBy,
     })
     .eq("id", 1)

@@ -512,6 +512,9 @@ export interface Database {
           app_name: string;
           app_tagline: string | null;
           logo_url: string | null;
+          cashier_banner_enabled: boolean;
+          cashier_banner_message: string | null;
+          cashier_banner_cta: string | null;
           updated_at: string;
           updated_by: string | null;
         };
@@ -520,6 +523,9 @@ export interface Database {
           app_name?: string;
           app_tagline?: string | null;
           logo_url?: string | null;
+          cashier_banner_enabled?: boolean;
+          cashier_banner_message?: string | null;
+          cashier_banner_cta?: string | null;
           updated_at?: string;
           updated_by?: string | null;
         };

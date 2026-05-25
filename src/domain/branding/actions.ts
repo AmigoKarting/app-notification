@@ -5,8 +5,12 @@ import { requireDev } from "@/domain/auth/role";
 import { RepositoryError } from "@/domain/errors";
 import { type FormState } from "@/domain/form-state";
 import { getServerDictionary } from "@/lib/i18n/server";
-import { updateAppSettings, type AppSettings } from "./repository";
-import { updateBrandingSchema } from "./schema";
+import {
+  updateAppSettings,
+  updateCashierBannerSettings,
+  type AppSettings,
+} from "./repository";
+import { updateBrandingSchema, updateCashierBannerSchema } from "./schema";
 
 function fieldErrorsFromZod(err: import("zod").ZodError<unknown>): Record<string, string> {
   const out: Record<string, string> = {};
@@ -44,4 +48,36 @@ export async function updateBrandingAction(
   // Invalidation large — le branding apparaît dans tous les layouts.
   revalidatePath("/", "layout");
   return { status: "success", message: t.actionMessages.brandingUpdated };
+}
+
+export async function updateCashierBannerAction(
+  _prev: FormState<AppSettings>,
+  formData: FormData,
+): Promise<FormState<AppSettings>> {
+  const profile = await requireDev();
+  const parsed = updateCashierBannerSchema.safeParse({
+    cashier_banner_enabled: formData.get("cashier_banner_enabled"),
+    cashier_banner_message: formData.get("cashier_banner_message"),
+    cashier_banner_cta: formData.get("cashier_banner_cta"),
+  });
+  const t = getServerDictionary();
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: t.errors.invalidData,
+      fieldErrors: fieldErrorsFromZod(parsed.error),
+    };
+  }
+  try {
+    await updateCashierBannerSettings(profile.id, parsed.data);
+  } catch (err) {
+    if (err instanceof RepositoryError) {
+      return { status: "error", message: err.message };
+    }
+    return { status: "error", message: t.errors.unexpected };
+  }
+
+  // La bannière vit dans le layout (app), donc on invalide partout.
+  revalidatePath("/", "layout");
+  return { status: "success", message: t.settings.cashierBannerSaved };
 }
