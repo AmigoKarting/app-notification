@@ -29,8 +29,13 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
     active: pathname === "/feed",
   };
 
+  // Caissière → Checklist d'abord (page d'accueil). Dev → accès aussi (test admin).
   const tabs = [
-    ...(isCashier ? [checklistTab, feedTab] : [feedTab]),
+    ...(isCashier
+      ? [checklistTab, feedTab]
+      : isDev
+        ? [feedTab, checklistTab]
+        : [feedTab]),
     ...(isDev
       ? [
           {

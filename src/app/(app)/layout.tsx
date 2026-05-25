@@ -80,7 +80,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Link>
 
             <span className="hidden md:contents">
-              {isCashier && (
+              {/* Lien Checklist : caissière (page perso) ou dev (test admin). */}
+              {(isCashier || isDev) && (
                 <NavLink href="/checklist" label={t.checklist.shortTitle} />
               )}
               <NavLink

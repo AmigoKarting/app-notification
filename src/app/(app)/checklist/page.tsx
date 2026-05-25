@@ -13,7 +13,9 @@ export default async function ChecklistPage() {
   const user = await requireUser();
   const profile = await getCurrentProfile();
 
-  if (profile?.role !== "caissiere") {
+  // Caissières et devs : l'admin doit pouvoir tester la checklist
+  // sans changer de compte.
+  if (profile?.role !== "caissiere" && profile?.role !== "dev") {
     redirect("/feed");
   }
 

@@ -17,7 +17,9 @@ export async function submitChecklistAction(
   const user = await requireUser();
   const profile = await getCurrentProfile();
 
-  if (profile?.role !== "caissiere") {
+  // Caissières et devs : permet aux admins de tester la soumission sans
+  // changer de compte.
+  if (profile?.role !== "caissiere" && profile?.role !== "dev") {
     return { status: "error", message: t.errors.unauthorized };
   }
 
