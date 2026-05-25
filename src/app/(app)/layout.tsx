@@ -50,9 +50,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(home);
   }
 
-  // Bannière rappel checklist : seulement pour les caissières, sauf sur la
-  // page checklist elle-même (où le rappel serait redondant).
-  const showCashierBanner = isCashier && pathname !== "/checklist";
+  // Bannière rappel checklist : visible sur TOUTES les pages des caissières
+  // tant que la checklist du jour n'est pas remplie.
+  const showCashierBanner = isCashier;
   const cashierChecklistDone =
     showCashierBanner ? await hasSubmittedToday(user.id) : true;
 

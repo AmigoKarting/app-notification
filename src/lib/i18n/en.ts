@@ -861,7 +861,7 @@ const en: Dictionary = {
     shortTitle: "Checklist",
     description: "Check off each task as you complete it during your shift.",
     reminder: "Don't forget to complete your checklist before leaving!",
-    bannerTitle: "Remember to fill out today's checklist",
+    bannerTitle: "Don't forget to fill out the checklists!",
     bannerCta: "Open",
     submit: "Submit my checklist",
     submitting: "Submitting…",

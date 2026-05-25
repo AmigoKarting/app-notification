@@ -859,7 +859,7 @@ const fr = {
     shortTitle: "Checklist",
     description: "Coche chaque tâche au fur et à mesure de ta journée.",
     reminder: "N'oublie pas de compléter ta checklist avant de partir !",
-    bannerTitle: "Pense à remplir ta checklist du jour",
+    bannerTitle: "Oublie pas de remplir les checklists !",
     bannerCta: "Ouvrir",
     submit: "Envoyer ma checklist",
     submitting: "Envoi en cours…",
