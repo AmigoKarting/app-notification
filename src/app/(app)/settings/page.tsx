@@ -11,14 +11,30 @@ import { ThemeSection } from "./theme-section";
 
 export const dynamic = "force-dynamic";
 
+// Slug de la catégorie système réservée aux rappels checklist caissière.
+// Définie dans la migration 0020.
+const CASHIER_CATEGORY_SLUG = "checklist-caisse";
+
 export default async function SettingsPage() {
   const t = getServerDictionary();
   const user = await requireUser();
-  const [profile, categories, mutedIds] = await Promise.all([
+  const [profile, allCategories, mutedIds] = await Promise.all([
     getCurrentProfile(),
     listCategories(),
     listMutedCategoryIds(user.id),
   ]);
+
+  const isCashier = profile?.role === "caissiere";
+
+  // Sépare la catégorie "checklist-caisse" du reste :
+  // - elle ne doit jamais apparaître dans la section générale "Mes notifications"
+  // - elle apparaît dans sa propre section uniquement pour les caissières
+  const cashierCategories = allCategories.filter(
+    (c) => c.slug === CASHIER_CATEGORY_SLUG,
+  );
+  const generalCategories = allCategories.filter(
+    (c) => c.slug !== CASHIER_CATEGORY_SLUG,
+  );
 
   return (
     <div className="space-y-6">
@@ -90,6 +106,29 @@ export default async function SettingsPage() {
         <PushToggle />
       </Card>
 
+      {/* Section dédiée caissière — séparée du reste, visible uniquement pour les caissières */}
+      {isCashier && cashierCategories.length > 0 && (
+        <Card className="border-amber-200 bg-amber-50/40 p-4 sm:p-6 dark:border-amber-800 dark:bg-amber-900/10">
+          <div className="mb-5">
+            <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+              {t.settings.cashierNotifications}
+            </h2>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              {t.settings.cashierNotificationsDesc}
+            </p>
+          </div>
+          <MuteSection
+            categories={cashierCategories.map((c) => ({
+              id: c.id,
+              name: c.name,
+              color: c.color,
+              icon: c.icon,
+            }))}
+            mutedIds={mutedIds}
+          />
+        </Card>
+      )}
+
       {/* Section Notifications — silencieuses par catégorie */}
       <Card className="p-4 sm:p-6">
         <div className="mb-5">
@@ -99,7 +138,7 @@ export default async function SettingsPage() {
           </p>
         </div>
         <MuteSection
-          categories={categories.map((c) => ({
+          categories={generalCategories.map((c) => ({
             id: c.id,
             name: c.name,
             color: c.color,

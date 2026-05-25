@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 const ROLE_BADGE: Record<AppRole, string> = {
   dev: "bg-brand-50 text-brand-700 ring-brand-200 dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700",
-  employee: "bg-neutral-100 text-neutral-700 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:ring-neutral-600",
+  gerant: "bg-neutral-100 text-neutral-700 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:ring-neutral-600",
   caissiere: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-700",
 };
 
@@ -26,7 +26,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   const all = await listProfilesWithEmail();
 
   const search = searchParams?.q?.trim().toLowerCase() ?? "";
-  const validRoles: AppRole[] = ["dev", "employee", "caissiere"];
+  const validRoles: AppRole[] = ["dev", "gerant", "caissiere"];
   const roleFilter = validRoles.includes(searchParams?.role as AppRole)
     ? (searchParams!.role as AppRole)
     : undefined;
@@ -80,9 +80,9 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
           label={t.adminUsers.devs}
         />
         <RoleFilter
-          href={`/admin/users?role=employee${search ? `&q=${encodeURIComponent(search)}` : ""}`}
-          active={roleFilter === "employee"}
-          label={t.adminUsers.employees}
+          href={`/admin/users?role=gerant${search ? `&q=${encodeURIComponent(search)}` : ""}`}
+          active={roleFilter === "gerant"}
+          label={t.adminUsers.gerants}
         />
         <RoleFilter
           href={`/admin/users?role=caissiere${search ? `&q=${encodeURIComponent(search)}` : ""}`}
@@ -127,7 +127,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                       {u.phone && <p className="text-xs text-neutral-500 dark:text-neutral-400">{u.phone}</p>}
                     </div>
                     <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${ROLE_BADGE[u.role] ?? ROLE_BADGE.employee}`}
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${ROLE_BADGE[u.role] ?? ROLE_BADGE.gerant}`}
                     >
                       {t.adminUsers.roleLabels[u.role] ?? u.role}
                     </span>
@@ -139,7 +139,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                         userId={u.id}
                         currentRole={u.role}
                         promoteLabel={t.adminUsers.promoteShort}
-                        setEmployeeLabel={t.adminUsers.setEmployee}
+                        setGerantLabel={t.adminUsers.setGerant}
                         setCashierLabel={t.adminUsers.setCashier}
                       />
                     )}
@@ -181,7 +181,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                       <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">{u.email ?? "—"}</td>
                       <td className="px-4 py-3">
                         <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${ROLE_BADGE[u.role] ?? ROLE_BADGE.employee}`}
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${ROLE_BADGE[u.role] ?? ROLE_BADGE.gerant}`}
                         >
                           {t.adminUsers.roleLabels[u.role] ?? u.role}
                         </span>
@@ -195,7 +195,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                             userId={u.id}
                             currentRole={u.role}
                             promoteLabel={t.adminUsers.promoteShort}
-                            setEmployeeLabel={t.adminUsers.setEmployee}
+                            setGerantLabel={t.adminUsers.setGerant}
                             setCashierLabel={t.adminUsers.setCashier}
                           />
                         )}
@@ -221,13 +221,13 @@ function RoleActions({
   userId,
   currentRole,
   promoteLabel,
-  setEmployeeLabel,
+  setGerantLabel,
   setCashierLabel,
 }: {
   userId: string;
   currentRole: AppRole;
   promoteLabel: string;
-  setEmployeeLabel: string;
+  setGerantLabel: string;
   setCashierLabel: string;
 }) {
   const targets: { role: AppRole; label: string }[] = [];
@@ -235,8 +235,8 @@ function RoleActions({
   if (currentRole !== "dev") {
     targets.push({ role: "dev", label: promoteLabel });
   }
-  if (currentRole !== "employee") {
-    targets.push({ role: "employee", label: setEmployeeLabel });
+  if (currentRole !== "gerant") {
+    targets.push({ role: "gerant", label: setGerantLabel });
   }
   if (currentRole !== "caissiere") {
     targets.push({ role: "caissiere", label: setCashierLabel });

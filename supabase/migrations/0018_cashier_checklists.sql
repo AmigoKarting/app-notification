@@ -25,6 +25,6 @@ CREATE POLICY "Cashiers view own checklists"
     auth.uid() = user_id
     OR EXISTS (
       SELECT 1 FROM public.profiles
-      WHERE id = auth.uid() AND role IN ('employee', 'dev')
+      WHERE id = auth.uid() AND role IN ('gerant', 'dev')
     )
   );

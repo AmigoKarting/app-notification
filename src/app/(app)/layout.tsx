@@ -2,10 +2,12 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppLogo, getBranding } from "@/components/app-brand";
+import { CashierChecklistBanner } from "@/components/cashier-checklist-banner";
 import { LanguageToggle } from "@/components/language-toggle";
 import { logoutAction } from "@/domain/auth/actions";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
+import { hasSubmittedToday } from "@/domain/checklists/repository";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { InstallAppBanner, InstallAppButton } from "@/components/install-app";
@@ -35,6 +37,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const isDev = profile?.role === "dev";
+  const isCashier = profile?.role === "caissiere";
   const displayLabel =
     (profile?.first_name && profile?.last_name
       ? `${profile.first_name} ${profile.last_name}`
@@ -44,6 +47,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!isDev && DEV_ONLY_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     redirect("/feed");
   }
+
+  // Bannière rappel checklist : seulement pour les caissières, sauf sur la
+  // page checklist elle-même (où le rappel serait redondant).
+  const showCashierBanner = isCashier && pathname !== "/checklist";
+  const cashierChecklistDone =
+    showCashierBanner ? await hasSubmittedToday(user.id) : true;
 
   return (
     <div className="min-h-screen">
@@ -60,6 +69,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
             <span className="hidden md:contents">
               <NavLink href="/feed" label={t.nav.notifications} />
+              {profile?.role === "caissiere" && (
+                <NavLink href="/checklist" label={t.checklist.shortTitle} />
+              )}
               {isDev && (
                 <Link
                   href="/admin"
@@ -120,6 +132,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
+      {showCashierBanner && (
+        <CashierChecklistBanner alreadySubmitted={cashierChecklistDone} />
+      )}
+
       <main className="mx-auto max-w-6xl px-4 py-4 pb-20 sm:px-6 sm:py-8 md:pb-8">{children}</main>
 
       <footer className="hidden border-t border-neutral-200 bg-white/60 backdrop-blur-sm md:block dark:border-neutral-800 dark:bg-neutral-900/60">
@@ -131,7 +147,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </footer>
 
-      <MobileBottomNav role={profile?.role ?? "employee"} />
+      <MobileBottomNav role={profile?.role ?? "gerant"} />
       <InstallAppBanner />
       <PushAutoSubscribe />
       <OnboardingModal />

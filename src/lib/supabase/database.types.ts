@@ -7,7 +7,7 @@ export type Json =
   | Json[];
 
 export type ReminderStatus = "pending" | "sent" | "cancelled" | "failed";
-export type AppRole = "employee" | "dev" | "caissiere";
+export type AppRole = "gerant" | "dev" | "caissiere";
 export type FeedItemKind = "notification" | "reminder";
 export type FeedItemStatus = "pending" | "sent" | "failed" | "cancelled";
 export type FeedPriority = "low" | "normal" | "high";
