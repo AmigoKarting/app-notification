@@ -25,6 +25,7 @@ export default async function SettingsPage() {
   ]);
 
   const isCashier = profile?.role === "caissiere";
+  const backHref = isCashier ? "/checklist" : "/feed";
 
   // Sépare la catégorie "checklist-caisse" du reste :
   // - elle ne doit jamais apparaître dans la section générale "Mes notifications"
@@ -42,7 +43,7 @@ export default async function SettingsPage() {
         title={t.settings.title}
         description={t.settings.description}
         action={
-          <LinkButton href="/feed" variant="secondary">
+          <LinkButton href={backHref} variant="secondary">
             {t.settings.back}
           </LinkButton>
         }

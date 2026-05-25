@@ -14,23 +14,22 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const isDev = role === "dev";
   const isCashier = role === "caissiere";
 
+  // Pour les caissières, l'onglet Checklist passe en premier (page d'accueil).
+  const checklistTab = {
+    href: "/checklist",
+    label: t.checklist.shortTitle,
+    icon: ClipboardSvg,
+    active: pathname === "/checklist",
+  };
+  const feedTab = {
+    href: "/feed",
+    label: t.nav.notifications,
+    icon: BellSvg,
+    active: pathname === "/feed",
+  };
+
   const tabs = [
-    {
-      href: "/feed",
-      label: t.nav.notifications,
-      icon: BellSvg,
-      active: pathname === "/feed",
-    },
-    ...(isCashier
-      ? [
-          {
-            href: "/checklist",
-            label: t.checklist.shortTitle,
-            icon: ClipboardSvg,
-            active: pathname === "/checklist",
-          },
-        ]
-      : []),
+    ...(isCashier ? [checklistTab, feedTab] : [feedTab]),
     ...(isDev
       ? [
           {

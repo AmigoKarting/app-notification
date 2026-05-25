@@ -9,7 +9,13 @@ export default async function HomePage() {
   const user = await getCurrentUser();
   if (user) {
     const profile = await getCurrentProfile();
-    redirect(profile?.role === "dev" ? "/admin" : "/feed");
+    const home =
+      profile?.role === "dev"
+        ? "/admin"
+        : profile?.role === "caissiere"
+          ? "/checklist"
+          : "/feed";
+    redirect(home);
   }
 
   const t = getServerDictionary();

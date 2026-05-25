@@ -44,8 +44,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       : profile?.display_name?.trim()) || user.email || "";
 
   const pathname = headers().get("x-pathname") ?? "";
+  // Page d'accueil par défaut selon le rôle.
+  const home = isDev ? "/admin" : isCashier ? "/checklist" : "/feed";
   if (!isDev && DEV_ONLY_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
-    redirect("/feed");
+    redirect(home);
   }
 
   // Bannière rappel checklist : seulement pour les caissières, sauf sur la
@@ -60,7 +62,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6">
           <nav className="flex items-center gap-1 text-sm">
             <Link
-              href={isDev ? "/admin" : "/feed"}
+              href={home}
               className="mr-3 flex items-center gap-2 font-semibold tracking-tight"
             >
               <AppLogo size={28} />
@@ -68,10 +70,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Link>
 
             <span className="hidden md:contents">
-              <NavLink href="/feed" label={t.nav.notifications} />
-              {profile?.role === "caissiere" && (
+              {isCashier && (
                 <NavLink href="/checklist" label={t.checklist.shortTitle} />
               )}
+              <NavLink href="/feed" label={t.nav.notifications} />
               {isDev && (
                 <Link
                   href="/admin"
