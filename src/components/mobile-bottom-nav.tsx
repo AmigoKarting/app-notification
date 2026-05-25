@@ -1,0 +1,118 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useTranslation } from "@/lib/i18n";
+
+interface MobileBottomNavProps {
+  isDev: boolean;
+}
+
+export function MobileBottomNav({ isDev }: MobileBottomNavProps) {
+  const pathname = usePathname();
+  const { t } = useTranslation();
+
+  const tabs = [
+    {
+      href: "/feed",
+      label: t.nav.notifications,
+      icon: BellSvg,
+      active: pathname === "/feed",
+    },
+    ...(isDev
+      ? [
+          {
+            href: "/admin",
+            label: t.nav.admin,
+            icon: GridSvg,
+            active: pathname.startsWith("/admin"),
+          },
+        ]
+      : []),
+    {
+      href: "/settings",
+      label: t.settings.title,
+      icon: CogSvg,
+      active: pathname === "/settings",
+    },
+  ];
+
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 backdrop-blur-md md:hidden dark:border-neutral-700/50 dark:bg-neutral-900/95">
+      <ul className="mx-auto flex max-w-md items-stretch justify-around">
+        {tabs.map((tab) => (
+          <li key={tab.href} className="flex-1">
+            <Link
+              href={tab.href}
+              className={`flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition ${
+                tab.active
+                  ? "text-brand-600 dark:text-brand-400"
+                  : "text-neutral-400 active:text-neutral-600 dark:text-neutral-500 dark:active:text-neutral-300"
+              }`}
+            >
+              <tab.icon active={tab.active} />
+              <span>{tab.label}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <div className="safe-area-bottom" />
+    </nav>
+  );
+}
+
+function BellSvg({ active }: { active: boolean }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill={active ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
+  );
+}
+
+function GridSvg({ active }: { active: boolean }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill={active ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  );
+}
+
+function CogSvg({ active }: { active: boolean }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill={active ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}

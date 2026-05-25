@@ -9,6 +9,7 @@ import { requireUser } from "@/domain/auth/session";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { InstallAppBanner, InstallAppButton } from "@/components/install-app";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { PushAutoSubscribe } from "@/components/push-auto-subscribe";
 import { getServerDictionary } from "@/lib/i18n/server";
 
@@ -54,18 +55,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               className="mr-3 flex items-center gap-2 font-semibold tracking-tight"
             >
               <AppLogo size={28} />
-              <span className="hidden sm:inline dark:text-neutral-100">{branding.app_name}</span>
+              <span className="dark:text-neutral-100">{branding.app_name}</span>
             </Link>
 
-            <NavLink href="/feed" label={t.nav.notifications} />
-            {isDev && (
-              <Link
-                href="/admin"
-                className="ml-2 inline-flex items-center gap-1 rounded-md bg-brand-50 px-2.5 py-1.5 text-sm font-medium text-brand-700 ring-1 ring-brand-200 transition hover:bg-brand-100 hover:text-brand-800 dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700 dark:hover:bg-brand-900/50"
-              >
-                {t.nav.admin}
-              </Link>
-            )}
+            <span className="hidden md:contents">
+              <NavLink href="/feed" label={t.nav.notifications} />
+              {isDev && (
+                <Link
+                  href="/admin"
+                  className="ml-2 inline-flex items-center gap-1 rounded-md bg-brand-50 px-2.5 py-1.5 text-sm font-medium text-brand-700 ring-1 ring-brand-200 transition hover:bg-brand-100 hover:text-brand-800 dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700 dark:hover:bg-brand-900/50"
+                >
+                  {t.nav.admin}
+                </Link>
+              )}
+            </span>
           </nav>
 
           <div className="flex items-center gap-2 text-sm">
@@ -74,7 +77,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <Link
                 href="/admin/aide"
                 title={t.nav.helpTooltip}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-600 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-brand-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-brand-400"
+                className="hidden h-9 w-9 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-600 transition hover:border-neutral-300 hover:bg-neutral-50 hover:text-brand-700 md:flex dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-brand-400"
                 aria-label={t.nav.help}
               >
                 <svg
@@ -101,15 +104,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-xs font-semibold text-white shadow-sm">
                 {displayLabel.slice(0, 1).toUpperCase()}
               </span>
-              <span className="hidden font-medium sm:inline">{displayLabel}</span>
+              <span className="hidden font-medium md:inline">{displayLabel}</span>
             </Link>
             {profile && isDev && (
-              <span className="hidden rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200 sm:inline dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700">
+              <span className="hidden rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200 md:inline dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700">
                 {profile.role}
               </span>
             )}
             <form action={logoutAction}>
-              <button className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-700">
+              <button className="hidden rounded-lg border border-neutral-200 bg-white px-3 py-1.5 font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50 md:inline-flex dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-700">
                 {t.auth.logout}
               </button>
             </form>
@@ -117,9 +120,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-4 pb-20 sm:px-6 sm:py-8 md:pb-8">{children}</main>
 
-      <footer className="border-t border-neutral-200 bg-white/60 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-900/60">
+      <footer className="hidden border-t border-neutral-200 bg-white/60 backdrop-blur-sm md:block dark:border-neutral-800 dark:bg-neutral-900/60">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <p className="text-xs text-neutral-400 dark:text-neutral-500">
             {branding.app_name}
@@ -128,6 +131,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </footer>
 
+      <MobileBottomNav isDev={isDev} />
       <InstallAppBanner />
       <PushAutoSubscribe />
       <OnboardingModal />

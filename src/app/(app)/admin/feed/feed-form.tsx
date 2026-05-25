@@ -120,10 +120,10 @@ export function FeedItemForm(props: Props) {
       </section>
 
       {/* ---- 1.5. Diffusion (épinglé / brouillon / canaux externes) ---- */}
-      <section className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5">
+      <section className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5 dark:border-neutral-700 dark:bg-neutral-800/40">
         <header>
-          <h3 className="text-sm font-semibold text-neutral-900">{t.feedForm.broadcasting}</h3>
-          <p className="text-xs text-neutral-600">
+          <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{t.feedForm.broadcasting}</h3>
+          <p className="text-xs text-neutral-600 dark:text-neutral-400">
             {t.feedForm.broadcastingDesc}
           </p>
         </header>
@@ -174,10 +174,10 @@ export function FeedItemForm(props: Props) {
       </section>
 
       {/* ---- 2. Destinataires ---- */}
-      <section className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5">
+      <section className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5 dark:border-neutral-700 dark:bg-neutral-800/40">
         <header>
-          <h3 className="text-sm font-semibold text-neutral-900">{t.feedForm.recipients}</h3>
-          <p className="text-xs text-neutral-600">{t.feedForm.recipientsQuestion}</p>
+          <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{t.feedForm.recipients}</h3>
+          <p className="text-xs text-neutral-600 dark:text-neutral-400">{t.feedForm.recipientsQuestion}</p>
         </header>
 
         <fieldset className="grid grid-cols-1 gap-2 md:grid-cols-3">
@@ -237,10 +237,10 @@ export function FeedItemForm(props: Props) {
       </section>
 
       {/* ---- 3. Classement (catégorie, période, priorité, type) ---- */}
-      <section className="space-y-4 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5">
+      <section className="space-y-4 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5 dark:border-neutral-700 dark:bg-neutral-800/40">
         <header>
-          <h3 className="text-sm font-semibold text-neutral-900">{t.feedForm.classification}</h3>
-          <p className="text-xs text-neutral-600">
+          <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{t.feedForm.classification}</h3>
+          <p className="text-xs text-neutral-600 dark:text-neutral-400">
             {t.feedForm.classificationDesc}
           </p>
         </header>
@@ -298,10 +298,10 @@ export function FeedItemForm(props: Props) {
       </section>
 
       {/* ---- 4. Dates ---- */}
-      <section className="space-y-4 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5">
+      <section className="space-y-4 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5 dark:border-neutral-700 dark:bg-neutral-800/40">
         <header>
-          <h3 className="text-sm font-semibold text-neutral-900">{t.feedForm.dates}</h3>
-          <p className="text-xs text-neutral-600">
+          <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{t.feedForm.dates}</h3>
+          <p className="text-xs text-neutral-600 dark:text-neutral-400">
             {t.feedForm.datesDesc}
           </p>
         </header>

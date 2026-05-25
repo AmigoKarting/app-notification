@@ -78,7 +78,7 @@ export function AdminSidebar() {
       <nav className="sticky top-20 space-y-6">
         {nav.map((section) => (
           <div key={section.label}>
-            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
               {section.label}
             </p>
             <ul className="space-y-0.5">
@@ -91,13 +91,13 @@ export function AdminSidebar() {
                       href={entry.href}
                       className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition ${
                         active
-                          ? "bg-brand-100 font-semibold text-brand-900 ring-2 ring-brand-300 shadow-sm"
-                          : "text-neutral-700 hover:bg-neutral-100"
+                          ? "bg-brand-100 font-semibold text-brand-900 ring-2 ring-brand-300 shadow-sm dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700"
+                          : "text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
                       }`}
                     >
                       <Icon
                         size={18}
-                        className={active ? "text-brand-700" : "text-neutral-400 group-hover:text-neutral-700"}
+                        className={active ? "text-brand-700 dark:text-brand-400" : "text-neutral-400 group-hover:text-neutral-700 dark:text-neutral-500 dark:group-hover:text-neutral-300"}
                       />
                       <span className="flex-1 truncate">{entry.label}</span>
                     </Link>
@@ -118,20 +118,22 @@ export function AdminMobileNav() {
   const nav = getNav(t.nav);
 
   return (
-    <nav className="lg:hidden -mx-4 mb-2 overflow-x-auto border-y border-neutral-200 bg-white px-4 sm:-mx-6 sm:px-6">
+    <nav className="lg:hidden -mx-4 mb-4 overflow-x-auto border-b border-neutral-200 bg-neutral-50/80 px-4 sm:-mx-6 sm:px-6 dark:border-neutral-700 dark:bg-neutral-800/50">
       <ul className="flex gap-1 whitespace-nowrap py-2 text-sm">
         {nav.flatMap((s) => s.entries).map((entry) => {
+          const Icon = entry.icon;
           const active = isActive(entry.href, pathname);
           return (
             <li key={entry.href}>
               <Link
                 href={entry.href}
-                className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 ${
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition ${
                   active
-                    ? "bg-brand-100 font-semibold text-brand-900 ring-2 ring-brand-300"
-                    : "text-neutral-700 hover:bg-neutral-100"
+                    ? "bg-brand-600 font-medium text-white shadow-sm dark:bg-brand-500"
+                    : "text-neutral-600 active:bg-neutral-200 dark:text-neutral-400 dark:active:bg-neutral-700"
                 }`}
               >
+                <Icon size={15} className={active ? "text-white" : ""} />
                 {entry.label}
               </Link>
             </li>

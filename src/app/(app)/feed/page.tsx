@@ -84,7 +84,7 @@ export default async function FeedPage({ searchParams }: PageProps) {
           name="q"
           defaultValue={search}
           placeholder={t.feed.searchPlaceholder}
-          className="w-full max-w-md rounded-lg border border-neutral-300 bg-white px-3.5 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          className="w-full max-w-md rounded-lg border border-neutral-300 bg-white px-3.5 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:focus:border-brand-500 dark:focus:ring-brand-900/50"
         />
         {search && (
           <Link

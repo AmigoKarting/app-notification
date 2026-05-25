@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.safe-area-bottom {
+  height: env(safe-area-inset-bottom, 0px);
+}
+
 :root {
   color-scheme: light;
   /* Brand color en triplets RGB (modifiables via JS pour le theming) */
