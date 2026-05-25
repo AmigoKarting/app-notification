@@ -14,7 +14,10 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     name: appName,
     short_name: appName,
     description: "Notifications et rappels pour votre équipe",
-    start_url: "/feed",
+    // "/" redirige selon le rôle (dev → /admin, caissiere → /checklist,
+    // sinon → /feed). Important pour que les caissières atterrissent
+    // directement sur leur checklist en ouvrant la PWA.
+    start_url: "/",
     display: "standalone",
     background_color: "#fafafa",
     theme_color: "#6366f1",
