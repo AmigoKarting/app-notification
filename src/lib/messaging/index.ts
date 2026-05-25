@@ -1,6 +1,7 @@
 import "server-only";
 
 import { EmailChannel } from "./channels/email";
+import { WebPushChannel } from "./channels/push";
 import { SmsChannel } from "./channels/sms";
 import { channelRegistry } from "./registry";
 
@@ -23,6 +24,7 @@ function bootstrap(): void {
   bootstrapped = true;
   channelRegistry.register(new EmailChannel());
   channelRegistry.register(new SmsChannel());
+  channelRegistry.register(new WebPushChannel());
   // channelRegistry.register(new WhatsappChannel()); // futur
 }
 bootstrap();

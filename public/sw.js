@@ -24,3 +24,44 @@ self.addEventListener("fetch", (event) => {
     );
   }
 });
+
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = { title: "Nouvelle notification", body: event.data.text() };
+  }
+
+  const options = {
+    body: payload.body || "",
+    icon: payload.icon || "/icon-192x192.png",
+    badge: payload.badge || "/icon-192x192.png",
+    data: payload.data || { url: "/" },
+    vibrate: [200, 100, 200],
+    tag: payload.tag || "default",
+    renotify: true,
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title || "Notification", options)
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/feed";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (client.url.includes(url) && "focus" in client) {
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});

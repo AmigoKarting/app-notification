@@ -426,6 +426,8 @@ const en: Dictionary = {
     lightMode: "Light",
     darkMode: "Dark",
     systemMode: "System",
+    pushNotifications: "Push notifications",
+    pushNotificationsDesc: "Receive real-time notifications on this device.",
     myNotifications: "My notifications",
     myNotificationsDesc: "Mute categories you're not interested in.",
     noCategoriesYet: "No categories yet. Notifications without a category cannot be muted.",
@@ -839,6 +841,16 @@ const en: Dictionary = {
     focusSearch: "Focus search",
     showHelp: "Show shortcuts",
     hint: "Press a key anywhere (except in a text field).",
+  },
+
+  push: {
+    loading: "Loading…",
+    unsupported: "Push notifications are not supported by this browser.",
+    denied: "Notifications are blocked. Enable them in your browser settings.",
+    enabledTitle: "Notifications enabled",
+    enabledDesc: "You will receive push notifications on this device.",
+    disabledTitle: "Notifications disabled",
+    disabledDesc: "Enable push notifications so you never miss anything.",
   },
 } as const;
 

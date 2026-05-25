@@ -424,6 +424,8 @@ const fr = {
     lightMode: "Clair",
     darkMode: "Sombre",
     systemMode: "Système",
+    pushNotifications: "Notifications push",
+    pushNotificationsDesc: "Reçois des notifications en temps réel sur cet appareil.",
     myNotifications: "Mes notifications",
     myNotificationsDesc: "Coupe le son sur les catégories qui ne t'intéressent pas.",
     noCategoriesYet: "Aucune catégorie pour l'instant. Les notifications sans catégorie ne peuvent pas être masquées.",
@@ -837,6 +839,16 @@ const fr = {
     focusSearch: "Rechercher",
     showHelp: "Afficher les raccourcis",
     hint: "Appuie sur une touche n'importe où (sauf dans un champ texte).",
+  },
+
+  push: {
+    loading: "Chargement…",
+    unsupported: "Les notifications push ne sont pas supportées par ce navigateur.",
+    denied: "Les notifications sont bloquées. Active-les dans les réglages de ton navigateur.",
+    enabledTitle: "Notifications activées",
+    enabledDesc: "Tu recevras les notifications push sur cet appareil.",
+    disabledTitle: "Notifications désactivées",
+    disabledDesc: "Active les notifications push pour ne rien manquer.",
   },
 } as const;
 

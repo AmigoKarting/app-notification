@@ -9,7 +9,7 @@
  *   - notify()       — point d'entrée applicatif: dispatch + persistance.
  */
 
-export type ChannelId = "email" | "sms" | "whatsapp";
+export type ChannelId = "email" | "sms" | "whatsapp" | "push";
 
 export interface Recipient {
   email?: string | null;

@@ -12,7 +12,7 @@ export type FeedItemKind = "notification" | "reminder";
 export type FeedItemStatus = "pending" | "sent" | "failed" | "cancelled";
 export type FeedPriority = "low" | "normal" | "high";
 export type FeedTargetMode = "all" | "teams" | "users";
-export type MessageChannel = "email" | "sms" | "whatsapp";
+export type MessageChannel = "email" | "sms" | "whatsapp" | "push";
 export type DeliveryStatus = "queued" | "sent" | "failed" | "skipped";
 
 export interface Database {
@@ -447,6 +447,26 @@ export interface Database {
             referencedColumns: ["id"];
           },
         ];
+      };
+      push_subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["push_subscriptions"]["Insert"]>;
+        Relationships: [];
       };
       schedule_runs: {
         Row: {

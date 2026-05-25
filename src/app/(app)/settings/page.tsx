@@ -4,6 +4,7 @@ import { requireUser } from "@/domain/auth/session";
 import { listCategories } from "@/domain/categories/repository";
 import { listMutedCategoryIds } from "@/domain/category-mutes/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
+import { PushToggle } from "@/components/push-toggle";
 import { ProfileForm } from "../profile/profile-form";
 import { MuteSection } from "./mute-section";
 import { ThemeSection } from "./theme-section";
@@ -76,6 +77,17 @@ export default async function SettingsPage() {
           </p>
         </div>
         <ThemeSection />
+      </Card>
+
+      {/* Section Push Notifications */}
+      <Card className="p-4 sm:p-6">
+        <div className="mb-5">
+          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t.settings.pushNotifications}</h2>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            {t.settings.pushNotificationsDesc}
+          </p>
+        </div>
+        <PushToggle />
       </Card>
 
       {/* Section Notifications — silencieuses par catégorie */}
