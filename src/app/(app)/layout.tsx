@@ -131,7 +131,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </footer>
 
-      <MobileBottomNav isDev={isDev} />
+      <MobileBottomNav role={profile?.role ?? "employee"} />
       <InstallAppBanner />
       <PushAutoSubscribe />
       <OnboardingModal />

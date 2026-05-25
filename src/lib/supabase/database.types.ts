@@ -448,6 +448,28 @@ export interface Database {
           },
         ];
       };
+      cashier_checklists: {
+        Row: {
+          id: string;
+          user_id: string;
+          completed_items: string[];
+          total_items: number;
+          notes: string | null;
+          submitted_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          completed_items: string[];
+          total_items: number;
+          notes?: string | null;
+          submitted_at?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["cashier_checklists"]["Insert"]>;
+        Relationships: [];
+      };
       push_subscriptions: {
         Row: {
           id: string;

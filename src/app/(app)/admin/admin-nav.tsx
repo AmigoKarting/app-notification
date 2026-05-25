@@ -7,6 +7,7 @@ import {
   BellIcon,
   BrushIcon,
   CalendarIcon,
+  CheckIcon,
   ClockIcon,
   HomeIcon,
   SendIcon,
@@ -52,6 +53,7 @@ function getNav(t: Dictionary["nav"]): NavSection[] {
       entries: [
         { href: "/admin/users", label: t.users, icon: UserIcon },
         { href: "/admin/deliveries", label: t.deliveries, icon: SendIcon },
+        { href: "/admin/checklists", label: t.checklists, icon: CheckIcon },
         { href: "/admin/analytics", label: t.analytics, icon: BarChartIcon },
         { href: "/admin/branding", label: t.branding, icon: BrushIcon },
       ],

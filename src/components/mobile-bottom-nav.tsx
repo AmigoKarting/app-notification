@@ -5,12 +5,14 @@ import { usePathname } from "next/navigation";
 import { useTranslation } from "@/lib/i18n";
 
 interface MobileBottomNavProps {
-  isDev: boolean;
+  role: string;
 }
 
-export function MobileBottomNav({ isDev }: MobileBottomNavProps) {
+export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
+  const isDev = role === "dev";
+  const isCashier = role === "caissiere";
 
   const tabs = [
     {
@@ -19,6 +21,16 @@ export function MobileBottomNav({ isDev }: MobileBottomNavProps) {
       icon: BellSvg,
       active: pathname === "/feed",
     },
+    ...((isCashier || isDev)
+      ? [
+          {
+            href: "/checklist",
+            label: t.checklist.shortTitle,
+            icon: ClipboardSvg,
+            active: pathname === "/checklist",
+          },
+        ]
+      : []),
     ...(isDev
       ? [
           {
@@ -95,6 +107,28 @@ function GridSvg({ active }: { active: boolean }) {
       <rect x="14" y="3" width="7" height="7" rx="1" />
       <rect x="3" y="14" width="7" height="7" rx="1" />
       <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  );
+}
+
+function ClipboardSvg({ active }: { active: boolean }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill={active ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <path d="M12 11h4" />
+      <path d="M12 16h4" />
+      <path d="M8 11h.01" />
+      <path d="M8 16h.01" />
     </svg>
   );
 }
