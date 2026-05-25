@@ -22,7 +22,8 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
     active: pathname === "/checklist",
   };
   const feedTab = {
-    href: "/feed",
+    // Bypass nécessaire pour les caissières, sinon /feed les renvoie sur /checklist.
+    href: isCashier ? "/feed?keep=1" : "/feed",
     label: t.nav.notifications,
     icon: BellSvg,
     active: pathname === "/feed",

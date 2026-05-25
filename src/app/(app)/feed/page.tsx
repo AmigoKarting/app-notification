@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { EmptyState, PageHeader, PageTip, SparkleIcon } from "@/components/ui";
 import { FeedCard } from "@/components/feed-card";
+import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { listMutedCategoryIds } from "@/domain/category-mutes/repository";
 import { listComments } from "@/domain/comments/repository";
@@ -22,13 +24,25 @@ function startOfTomorrow(): Date {
 }
 
 interface PageProps {
-  searchParams?: { q?: string };
+  searchParams?: { q?: string; keep?: string };
 }
 
 export default async function FeedPage({ searchParams }: PageProps) {
   const t = getServerDictionary();
   const locale = getLocale();
   const user = await requireUser();
+
+  // Les caissières doivent atterrir sur /checklist quand elles ouvrent l'app.
+  // Le manifest PWA peut être en cache avec start_url=/feed, donc on redirige
+  // ici aussi. Le bypass `?keep=1` permet à la nav Notifications d'afficher
+  // quand même le fil si la caissière le demande explicitement.
+  if (searchParams?.keep !== "1") {
+    const profile = await getCurrentProfile();
+    if (profile?.role === "caissiere") {
+      redirect("/checklist");
+    }
+  }
+
   const todayStart = startOfToday();
   const tomorrowStart = startOfTomorrow();
 

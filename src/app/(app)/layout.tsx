@@ -73,7 +73,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               {isCashier && (
                 <NavLink href="/checklist" label={t.checklist.shortTitle} />
               )}
-              <NavLink href="/feed" label={t.nav.notifications} />
+              <NavLink
+                href={isCashier ? "/feed?keep=1" : "/feed"}
+                label={t.nav.notifications}
+              />
               {isDev && (
                 <Link
                   href="/admin"
