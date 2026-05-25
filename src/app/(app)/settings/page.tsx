@@ -25,6 +25,7 @@ export default async function SettingsPage() {
   ]);
 
   const isCashier = profile?.role === "caissiere";
+  const isDev = profile?.role === "dev";
   const backHref = isCashier ? "/checklist" : "/feed";
 
   // Sépare la catégorie "checklist-caisse" du reste :
@@ -96,58 +97,61 @@ export default async function SettingsPage() {
         <ThemeSection />
       </Card>
 
-      {/* Section Push Notifications */}
-      <Card className="p-4 sm:p-6">
-        <div className="mb-5">
-          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t.settings.pushNotifications}</h2>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            {t.settings.pushNotificationsDesc}
-          </p>
-        </div>
-        <PushToggle />
-      </Card>
+      {/* Sections push + mute par catégorie : réservées aux devs.
+          On ne laisse pas les employés couper leurs notifications. */}
+      {isDev && (
+        <>
+          <Card className="p-4 sm:p-6">
+            <div className="mb-5">
+              <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t.settings.pushNotifications}</h2>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                {t.settings.pushNotificationsDesc}
+              </p>
+            </div>
+            <PushToggle />
+          </Card>
 
-      {/* Section dédiée caissière — séparée du reste, visible uniquement pour les caissières */}
-      {isCashier && cashierCategories.length > 0 && (
-        <Card className="border-amber-200 bg-amber-50/40 p-4 sm:p-6 dark:border-amber-800 dark:bg-amber-900/10">
-          <div className="mb-5">
-            <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
-              {t.settings.cashierNotifications}
-            </h2>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">
-              {t.settings.cashierNotificationsDesc}
-            </p>
-          </div>
-          <MuteSection
-            categories={cashierCategories.map((c) => ({
-              id: c.id,
-              name: c.name,
-              color: c.color,
-              icon: c.icon,
-            }))}
-            mutedIds={mutedIds}
-          />
-        </Card>
+          {cashierCategories.length > 0 && (
+            <Card className="border-amber-200 bg-amber-50/40 p-4 sm:p-6 dark:border-amber-800 dark:bg-amber-900/10">
+              <div className="mb-5">
+                <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+                  {t.settings.cashierNotifications}
+                </h2>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  {t.settings.cashierNotificationsDesc}
+                </p>
+              </div>
+              <MuteSection
+                categories={cashierCategories.map((c) => ({
+                  id: c.id,
+                  name: c.name,
+                  color: c.color,
+                  icon: c.icon,
+                }))}
+                mutedIds={mutedIds}
+              />
+            </Card>
+          )}
+
+          <Card className="p-4 sm:p-6">
+            <div className="mb-5">
+              <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t.settings.myNotifications}</h2>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                {t.settings.myNotificationsDesc}
+              </p>
+            </div>
+            <MuteSection
+              categories={generalCategories.map((c) => ({
+                id: c.id,
+                name: c.name,
+                color: c.color,
+                icon: c.icon,
+              }))}
+              mutedIds={mutedIds}
+            />
+          </Card>
+        </>
       )}
-
-      {/* Section Notifications — silencieuses par catégorie */}
-      <Card className="p-4 sm:p-6">
-        <div className="mb-5">
-          <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t.settings.myNotifications}</h2>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            {t.settings.myNotificationsDesc}
-          </p>
-        </div>
-        <MuteSection
-          categories={generalCategories.map((c) => ({
-            id: c.id,
-            name: c.name,
-            color: c.color,
-            icon: c.icon,
-          }))}
-          mutedIds={mutedIds}
-        />
-      </Card>
 
       <PageTip>{t.pageTips.settings}</PageTip>
     </div>
