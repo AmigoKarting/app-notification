@@ -166,7 +166,7 @@ export function FeedItemForm(props: Props) {
             <ChannelCheckbox
               name="send_channels"
               value="push"
-              defaultChecked={initialChannels.has("push")}
+              defaultChecked={props.mode === "create" || initialChannels.has("push")}
               label="🔔 Push"
             />
           </div>

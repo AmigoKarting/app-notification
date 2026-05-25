@@ -9,6 +9,7 @@ import { requireUser } from "@/domain/auth/session";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { InstallAppBanner, InstallAppButton } from "@/components/install-app";
+import { PushAutoSubscribe } from "@/components/push-auto-subscribe";
 import { getServerDictionary } from "@/lib/i18n/server";
 
 const DEV_ONLY_PREFIXES = ["/dashboard", "/employees", "/reminders", "/admin"];
@@ -128,6 +129,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </footer>
 
       <InstallAppBanner />
+      <PushAutoSubscribe />
       <OnboardingModal />
       <KeyboardShortcuts isDev={isDev} />
     </div>
