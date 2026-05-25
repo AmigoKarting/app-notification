@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireDev } from "@/domain/auth/role";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const setRoleSchema = z.object({
   user_id: z.string().uuid(),
@@ -23,7 +23,7 @@ export async function setUserRoleAction(formData: FormData): Promise<void> {
     return;
   }
 
-  const supabase = createClient();
+  const supabase = createAdminClient();
   await supabase.from("profiles").update({ role: parsed.data.role }).eq("id", parsed.data.user_id);
   revalidatePath("/admin/users");
 }
