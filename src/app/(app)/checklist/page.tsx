@@ -13,7 +13,7 @@ export default async function ChecklistPage() {
   const user = await requireUser();
   const profile = await getCurrentProfile();
 
-  if (profile?.role !== "caissiere" && profile?.role !== "dev") {
+  if (profile?.role !== "caissiere") {
     redirect("/feed");
   }
 

@@ -17,7 +17,7 @@ export async function submitChecklistAction(
   const user = await requireUser();
   const profile = await getCurrentProfile();
 
-  if (profile?.role !== "caissiere" && profile?.role !== "dev") {
+  if (profile?.role !== "caissiere") {
     return { status: "error", message: t.errors.unauthorized };
   }
 

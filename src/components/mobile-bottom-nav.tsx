@@ -21,7 +21,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
       icon: BellSvg,
       active: pathname === "/feed",
     },
-    ...((isCashier || isDev)
+    ...(isCashier
       ? [
           {
             href: "/checklist",
