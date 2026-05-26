@@ -4,8 +4,13 @@ import { useFormState, useFormStatus } from "react-dom";
 import { Button, FormError } from "@/components/ui";
 import { submitChecklistAction } from "@/domain/checklists/actions";
 import { idleFormState, type FormState } from "@/domain/form-state";
-import { CHECKLIST_ITEMS } from "@/domain/checklists/items";
 import { useTranslation } from "@/lib/i18n";
+
+export interface ChecklistTaskProps {
+  key: string;
+  section: "opening" | "during" | "closing";
+  label: string;
+}
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -17,7 +22,13 @@ function SubmitButton() {
   );
 }
 
-export function ChecklistForm({ alreadySubmittedToday }: { alreadySubmittedToday: boolean }) {
+export function ChecklistForm({
+  alreadySubmittedToday,
+  tasks,
+}: {
+  alreadySubmittedToday: boolean;
+  tasks: ChecklistTaskProps[];
+}) {
   const { t } = useTranslation();
   const [state, formAction] = useFormState<FormState<unknown>, FormData>(
     submitChecklistAction,
@@ -47,7 +58,8 @@ export function ChecklistForm({ alreadySubmittedToday }: { alreadySubmittedToday
   return (
     <form action={formAction} className="space-y-6">
       {sections.map((section) => {
-        const items = CHECKLIST_ITEMS.filter((i) => i.section === section.id);
+        const items = tasks.filter((i) => i.section === section.id);
+        if (items.length === 0) return null;
         return (
           <div key={section.id} className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
@@ -65,7 +77,7 @@ export function ChecklistForm({ alreadySubmittedToday }: { alreadySubmittedToday
                       className="mt-0.5 h-5 w-5 shrink-0 rounded border-neutral-300 text-brand-600 focus:ring-brand-500 dark:border-neutral-600 dark:bg-neutral-700"
                     />
                     <span className="text-sm text-neutral-800 dark:text-neutral-200">
-                      {t.checklist.items[item.key]}
+                      {item.label}
                     </span>
                   </label>
                 </li>

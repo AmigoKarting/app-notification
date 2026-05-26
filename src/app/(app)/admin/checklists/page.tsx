@@ -1,7 +1,7 @@
-import { Card, EmptyState, PageHeader, formatDateTime } from "@/components/ui";
+import { Card, EmptyState, LinkButton, PageHeader, formatDateTime } from "@/components/ui";
 import { requireDev } from "@/domain/auth/role";
 import { listRecentChecklists } from "@/domain/checklists/repository";
-import { CHECKLIST_ITEMS, TOTAL_ITEMS } from "@/domain/checklists/items";
+import { listAllChecklistTasks } from "@/domain/checklists/tasks-repository";
 import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -11,13 +11,21 @@ export default async function AdminChecklistsPage() {
   const t = getServerDictionary();
   const locale = getLocale();
   const dateFmt = locale === "en" ? "en-US" : "fr-FR";
-  const checklists = await listRecentChecklists();
+  const [checklists, allTasks] = await Promise.all([
+    listRecentChecklists(),
+    listAllChecklistTasks(),
+  ]);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title={t.checklist.adminTitle}
         description={t.checklist.adminDescription}
+        action={
+          <LinkButton href="/admin/checklist-tasks" variant="secondary">
+            {t.checklistAdmin.manageTasks}
+          </LinkButton>
+        }
       />
 
       {checklists.length === 0 ? (
@@ -34,7 +42,9 @@ export default async function AdminChecklistsPage() {
                 : cl.display_name?.trim()) || "—";
             const pct = Math.round((cl.completed_items.length / cl.total_items) * 100);
             const completedSet = new Set(cl.completed_items);
-            const missing = CHECKLIST_ITEMS.filter((i) => !completedSet.has(i.key));
+            const missing = allTasks
+              .filter((task) => task.is_active && !completedSet.has(task.task_key))
+              .map((task) => ({ key: task.task_key, label: task.label }));
 
             return (
               <Card key={cl.id} className="p-4 sm:p-5">
@@ -85,7 +95,7 @@ export default async function AdminChecklistsPage() {
                           key={item.key}
                           className="list-disc text-xs text-neutral-600 dark:text-neutral-400"
                         >
-                          {t.checklist.items[item.key]}
+                          {item.label}
                         </li>
                       ))}
                     </ul>

@@ -3,6 +3,7 @@ import { Card, PageHeader } from "@/components/ui";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { hasSubmittedToday } from "@/domain/checklists/repository";
+import { listActiveChecklistTasks } from "@/domain/checklists/tasks-repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { ChecklistForm } from "./checklist-form";
 
@@ -19,7 +20,10 @@ export default async function ChecklistPage() {
     redirect("/feed");
   }
 
-  const alreadyDone = await hasSubmittedToday(user.id);
+  const [alreadyDone, tasks] = await Promise.all([
+    hasSubmittedToday(user.id),
+    listActiveChecklistTasks(),
+  ]);
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
@@ -37,7 +41,14 @@ export default async function ChecklistPage() {
         </Card>
       )}
 
-      <ChecklistForm alreadySubmittedToday={alreadyDone} />
+      <ChecklistForm
+        alreadySubmittedToday={alreadyDone}
+        tasks={tasks.map((t) => ({
+          key: t.task_key,
+          section: t.section,
+          label: t.label,
+        }))}
+      />
     </div>
   );
 }

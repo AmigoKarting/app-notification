@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { type FormState } from "@/domain/form-state";
-import { CHECKLIST_ITEMS, TOTAL_ITEMS } from "./items";
 import { hasSubmittedToday } from "./repository";
+import { listActiveChecklistTasks } from "./tasks-repository";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getServerDictionary } from "@/lib/i18n/server";
 
@@ -28,9 +28,11 @@ export async function submitChecklistAction(
     return { status: "error", message: t.checklist.alreadyDone };
   }
 
+  const activeTasks = await listActiveChecklistTasks();
   const checkedItems = formData.getAll("items").map(String);
-  const validKeys = new Set(CHECKLIST_ITEMS.map((i) => i.key));
+  const validKeys = new Set(activeTasks.map((t) => t.task_key));
   const completedItems = checkedItems.filter((k) => validKeys.has(k));
+  const totalItems = activeTasks.length;
   const notes = formData.get("notes")?.toString().trim() || null;
 
   const supabase = createAdminClient();
@@ -38,7 +40,7 @@ export async function submitChecklistAction(
   const { error } = await supabase.from("cashier_checklists").insert({
     user_id: user.id,
     completed_items: completedItems,
-    total_items: TOTAL_ITEMS,
+    total_items: totalItems,
     notes,
   });
 
@@ -55,7 +57,7 @@ export async function submitChecklistAction(
   const notifTitle = t.checklist.notifTitle.replace("{name}", cashierName);
   const notifBody = t.checklist.notifBody
     .replace("{count}", String(count))
-    .replace("{total}", String(TOTAL_ITEMS));
+    .replace("{total}", String(totalItems));
 
   await supabase.from("feed_items").insert({
     kind: "notification" as const,

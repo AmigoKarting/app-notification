@@ -470,6 +470,30 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["cashier_checklists"]["Insert"]>;
         Relationships: [];
       };
+      checklist_tasks: {
+        Row: {
+          id: string;
+          task_key: string;
+          section: "opening" | "during" | "closing";
+          label: string;
+          sort_order: number;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          task_key: string;
+          section: "opening" | "during" | "closing";
+          label: string;
+          sort_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["checklist_tasks"]["Insert"]>;
+        Relationships: [];
+      };
       push_subscriptions: {
         Row: {
           id: string;
