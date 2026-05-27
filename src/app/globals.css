@@ -20,24 +20,33 @@
   --brand-800: 91 33 182;
   --brand-900: 76 29 149;
 
-  /* Semantic surface tokens */
+  /* Tokens de surface — light */
   --surface-0: #ffffff;
   --surface-1: #fafafa;
   --surface-2: #f5f5f5;
+  --surface-3: #ebebeb;
   --surface-border: #e5e5e5;
+  --surface-border-strong: #d4d4d4;
   --surface-text: #171717;
   --surface-text-muted: #525252;
+  --surface-text-subtle: #737373;
 }
 
 .dark {
   color-scheme: dark;
 
-  --surface-0: #1a1a2e;
-  --surface-1: #16162a;
-  --surface-2: #1e1e36;
-  --surface-border: #2d2d4a;
-  --surface-text: #e5e5e5;
-  --surface-text-muted: #a3a3a3;
+  /* ----- Palette dark moderne (inspiration Linear / Vercel) -----
+     Anthracite légèrement bleuté → meilleur contraste, moins fatigant
+     pour les yeux que du noir pur, plus pro que du gris neutre.        */
+  --surface-0: #0f1117;          /* Background le plus profond (body) */
+  --surface-1: #14171f;          /* Background standard (carte/section) */
+  --surface-2: #1a1e28;          /* Surface élevée (input, card hover) */
+  --surface-3: #232838;          /* Surface très élevée (popover, modale) */
+  --surface-border: #262b38;     /* Bordure standard */
+  --surface-border-strong: #383e4f; /* Bordure de focus / séparateur */
+  --surface-text: #eef0f5;       /* Texte primaire (presque blanc) */
+  --surface-text-muted: #a6acbb; /* Texte secondaire */
+  --surface-text-subtle: #6b7280; /* Texte tertiaire / hints */
 }
 
 html, body {
@@ -52,6 +61,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.dark body {
+  background-color: var(--surface-0);
+}
+
 input,
 textarea,
 select {
@@ -59,12 +72,98 @@ select {
   color: var(--surface-text);
 }
 
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--surface-2);
+  color: var(--surface-text);
+  border-color: var(--surface-border);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--surface-text-subtle);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: rgb(var(--brand-500));
+  box-shadow: 0 0 0 3px rgb(var(--brand-500) / 0.15);
+}
+
+/* =====================================================================
+   Overrides dark : on remappe les classes Tailwind les plus utilisées
+   dans le code vers la nouvelle palette pour ne pas avoir à refactor
+   chaque composant. La hiérarchie suit surface-0 → surface-3.
+   ===================================================================== */
+
+/* Backgrounds dark */
+.dark .bg-white                { background-color: var(--surface-1) !important; }
+.dark .bg-white\/85            { background-color: rgb(20 23 31 / 0.85) !important; }
+.dark .bg-white\/95            { background-color: rgb(20 23 31 / 0.95) !important; }
+.dark .bg-neutral-50           { background-color: var(--surface-1) !important; }
+.dark .bg-neutral-100          { background-color: var(--surface-2) !important; }
+.dark .bg-neutral-700          { background-color: var(--surface-3) !important; }
+.dark .bg-neutral-800          { background-color: var(--surface-1) !important; }
+.dark .bg-neutral-900          { background-color: var(--surface-0) !important; }
+.dark .bg-neutral-900\/85      { background-color: rgb(15 17 23 / 0.85) !important; }
+.dark .bg-neutral-900\/95      { background-color: rgb(15 17 23 / 0.95) !important; }
+.dark .bg-neutral-800\/50      { background-color: rgb(20 23 31 / 0.6) !important; }
+.dark .bg-neutral-800\/60      { background-color: rgb(20 23 31 / 0.6) !important; }
+.dark .bg-neutral-700\/30      { background-color: rgb(35 40 56 / 0.3) !important; }
+.dark .bg-neutral-700\/40      { background-color: rgb(35 40 56 / 0.4) !important; }
+.dark .bg-neutral-700\/50      { background-color: rgb(35 40 56 / 0.5) !important; }
+
+/* Bordures dark */
+.dark .border-neutral-200      { border-color: var(--surface-border) !important; }
+.dark .border-neutral-300      { border-color: var(--surface-border) !important; }
+.dark .border-neutral-600      { border-color: var(--surface-border-strong) !important; }
+.dark .border-neutral-700      { border-color: var(--surface-border) !important; }
+.dark .border-neutral-700\/50  { border-color: rgb(38 43 56 / 0.6) !important; }
+.dark .border-neutral-800      { border-color: var(--surface-border) !important; }
+
+/* Hover borders */
+.dark .hover\:border-neutral-300:hover { border-color: var(--surface-border-strong) !important; }
+.dark .hover\:border-neutral-500:hover { border-color: var(--surface-border-strong) !important; }
+.dark .hover\:border-neutral-600:hover { border-color: var(--surface-border-strong) !important; }
+
+/* Hover backgrounds dark */
+.dark .hover\:bg-neutral-50:hover      { background-color: var(--surface-2) !important; }
+.dark .hover\:bg-neutral-100:hover     { background-color: var(--surface-3) !important; }
+.dark .hover\:bg-neutral-700:hover     { background-color: var(--surface-3) !important; }
+.dark .hover\:bg-neutral-700\/50:hover { background-color: rgb(35 40 56 / 0.5) !important; }
+.dark .hover\:bg-neutral-800:hover     { background-color: var(--surface-2) !important; }
+.dark .active\:bg-neutral-700:active   { background-color: var(--surface-3) !important; }
+
+/* Dividers dark */
+.dark .divide-neutral-100 > :not([hidden]) ~ :not([hidden]) { border-color: var(--surface-border) !important; }
+.dark .divide-neutral-200 > :not([hidden]) ~ :not([hidden]) { border-color: var(--surface-border) !important; }
+.dark .divide-neutral-700 > :not([hidden]) ~ :not([hidden]) { border-color: var(--surface-border) !important; }
+
+/* Text colors dark : on respecte la hiérarchie surface-text */
+.dark .text-neutral-100        { color: var(--surface-text) !important; }
+.dark .text-neutral-200        { color: var(--surface-text) !important; }
+.dark .text-neutral-300        { color: var(--surface-text-muted) !important; }
+.dark .text-neutral-400        { color: var(--surface-text-muted) !important; }
+.dark .text-neutral-500        { color: var(--surface-text-subtle) !important; }
+
+/* Ring focus dark */
+.dark .focus\:ring-brand-900\/50:focus { box-shadow: 0 0 0 3px rgb(var(--brand-500) / 0.2) !important; }
+
 /* Backgrounds qui suivent le thème */
 .bg-app-gradient {
   background:
     radial-gradient(at 0% 0%, rgb(var(--brand-500) / 0.10) 0px, transparent 50%),
     radial-gradient(at 100% 100%, rgb(var(--brand-400) / 0.08) 0px, transparent 50%),
     var(--surface-1);
+}
+
+.dark .bg-app-gradient {
+  background:
+    radial-gradient(at 0% 0%, rgb(var(--brand-500) / 0.10) 0px, transparent 55%),
+    radial-gradient(at 100% 100%, rgb(var(--brand-400) / 0.06) 0px, transparent 55%),
+    var(--surface-0);
 }
 
 .bg-brand-gradient {
@@ -78,6 +177,7 @@ select {
   background: linear-gradient(135deg, rgb(var(--brand-700)) 0%, rgb(var(--brand-800)) 100%);
 }
 
+/* Ombres : plus marquées en dark pour conserver la lisibilité de la hiérarchie. */
 .shadow-soft {
   box-shadow:
     0 1px 3px 0 rgba(0, 0, 0, 0.04),
@@ -85,8 +185,8 @@ select {
 }
 .dark .shadow-soft {
   box-shadow:
-    0 1px 3px 0 rgba(0, 0, 0, 0.3),
-    0 4px 20px -4px rgba(0, 0, 0, 0.4);
+    0 1px 2px 0 rgba(0, 0, 0, 0.4),
+    0 4px 16px -4px rgba(0, 0, 0, 0.5);
 }
 
 .shadow-soft-lg {
@@ -96,8 +196,9 @@ select {
 }
 .dark .shadow-soft-lg {
   box-shadow:
-    0 10px 40px -10px rgb(var(--brand-600) / 0.25),
-    0 2px 8px -1px rgba(0, 0, 0, 0.3);
+    0 12px 48px -8px rgba(0, 0, 0, 0.6),
+    0 2px 8px -1px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgb(var(--brand-500) / 0.05);
 }
 
 .card-hover {
@@ -106,6 +207,45 @@ select {
 .card-hover:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 28px -8px rgb(var(--brand-600) / 0.18);
+}
+.dark .card-hover:hover {
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.6);
+}
+
+/* ===================================================================== */
+/* Scrollbar custom — moderne, discrète, harmonisée avec le thème.        */
+/* ===================================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-border-strong) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--surface-border);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--surface-border-strong);
+}
+
+/* Sélection texte dark */
+.dark ::selection {
+  background-color: rgb(var(--brand-500) / 0.4);
+  color: var(--surface-text);
+}
+
+/* Anneaux de focus discrets et accessibles en dark */
+.dark *:focus-visible {
+  outline-color: rgb(var(--brand-400));
 }
 
 /* ------------------------------------------------------------------ */
