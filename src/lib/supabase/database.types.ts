@@ -520,6 +520,42 @@ export interface Database {
           },
         ];
       };
+      role_banners: {
+        Row: {
+          role_slug: string;
+          enabled: boolean;
+          message: string;
+          cta_label: string | null;
+          cta_url: string;
+          icon: string;
+          color: string;
+          dismiss_condition: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          role_slug: string;
+          enabled?: boolean;
+          message: string;
+          cta_label?: string | null;
+          cta_url?: string;
+          icon?: string;
+          color?: string;
+          dismiss_condition?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["role_banners"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "role_banners_role_slug_fkey";
+            columns: ["role_slug"];
+            isOneToOne: true;
+            referencedRelation: "roles";
+            referencedColumns: ["slug"];
+          },
+        ];
+      };
       checklist_tasks: {
         Row: {
           id: string;

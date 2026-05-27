@@ -1,13 +1,14 @@
 import { Card, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
-import { getAppSettings } from "@/domain/branding/repository";
 import { listCategories } from "@/domain/categories/repository";
 import { listMutedCategoryIds } from "@/domain/category-mutes/repository";
+import { listAllBanners } from "@/domain/role-banners/repository";
+import { listRolesWithPermissions } from "@/domain/roles/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { PushToggle } from "@/components/push-toggle";
 import { ProfileForm } from "../profile/profile-form";
-import { CashierBannerForm } from "./cashier-banner-form";
+import { BannersManager } from "./banners-manager";
 import { MuteSection } from "./mute-section";
 import { ThemeSection } from "./theme-section";
 
@@ -20,16 +21,20 @@ const CASHIER_CATEGORY_SLUG = "checklist-caisse";
 export default async function SettingsPage() {
   const t = getServerDictionary();
   const user = await requireUser();
-  const [profile, allCategories, mutedIds, appSettings] = await Promise.all([
+  const [profile, allCategories, mutedIds] = await Promise.all([
     getCurrentProfile(),
     listCategories(),
     listMutedCategoryIds(user.id),
-    getAppSettings(),
   ]);
 
   const isCashier = profile?.role === "caissiere";
   const isDev = profile?.role === "dev";
   const backHref = isCashier ? "/checklist" : "/feed";
+
+  // Données admin chargées uniquement quand on est dev
+  const [banners, allRoles] = isDev
+    ? await Promise.all([listAllBanners(), listRolesWithPermissions()])
+    : [[], []];
 
   // Sépare la catégorie "checklist-caisse" du reste :
   // - elle ne doit jamais apparaître dans la section générale "Mes notifications"
@@ -104,20 +109,33 @@ export default async function SettingsPage() {
           On ne laisse pas les employés couper leurs notifications. */}
       {isDev && (
         <>
-          {/* Bannière de rappel caissière : configurable par les devs */}
+          {/* Bannières par rôle : configurables par les devs.
+              Une bannière par rôle, avec dismiss_condition optionnel. */}
           <Card className="p-4 sm:p-6">
             <div className="mb-5">
               <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
-                {t.settings.cashierBanner}
+                {t.bannersAdmin.sectionTitle}
               </h2>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                {t.settings.cashierBannerDesc}
+                {t.bannersAdmin.sectionDesc}
               </p>
             </div>
-            <CashierBannerForm
-              initialEnabled={appSettings.cashier_banner_enabled}
-              initialMessage={appSettings.cashier_banner_message}
-              initialCta={appSettings.cashier_banner_cta}
+            <BannersManager
+              banners={banners.map((b) => ({
+                role_slug: b.role_slug,
+                enabled: b.enabled,
+                message: b.message,
+                cta_label: b.cta_label,
+                cta_url: b.cta_url,
+                icon: b.icon,
+                color: b.color,
+                dismiss_condition: b.dismiss_condition,
+              }))}
+              allRoles={allRoles.map((r) => ({
+                slug: r.slug,
+                name: r.name,
+                icon: r.icon,
+              }))}
             />
           </Card>
 

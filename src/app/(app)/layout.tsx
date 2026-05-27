@@ -2,12 +2,13 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppLogo, getBranding } from "@/components/app-brand";
-import { CashierChecklistBanner } from "@/components/cashier-checklist-banner";
+import { RoleBanner } from "@/components/role-banner";
 import { LanguageToggle } from "@/components/language-toggle";
 import { logoutAction } from "@/domain/auth/actions";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { hasSubmittedToday } from "@/domain/checklists/repository";
+import { getBannerForRole } from "@/domain/role-banners/repository";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { InstallAppBanner, InstallAppButton } from "@/components/install-app";
@@ -60,11 +61,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(home);
   }
 
-  // Bannière rappel checklist : visible sur TOUTES les pages des caissières
-  // tant que la checklist du jour n'est pas remplie.
-  const showCashierBanner = isCashier;
-  const cashierChecklistDone =
-    showCashierBanner ? await hasSubmittedToday(user.id) : true;
+  // Bannière configurée pour le rôle courant (table role_banners).
+  // L'évaluation du dismiss_condition est faite ici côté serveur.
+  let activeBanner: Awaited<ReturnType<typeof getBannerForRole>> = null;
+  if (profile?.role) {
+    try {
+      activeBanner = await getBannerForRole(profile.role);
+      if (activeBanner?.dismiss_condition === "cashier_checklist_done") {
+        const done = await hasSubmittedToday(user.id);
+        if (done) activeBanner = null;
+      }
+    } catch (e) {
+      console.error("[LAYOUT] getBannerForRole error:", e);
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -148,14 +158,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      {showCashierBanner && (
-        <CashierChecklistBanner
-          alreadySubmitted={cashierChecklistDone}
-          enabled={branding.cashier_banner_enabled}
-          customMessage={branding.cashier_banner_message}
-          customCta={branding.cashier_banner_cta}
-        />
-      )}
+      {activeBanner && <RoleBanner banner={activeBanner} />}
 
       <main className="mx-auto max-w-6xl px-4 py-4 pb-20 sm:px-6 sm:py-8 md:pb-8">{children}</main>
 
