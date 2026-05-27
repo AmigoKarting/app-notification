@@ -1,8 +1,8 @@
 -- =====================================================================
 -- Bundle de toutes les migrations Supabase pour app-notification.
 -- Généré automatiquement par scripts/build-all-migrations.mjs
--- Date: 2026-05-13T17:30:30.094Z
--- Migrations incluses: 13
+-- Date: 2026-05-27T21:11:16.114Z
+-- Migrations incluses: 23
 --
 -- USAGE : copier-coller ce fichier entier dans le SQL Editor de Supabase
 -- (Dashboard → SQL Editor → New query → coller → Run).
@@ -1691,17 +1691,23 @@ alter table public.profiles
   add column if not exists phone_last4 text;
 
 -- Mise à jour du trigger handle_new_user pour prendre les métadonnées
+-- IMPORTANT: garde la logique "premier inscrit = dev" de la migration 0006
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  no_dev_yet boolean;
 begin
+  select not exists (select 1 from public.profiles where role = 'dev')
+  into no_dev_yet;
+
   insert into public.profiles (id, role, first_name, last_name, phone, phone_last4, email)
   values (
     new.id,
-    'employee',
+    case when no_dev_yet then 'dev'::public.app_role else 'employee'::public.app_role end,
     coalesce(new.raw_user_meta_data->>'first_name', null),
     coalesce(new.raw_user_meta_data->>'last_name', null),
     coalesce(new.raw_user_meta_data->>'phone', null),
@@ -1717,3 +1723,557 @@ begin
   return new;
 end;
 $$;
+
+
+-- ---------------------------------------------------------------------
+--  0014_fix_rls_recursion.sql
+-- ---------------------------------------------------------------------
+
+-- =====================================================================
+--  Fix infinite recursion in feed_items RLS policies
+--
+--  Problem: feed_items SELECT policy checks feed_item_target_teams
+--  and feed_item_target_users. The WRITE policies on those tables
+--  check back into feed_items → infinite loop.
+--
+--  Fix: simplify write policies on target tables to just check
+--  is_dev() without querying feed_items. Ownership is enforced
+--  at the application level.
+-- =====================================================================
+
+-- Fix feed_item_target_teams write policy
+drop policy if exists feed_target_teams_write_dev on public.feed_item_target_teams;
+create policy feed_target_teams_write_dev on public.feed_item_target_teams
+for all to authenticated
+using (public.is_dev())
+with check (public.is_dev());
+
+-- Fix feed_item_target_users write policy
+drop policy if exists feed_target_users_write_dev on public.feed_item_target_users;
+create policy feed_target_users_write_dev on public.feed_item_target_users
+for all to authenticated
+using (public.is_dev())
+with check (public.is_dev());
+
+
+-- ---------------------------------------------------------------------
+--  0015_add_caissiere_role.sql
+-- ---------------------------------------------------------------------
+
+-- Ajoute le rôle "caissiere" à l'enum app_role.
+-- Les caissières ont les mêmes accès que les employés (feed, settings).
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'caissiere';
+
+
+-- ---------------------------------------------------------------------
+--  0016_push_subscriptions.sql
+-- ---------------------------------------------------------------------
+
+-- Push notification subscriptions (Web Push API)
+-- Stores browser push subscription objects per user.
+
+ALTER TYPE public.message_channel ADD VALUE IF NOT EXISTS 'push';
+
+CREATE TABLE public.push_subscriptions (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  endpoint    text NOT NULL,
+  p256dh      text NOT NULL,
+  auth        text NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(user_id, endpoint)
+);
+
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- Users can manage their own subscriptions
+CREATE POLICY "Users can insert own push subscriptions"
+  ON public.push_subscriptions FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own push subscriptions"
+  ON public.push_subscriptions FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own push subscriptions"
+  ON public.push_subscriptions FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- Service role bypasses RLS for sending (no extra policy needed)
+
+
+-- ---------------------------------------------------------------------
+--  0017_fix_guard_profile_role.sql
+-- ---------------------------------------------------------------------
+
+-- Fix: allow service_role (admin client) to change user roles.
+-- The application layer already validates the caller is a dev via requireDev().
+
+CREATE OR REPLACE FUNCTION public.guard_profile_role()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF new.role IS DISTINCT FROM old.role
+     AND auth.role() IS DISTINCT FROM 'service_role'
+     AND NOT public.is_dev() THEN
+    RAISE EXCEPTION 'role change not allowed';
+  END IF;
+  RETURN new;
+END;
+$$;
+
+
+-- ---------------------------------------------------------------------
+--  0018_cashier_checklists.sql
+-- ---------------------------------------------------------------------
+
+-- Cashier daily task checklists
+CREATE TABLE public.cashier_checklists (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  completed_items text[] NOT NULL DEFAULT '{}',
+  total_items   int NOT NULL,
+  notes         text,
+  submitted_at  timestamptz NOT NULL DEFAULT now(),
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.cashier_checklists ENABLE ROW LEVEL SECURITY;
+
+-- Cashiers can insert their own checklists
+CREATE POLICY "Cashiers insert own checklists"
+  ON public.cashier_checklists FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+-- Cashiers can view their own checklists
+CREATE POLICY "Cashiers view own checklists"
+  ON public.cashier_checklists FOR SELECT
+  TO authenticated
+  USING (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE id = auth.uid() AND role IN ('gerant', 'dev')
+    )
+  );
+
+
+-- ---------------------------------------------------------------------
+--  0019_rename_employee_to_gerant.sql
+-- ---------------------------------------------------------------------
+
+-- Rename role 'employee' to 'gerant'
+ALTER TYPE public.app_role RENAME VALUE 'employee' TO 'gerant';
+
+
+-- ---------------------------------------------------------------------
+--  0020_cashier_checklist_reminder.sql
+-- ---------------------------------------------------------------------
+
+-- =====================================================================
+--  Catégorie réservée "checklist-caisse"
+--  - Slug réservé utilisé par le code pour identifier les notifs
+--    spécifiques aux caissières (séparation visuelle dans /settings).
+--  - owner_id NULL = catégorie "système" (non éditable depuis l'UI).
+-- =====================================================================
+
+insert into public.categories (slug, name, color, icon, owner_id)
+values ('checklist-caisse', 'Checklist caisse', '#f59e0b', '📋', null)
+on conflict (slug) do nothing;
+
+
+-- ---------------------------------------------------------------------
+--  0021_cashier_banner_settings.sql
+-- ---------------------------------------------------------------------
+
+-- =====================================================================
+--  Paramètres configurables pour la bannière de rappel checklist caissière
+--   - cashier_banner_enabled : on/off du rappel
+--   - cashier_banner_message : texte custom (null → fallback i18n côté code)
+--   - cashier_banner_cta     : libellé bouton custom (null → fallback i18n)
+--
+--  Défensif : crée d'abord app_settings si la migration 0008 (branding)
+--  n'a pas encore été appliquée. Idempotent dans tous les cas.
+-- =====================================================================
+
+-- Si la table n'existe pas encore (migration 0008 pas exécutée),
+-- on la crée avec toutes les colonnes (y compris celles ajoutées ici).
+create table if not exists public.app_settings (
+  id          int  primary key default 1 check (id = 1),
+  app_name    text not null default 'App Notification',
+  app_tagline text,
+  logo_url    text,
+  updated_at  timestamptz not null default now(),
+  updated_by  uuid references auth.users(id) on delete set null
+);
+
+-- Force la ligne unique au cas où elle n'existerait pas non plus.
+insert into public.app_settings (id) values (1)
+on conflict (id) do nothing;
+
+-- Active le RLS et les policies de base (si pas déjà fait par 0008).
+alter table public.app_settings enable row level security;
+
+drop policy if exists app_settings_select on public.app_settings;
+create policy app_settings_select on public.app_settings
+for select to anon, authenticated using (true);
+
+drop policy if exists app_settings_update_dev on public.app_settings;
+create policy app_settings_update_dev on public.app_settings
+for update to authenticated
+using (public.is_dev())
+with check (public.is_dev());
+
+grant select on public.app_settings to anon, authenticated;
+grant update on public.app_settings to authenticated;
+
+-- Ajout des nouvelles colonnes spécifiques bannière caissière.
+alter table public.app_settings
+  add column if not exists cashier_banner_enabled boolean not null default true,
+  add column if not exists cashier_banner_message text,
+  add column if not exists cashier_banner_cta     text;
+
+
+-- ---------------------------------------------------------------------
+--  0022_checklist_tasks.sql
+-- ---------------------------------------------------------------------
+
+-- =====================================================================
+--  Tâches de la checklist caissière, gérables depuis l'UI admin.
+--  Remplace l'array codé en dur dans src/domain/checklists/items.ts.
+--
+--  - task_key : identifiant stable (utilisé dans cashier_checklists.completed_items[])
+--  - section  : opening / during / closing (groupes d'affichage)
+--  - label    : texte affiché à la caissière
+--  - sort_order : ordre dans la section
+--  - is_active : décocher = tâche cachée du formulaire sans suppression
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- Prérequis défensifs : ces fonctions viennent normalement de 0001/0003
+-- mais on les recrée ici au cas où la migration est rejouée sur un
+-- projet partiellement migré.
+-- ---------------------------------------------------------------------
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+create or replace function public.is_dev()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role::text = 'dev'
+  );
+$$;
+
+create table if not exists public.checklist_tasks (
+  id          uuid primary key default gen_random_uuid(),
+  task_key    text not null unique,
+  section     text not null check (section in ('opening', 'during', 'closing')),
+  label       text not null check (length(trim(label)) > 0),
+  sort_order  int  not null default 0,
+  is_active   boolean not null default true,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+create index if not exists checklist_tasks_section_order_idx
+  on public.checklist_tasks (section, sort_order, id);
+
+create index if not exists checklist_tasks_active_idx
+  on public.checklist_tasks (is_active);
+
+drop trigger if exists trg_checklist_tasks_updated_at on public.checklist_tasks;
+create trigger trg_checklist_tasks_updated_at
+before update on public.checklist_tasks
+for each row execute function public.set_updated_at();
+
+alter table public.checklist_tasks enable row level security;
+
+drop policy if exists checklist_tasks_select on public.checklist_tasks;
+create policy checklist_tasks_select on public.checklist_tasks
+for select to authenticated using (true);
+
+drop policy if exists checklist_tasks_write_dev on public.checklist_tasks;
+create policy checklist_tasks_write_dev on public.checklist_tasks
+for all to authenticated
+using (public.is_dev()) with check (public.is_dev());
+
+grant select on public.checklist_tasks to authenticated;
+grant insert, update, delete on public.checklist_tasks to authenticated;
+
+-- ---------------------------------------------------------------------
+-- Seed : 20 tâches actuellement codées en dur (libellés français).
+-- ---------------------------------------------------------------------
+insert into public.checklist_tasks (task_key, section, label, sort_order) values
+  ('voicemail',                'opening',  'J''ai pris les messages vocaux et retourné les appels.', 10),
+  ('hoods_wash_opening',       'opening',  'J''ai pris les cagoules et parti une brassée.', 20),
+  ('check_bathrooms_opening',  'opening',  'J''ai vérifié les salles de bains.', 30),
+  ('check_reservations',       'opening',  'J''ai pris connaissance des réservations à venir.', 40),
+  ('clean_bathrooms_during',   'during',   'J''ai nettoyé les salles de bain et rempli le papier/savon.', 10),
+  ('hoods_wash_during',        'during',   'J''ai pris les cagoules et parti une brassée.', 20),
+  ('clean_site_tables',        'during',   'J''ai fait le tour du site pour ramasser les déchets et nettoyé les tables et bancs.', 30),
+  ('empty_trash_recycling',    'during',   'J''ai vidé les poubelles/recyclage à l''intérieur et à l''extérieur.', 40),
+  ('copy_forms',               'during',   'S''il reste moins de 5 exemplaires d''un formulaire, j''en ai fait 25 copies.', 50),
+  ('check_waivers',            'during',   'S''il reste moins de 10 dégagements de responsabilités, j''ai averti le gérant.', 60),
+  ('fill_fridge_displays',     'closing',  'J''ai rempli le frigidaire et les présentoirs.', 10),
+  ('clean_site_red_zone',      'closing',  'J''ai fait le tour du site pour ramasser les déchets (zone rouge).', 20),
+  ('clean_bathrooms_closing',  'closing',  'J''ai nettoyé les salles de bain et rempli le papier/savon.', 30),
+  ('sweep_mop_toilets',        'closing',  'J''ai balayé le plancher et passé la vadrouille des toilettes.', 40),
+  ('fold_hoods_dryer',         'closing',  'J''ai plié les cagoules dans la sécheuse et la laveuse est vide.', 50),
+  ('clean_workspace',          'closing',  'Mon environnement de travail est propre et bien rangé.', 60),
+  ('sweep_mop_kiosk',          'closing',  'J''ai passé le balai et la vadrouille sur le plancher du kiosque.', 70),
+  ('collect_dirty_hoods',      'closing',  'J''ai récupéré les cagoules sales dans le garage.', 80),
+  ('clean_pizza_machine',      'closing',  'J''ai bien nettoyé la machine à pizza.', 90),
+  ('cash_closing',             'closing',  'J''ai fait ma clôture de caisse.', 100)
+on conflict (task_key) do nothing;
+
+
+-- ---------------------------------------------------------------------
+--  0023_roles_and_permissions.sql
+-- ---------------------------------------------------------------------
+
+-- =====================================================================
+--  RBAC : rôles personnalisables + permissions par rôle
+--
+--  - `roles` : tous les rôles (slug = valeur de app_role enum)
+--      → 3 rôles système préchargés : dev, gerant, caissiere
+--      → des rôles custom peuvent être ajoutés via create_custom_role()
+--  - `role_permissions` : permissions actives pour chaque rôle
+--      → liste de permissions définie dans le code TS (permissions.ts)
+--  - `create_custom_role(slug, ...)` : étend dynamiquement l'enum
+--    app_role puis insère dans `roles`.
+--  - `delete_custom_role(slug)` : retire un rôle non-système qui n'est
+--    pas en cours d'utilisation.
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- Prérequis défensifs : recrée set_updated_at, is_dev et l'enum
+-- app_role si absents (cas d'un projet partiellement migré).
+-- ---------------------------------------------------------------------
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+do $$ begin
+  create type public.app_role as enum ('dev', 'gerant', 'caissiere');
+exception when duplicate_object then null;
+end $$;
+
+create or replace function public.is_dev()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role::text = 'dev'
+  );
+$$;
+
+-- ---------------------------------------------------------------------
+-- 1) Table roles
+-- ---------------------------------------------------------------------
+create table if not exists public.roles (
+  slug         text primary key,
+  name         text not null check (length(trim(name)) > 0),
+  description  text,
+  color        text not null default '#6b7280',
+  icon         text,
+  is_system    boolean not null default false,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+drop trigger if exists trg_roles_updated_at on public.roles;
+create trigger trg_roles_updated_at
+before update on public.roles
+for each row execute function public.set_updated_at();
+
+alter table public.roles enable row level security;
+
+drop policy if exists roles_select on public.roles;
+create policy roles_select on public.roles
+for select to authenticated using (true);
+
+drop policy if exists roles_write_dev on public.roles;
+create policy roles_write_dev on public.roles
+for all to authenticated
+using (public.is_dev()) with check (public.is_dev());
+
+grant select on public.roles to authenticated;
+grant insert, update, delete on public.roles to authenticated;
+
+-- Seed des rôles système (slugs identiques aux valeurs app_role)
+insert into public.roles (slug, name, description, color, icon, is_system) values
+  ('dev',       'Développeur', 'Accès complet à toute l''administration.', '#7c3aed', '🛠️', true),
+  ('gerant',    'Gérant',      'Lecture du fil de notifications.',         '#6b7280', '👤', true),
+  ('caissiere', 'Caissière',   'Checklist quotidienne + fil de notifications.', '#f59e0b', '💰', true)
+on conflict (slug) do nothing;
+
+-- ---------------------------------------------------------------------
+-- 2) Table role_permissions
+-- ---------------------------------------------------------------------
+create table if not exists public.role_permissions (
+  role_slug   text not null references public.roles(slug) on delete cascade,
+  permission  text not null,
+  primary key (role_slug, permission)
+);
+
+create index if not exists role_permissions_role_idx
+  on public.role_permissions (role_slug);
+
+alter table public.role_permissions enable row level security;
+
+drop policy if exists role_permissions_select on public.role_permissions;
+create policy role_permissions_select on public.role_permissions
+for select to authenticated using (true);
+
+drop policy if exists role_permissions_write_dev on public.role_permissions;
+create policy role_permissions_write_dev on public.role_permissions
+for all to authenticated
+using (public.is_dev()) with check (public.is_dev());
+
+grant select on public.role_permissions to authenticated;
+grant insert, update, delete on public.role_permissions to authenticated;
+
+-- Seed des permissions par défaut pour les rôles système.
+-- (La liste complète est définie côté code dans permissions.ts ;
+--  ici on n'insère que les permissions à accorder à chaque rôle.)
+insert into public.role_permissions (role_slug, permission) values
+  -- dev : accès complet (toutes les permissions admin)
+  ('dev', 'admin.access'),
+  ('dev', 'admin.users'),
+  ('dev', 'admin.categories'),
+  ('dev', 'admin.sessions'),
+  ('dev', 'admin.teams'),
+  ('dev', 'admin.templates'),
+  ('dev', 'admin.schedules'),
+  ('dev', 'admin.deliveries'),
+  ('dev', 'admin.analytics'),
+  ('dev', 'admin.branding'),
+  ('dev', 'admin.feed'),
+  ('dev', 'admin.checklists_history'),
+  ('dev', 'admin.checklist_tasks'),
+  ('dev', 'admin.roles'),
+  ('dev', 'feed.read'),
+  ('dev', 'feed.write'),
+  ('dev', 'checklist.view'),
+  ('dev', 'checklist.submit'),
+  ('dev', 'notifications.mute'),
+  ('dev', 'settings.cashier_banner'),
+  -- gérant : juste lire le fil
+  ('gerant', 'feed.read'),
+  -- caissière : fil + checklist
+  ('caissiere', 'feed.read'),
+  ('caissiere', 'checklist.view'),
+  ('caissiere', 'checklist.submit')
+on conflict (role_slug, permission) do nothing;
+
+-- ---------------------------------------------------------------------
+-- 3) RPC : créer un rôle custom (étend l'enum app_role)
+-- ---------------------------------------------------------------------
+create or replace function public.create_custom_role(
+  p_slug        text,
+  p_name        text,
+  p_description text,
+  p_color       text,
+  p_icon        text
+) returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_dev() then
+    raise exception 'forbidden: only devs can create roles';
+  end if;
+  if p_slug is null or p_slug !~ '^[a-z][a-z0-9_]{1,40}$' then
+    raise exception 'invalid slug — use lowercase letters, digits, underscores (2-41 chars)';
+  end if;
+  if p_slug in ('dev', 'gerant', 'caissiere', 'employee') then
+    raise exception 'reserved slug';
+  end if;
+
+  -- 1) Étendre l'enum app_role pour permettre profiles.role = p_slug
+  execute format('alter type public.app_role add value if not exists %L', p_slug);
+
+  -- 2) Enregistrer le rôle dans la table
+  insert into public.roles (slug, name, description, color, icon, is_system)
+  values (
+    p_slug,
+    coalesce(nullif(trim(p_name), ''), p_slug),
+    nullif(trim(coalesce(p_description, '')), ''),
+    coalesce(nullif(trim(coalesce(p_color, '')), ''), '#6b7280'),
+    nullif(trim(coalesce(p_icon, '')), ''),
+    false
+  );
+end;
+$$;
+
+grant execute on function public.create_custom_role(text, text, text, text, text) to authenticated;
+
+-- ---------------------------------------------------------------------
+-- 4) RPC : supprimer un rôle custom
+--    (Refuse si is_system OU si au moins un profil l'utilise.)
+-- ---------------------------------------------------------------------
+create or replace function public.delete_custom_role(p_slug text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_is_system boolean;
+  v_in_use    boolean;
+begin
+  if not public.is_dev() then
+    raise exception 'forbidden';
+  end if;
+
+  select is_system into v_is_system from public.roles where slug = p_slug;
+  if v_is_system is null then
+    raise exception 'unknown role';
+  end if;
+  if v_is_system then
+    raise exception 'system roles cannot be deleted';
+  end if;
+
+  select exists(select 1 from public.profiles where role::text = p_slug)
+  into v_in_use;
+  if v_in_use then
+    raise exception 'role still in use — reassign users first';
+  end if;
+
+  delete from public.roles where slug = p_slug;
+  -- Note : la valeur reste dans l'enum app_role (PostgreSQL ne permet
+  -- pas de retirer une valeur d'enum). Pas grave : la valeur n'est
+  -- plus assignable via l'UI car absente de `roles`.
+end;
+$$;
+
+grant execute on function public.delete_custom_role(text) to authenticated;
