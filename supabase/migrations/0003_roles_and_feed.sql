@@ -6,7 +6,10 @@
 -- ---------------------------------------------------------------------
 -- Enums
 -- ---------------------------------------------------------------------
-do $$ begin create type public.app_role        as enum ('employee', 'dev'); exception when duplicate_object then null; end $$;
+-- Note : la valeur 'employee' a été renommée en 'gerant' (migration 0019).
+-- On crée donc directement l'enum avec 'gerant' pour que les nouveaux
+-- déploiements partent du nom final. Les inserts plus bas utilisent 'gerant'.
+do $$ begin create type public.app_role        as enum ('gerant', 'dev'); exception when duplicate_object then null; end $$;
 do $$ begin create type public.feed_item_kind  as enum ('notification', 'reminder'); exception when duplicate_object then null; end $$;
 do $$ begin create type public.feed_priority   as enum ('low', 'normal', 'high'); exception when duplicate_object then null; end $$;
 
@@ -15,7 +18,7 @@ do $$ begin create type public.feed_priority   as enum ('low', 'normal', 'high')
 -- ---------------------------------------------------------------------
 create table if not exists public.profiles (
   id            uuid primary key references auth.users(id) on delete cascade,
-  role          public.app_role not null default 'employee',
+  role          public.app_role not null default 'gerant',
   display_name  text,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
@@ -35,7 +38,7 @@ set search_path = public
 as $$
 begin
   insert into public.profiles (id, role)
-  values (new.id, 'employee')
+  values (new.id, 'gerant')
   on conflict (id) do nothing;
   return new;
 end;
@@ -48,7 +51,7 @@ create trigger on_auth_user_created
 
 -- Backfill: crée un profil pour les users existants (idempotent)
 insert into public.profiles (id, role)
-select u.id, 'employee'
+select u.id, 'gerant'
 from auth.users u
 on conflict (id) do nothing;
 

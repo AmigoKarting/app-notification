@@ -10,8 +10,11 @@
 -- ---------------------------------------------------------------------
 alter table public.feed_items
   add column if not exists action_label text,
-  add column if not exists action_url   text,
-  -- Garantir cohérence: les deux ou aucun.
+  add column if not exists action_url   text;
+
+-- Garantir cohérence: les deux ou aucun. Idempotent : on drop d'abord.
+alter table public.feed_items drop constraint if exists feed_items_action_pair;
+alter table public.feed_items
   add constraint feed_items_action_pair check (
     (action_label is null and action_url is null)
     or (action_label is not null and action_url is not null)

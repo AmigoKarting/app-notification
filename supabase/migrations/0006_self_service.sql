@@ -40,7 +40,7 @@ begin
   insert into public.profiles (id, role)
   values (
     new.id,
-    case when no_dev_yet then 'dev'::public.app_role else 'employee'::public.app_role end
+    case when no_dev_yet then 'dev'::public.app_role else 'gerant'::public.app_role end
   )
   on conflict (id) do nothing;
   return new;

@@ -1,7 +1,7 @@
 -- =====================================================================
 -- Bundle de toutes les migrations Supabase pour app-notification.
 -- Généré automatiquement par scripts/build-all-migrations.mjs
--- Date: 2026-05-27T21:11:16.114Z
+-- Date: 2026-05-27T21:22:40.201Z
 -- Migrations incluses: 23
 --
 -- USAGE : copier-coller ce fichier entier dans le SQL Editor de Supabase
@@ -289,7 +289,10 @@ grant execute on function public.claim_due_reminders(int, int, int) to service_r
 -- ---------------------------------------------------------------------
 -- Enums
 -- ---------------------------------------------------------------------
-do $$ begin create type public.app_role        as enum ('employee', 'dev'); exception when duplicate_object then null; end $$;
+-- Note : la valeur 'employee' a été renommée en 'gerant' (migration 0019).
+-- On crée donc directement l'enum avec 'gerant' pour que les nouveaux
+-- déploiements partent du nom final. Les inserts plus bas utilisent 'gerant'.
+do $$ begin create type public.app_role        as enum ('gerant', 'dev'); exception when duplicate_object then null; end $$;
 do $$ begin create type public.feed_item_kind  as enum ('notification', 'reminder'); exception when duplicate_object then null; end $$;
 do $$ begin create type public.feed_priority   as enum ('low', 'normal', 'high'); exception when duplicate_object then null; end $$;
 
@@ -298,7 +301,7 @@ do $$ begin create type public.feed_priority   as enum ('low', 'normal', 'high')
 -- ---------------------------------------------------------------------
 create table if not exists public.profiles (
   id            uuid primary key references auth.users(id) on delete cascade,
-  role          public.app_role not null default 'employee',
+  role          public.app_role not null default 'gerant',
   display_name  text,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
@@ -318,7 +321,7 @@ set search_path = public
 as $$
 begin
   insert into public.profiles (id, role)
-  values (new.id, 'employee')
+  values (new.id, 'gerant')
   on conflict (id) do nothing;
   return new;
 end;
@@ -331,7 +334,7 @@ create trigger on_auth_user_created
 
 -- Backfill: crée un profil pour les users existants (idempotent)
 insert into public.profiles (id, role)
-select u.id, 'employee'
+select u.id, 'gerant'
 from auth.users u
 on conflict (id) do nothing;
 
@@ -731,7 +734,7 @@ begin
   insert into public.profiles (id, role)
   values (
     new.id,
-    case when no_dev_yet then 'dev'::public.app_role else 'employee'::public.app_role end
+    case when no_dev_yet then 'dev'::public.app_role else 'gerant'::public.app_role end
   )
   on conflict (id) do nothing;
   return new;
@@ -796,7 +799,7 @@ begin
   insert into public.profiles (id, role, email)
   values (
     new.id,
-    case when no_dev_yet then 'dev'::public.app_role else 'employee'::public.app_role end,
+    case when no_dev_yet then 'dev'::public.app_role else 'gerant'::public.app_role end,
     new.email
   )
   on conflict (id) do update set email = excluded.email;
@@ -1460,8 +1463,11 @@ using (bucket_id = 'notifications' and public.is_dev());
 -- ---------------------------------------------------------------------
 alter table public.feed_items
   add column if not exists action_label text,
-  add column if not exists action_url   text,
-  -- Garantir cohérence: les deux ou aucun.
+  add column if not exists action_url   text;
+
+-- Garantir cohérence: les deux ou aucun. Idempotent : on drop d'abord.
+alter table public.feed_items drop constraint if exists feed_items_action_pair;
+alter table public.feed_items
   add constraint feed_items_action_pair check (
     (action_label is null and action_url is null)
     or (action_label is not null and action_url is not null)
@@ -1707,7 +1713,7 @@ begin
   insert into public.profiles (id, role, first_name, last_name, phone, phone_last4, email)
   values (
     new.id,
-    case when no_dev_yet then 'dev'::public.app_role else 'employee'::public.app_role end,
+    case when no_dev_yet then 'dev'::public.app_role else 'gerant'::public.app_role end,
     coalesce(new.raw_user_meta_data->>'first_name', null),
     coalesce(new.raw_user_meta_data->>'last_name', null),
     coalesce(new.raw_user_meta_data->>'phone', null),
@@ -1771,10 +1777,11 @@ ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'caissiere';
 
 -- Push notification subscriptions (Web Push API)
 -- Stores browser push subscription objects per user.
+-- Idempotent : safe to re-run.
 
 ALTER TYPE public.message_channel ADD VALUE IF NOT EXISTS 'push';
 
-CREATE TABLE public.push_subscriptions (
+CREATE TABLE IF NOT EXISTS public.push_subscriptions (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   endpoint    text NOT NULL,
@@ -1786,17 +1793,19 @@ CREATE TABLE public.push_subscriptions (
 
 ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
 
--- Users can manage their own subscriptions
+DROP POLICY IF EXISTS "Users can insert own push subscriptions" ON public.push_subscriptions;
 CREATE POLICY "Users can insert own push subscriptions"
   ON public.push_subscriptions FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can view own push subscriptions" ON public.push_subscriptions;
 CREATE POLICY "Users can view own push subscriptions"
   ON public.push_subscriptions FOR SELECT
   TO authenticated
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own push subscriptions" ON public.push_subscriptions;
 CREATE POLICY "Users can delete own push subscriptions"
   ON public.push_subscriptions FOR DELETE
   TO authenticated
@@ -1831,8 +1840,8 @@ $$;
 --  0018_cashier_checklists.sql
 -- ---------------------------------------------------------------------
 
--- Cashier daily task checklists
-CREATE TABLE public.cashier_checklists (
+-- Cashier daily task checklists (idempotent: safe to re-run).
+CREATE TABLE IF NOT EXISTS public.cashier_checklists (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id       uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   completed_items text[] NOT NULL DEFAULT '{}',
@@ -1844,13 +1853,13 @@ CREATE TABLE public.cashier_checklists (
 
 ALTER TABLE public.cashier_checklists ENABLE ROW LEVEL SECURITY;
 
--- Cashiers can insert their own checklists
+DROP POLICY IF EXISTS "Cashiers insert own checklists" ON public.cashier_checklists;
 CREATE POLICY "Cashiers insert own checklists"
   ON public.cashier_checklists FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
--- Cashiers can view their own checklists
+DROP POLICY IF EXISTS "Cashiers view own checklists" ON public.cashier_checklists;
 CREATE POLICY "Cashiers view own checklists"
   ON public.cashier_checklists FOR SELECT
   TO authenticated
@@ -1867,8 +1876,19 @@ CREATE POLICY "Cashiers view own checklists"
 --  0019_rename_employee_to_gerant.sql
 -- ---------------------------------------------------------------------
 
--- Rename role 'employee' to 'gerant'
-ALTER TYPE public.app_role RENAME VALUE 'employee' TO 'gerant';
+-- Rename role 'employee' to 'gerant' (idempotent).
+-- Sur les nouveaux déploiements, 0003 crée déjà l'enum avec 'gerant',
+-- donc 'employee' n'existe pas et on ne fait rien.
+do $$
+begin
+  if exists (
+    select 1 from pg_enum e
+    join pg_type t on t.oid = e.enumtypid
+    where t.typname = 'app_role' and e.enumlabel = 'employee'
+  ) then
+    alter type public.app_role rename value 'employee' to 'gerant';
+  end if;
+end $$;
 
 
 -- ---------------------------------------------------------------------

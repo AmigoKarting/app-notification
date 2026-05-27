@@ -27,7 +27,7 @@ begin
   insert into public.profiles (id, role, first_name, last_name, phone, phone_last4, email)
   values (
     new.id,
-    case when no_dev_yet then 'dev'::public.app_role else 'employee'::public.app_role end,
+    case when no_dev_yet then 'dev'::public.app_role else 'gerant'::public.app_role end,
     coalesce(new.raw_user_meta_data->>'first_name', null),
     coalesce(new.raw_user_meta_data->>'last_name', null),
     coalesce(new.raw_user_meta_data->>'phone', null),
