@@ -13,6 +13,38 @@
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
+-- Prérequis défensifs : recrée set_updated_at, is_dev et l'enum
+-- app_role si absents (cas d'un projet partiellement migré).
+-- ---------------------------------------------------------------------
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+do $$ begin
+  create type public.app_role as enum ('dev', 'gerant', 'caissiere');
+exception when duplicate_object then null;
+end $$;
+
+create or replace function public.is_dev()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role::text = 'dev'
+  );
+$$;
+
+-- ---------------------------------------------------------------------
 -- 1) Table roles
 -- ---------------------------------------------------------------------
 create table if not exists public.roles (

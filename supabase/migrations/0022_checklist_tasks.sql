@@ -9,6 +9,34 @@
 --  - is_active : décocher = tâche cachée du formulaire sans suppression
 -- =====================================================================
 
+-- ---------------------------------------------------------------------
+-- Prérequis défensifs : ces fonctions viennent normalement de 0001/0003
+-- mais on les recrée ici au cas où la migration est rejouée sur un
+-- projet partiellement migré.
+-- ---------------------------------------------------------------------
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+create or replace function public.is_dev()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role::text = 'dev'
+  );
+$$;
+
 create table if not exists public.checklist_tasks (
   id          uuid primary key default gen_random_uuid(),
   task_key    text not null unique,
