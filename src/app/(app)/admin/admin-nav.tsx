@@ -52,6 +52,7 @@ function getNav(t: Dictionary["nav"]): NavSection[] {
       label: t.system,
       entries: [
         { href: "/admin/users", label: t.users, icon: UserIcon },
+        { href: "/admin/roles", label: t.roles, icon: UserIcon },
         { href: "/admin/deliveries", label: t.deliveries, icon: SendIcon },
         { href: "/admin/checklists", label: t.checklists, icon: CheckIcon },
         { href: "/admin/checklist-tasks", label: t.checklistTasks, icon: CheckIcon },

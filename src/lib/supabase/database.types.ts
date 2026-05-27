@@ -7,7 +7,13 @@ export type Json =
   | Json[];
 
 export type ReminderStatus = "pending" | "sent" | "cancelled" | "failed";
-export type AppRole = "gerant" | "dev" | "caissiere";
+// L'enum SQL `app_role` est étendu dynamiquement via create_custom_role().
+// Côté TypeScript on garde un alias `string` pour pouvoir représenter
+// n'importe quel slug (dev, gerant, caissiere, ou tout rôle custom).
+// Les helpers `isDev`, `isCashier` etc. comparent toujours à des
+// littéraux donc le confort de l'autocomplétion reste sur les rôles
+// connus côté code.
+export type AppRole = string;
 export type FeedItemKind = "notification" | "reminder";
 export type FeedItemStatus = "pending" | "sent" | "failed" | "cancelled";
 export type FeedPriority = "low" | "normal" | "high";
@@ -470,6 +476,50 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["cashier_checklists"]["Insert"]>;
         Relationships: [];
       };
+      roles: {
+        Row: {
+          slug: string;
+          name: string;
+          description: string | null;
+          color: string;
+          icon: string | null;
+          is_system: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          slug: string;
+          name: string;
+          description?: string | null;
+          color?: string;
+          icon?: string | null;
+          is_system?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["roles"]["Insert"]>;
+        Relationships: [];
+      };
+      role_permissions: {
+        Row: {
+          role_slug: string;
+          permission: string;
+        };
+        Insert: {
+          role_slug: string;
+          permission: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["role_permissions"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_role_slug_fkey";
+            columns: ["role_slug"];
+            isOneToOne: false;
+            referencedRelation: "roles";
+            referencedColumns: ["slug"];
+          },
+        ];
+      };
       checklist_tasks: {
         Row: {
           id: string;
@@ -616,6 +666,20 @@ export interface Database {
           stale_after_minutes?: number;
         };
         Returns: Database["public"]["Tables"]["reminders"]["Row"][];
+      };
+      create_custom_role: {
+        Args: {
+          p_slug: string;
+          p_name: string;
+          p_description: string | null;
+          p_color: string | null;
+          p_icon: string | null;
+        };
+        Returns: void;
+      };
+      delete_custom_role: {
+        Args: { p_slug: string };
+        Returns: void;
       };
     };
     Enums: {

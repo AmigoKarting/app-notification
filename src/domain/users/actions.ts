@@ -5,9 +5,11 @@ import { z } from "zod";
 import { requireDev } from "@/domain/auth/role";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+// Slug = lettres minuscules, chiffres, underscores. Cohérent avec
+// l'enum app_role étendu dynamiquement par create_custom_role().
 const setRoleSchema = z.object({
   user_id: z.string().uuid(),
-  role: z.enum(["gerant", "dev", "caissiere"]),
+  role: z.string().regex(/^[a-z][a-z0-9_]*$/, "Slug invalide"),
 });
 
 export async function setUserRoleAction(formData: FormData): Promise<void> {
@@ -23,7 +25,15 @@ export async function setUserRoleAction(formData: FormData): Promise<void> {
     return;
   }
 
+  // Vérifie que le slug correspond bien à un rôle enregistré dans la table.
   const supabase = createAdminClient();
+  const { data: role } = await supabase
+    .from("roles")
+    .select("slug")
+    .eq("slug", parsed.data.role)
+    .maybeSingle();
+  if (!role) return;
+
   await supabase.from("profiles").update({ role: parsed.data.role }).eq("id", parsed.data.user_id);
   revalidatePath("/admin/users");
 }

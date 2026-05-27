@@ -1,18 +1,12 @@
 import Link from "next/link";
 import { Card, EmptyState, PageHeader, PageTip, formatDateTime } from "@/components/ui";
 import { requireDev } from "@/domain/auth/role";
-import { setUserRoleAction } from "@/domain/users/actions";
+import { listRolesWithPermissions, type RoleWithPermissions } from "@/domain/roles/repository";
 import { listProfilesWithEmail } from "@/domain/users/repository";
 import { getServerDictionary, getLocale } from "@/lib/i18n/server";
-import type { AppRole } from "@/lib/supabase/database.types";
+import { RoleSelect } from "./role-select";
 
 export const dynamic = "force-dynamic";
-
-const ROLE_BADGE: Record<AppRole, string> = {
-  dev: "bg-brand-50 text-brand-700 ring-brand-200 dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700",
-  gerant: "bg-neutral-100 text-neutral-700 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:ring-neutral-600",
-  caissiere: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-700",
-};
 
 interface PageProps {
   searchParams?: { q?: string; role?: string };
@@ -23,12 +17,16 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   const locale = getLocale();
   const dateFmt = locale === "en" ? "en-US" : "fr-FR";
   const me = await requireDev();
-  const all = await listProfilesWithEmail();
+  const [all, roles] = await Promise.all([
+    listProfilesWithEmail(),
+    listRolesWithPermissions(),
+  ]);
+  const rolesBySlug = new Map(roles.map((r) => [r.slug, r]));
 
   const search = searchParams?.q?.trim().toLowerCase() ?? "";
-  const validRoles: AppRole[] = ["dev", "gerant", "caissiere"];
-  const roleFilter = validRoles.includes(searchParams?.role as AppRole)
-    ? (searchParams!.role as AppRole)
+  const knownSlugs = new Set(roles.map((r) => r.slug));
+  const roleFilter = searchParams?.role && knownSlugs.has(searchParams.role)
+    ? searchParams.role
     : undefined;
 
   const users = all.filter((u) => {
@@ -74,21 +72,14 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
           active={!roleFilter}
           label={t.adminUsers.all}
         />
-        <RoleFilter
-          href={`/admin/users?role=dev${search ? `&q=${encodeURIComponent(search)}` : ""}`}
-          active={roleFilter === "dev"}
-          label={t.adminUsers.devs}
-        />
-        <RoleFilter
-          href={`/admin/users?role=gerant${search ? `&q=${encodeURIComponent(search)}` : ""}`}
-          active={roleFilter === "gerant"}
-          label={t.adminUsers.gerants}
-        />
-        <RoleFilter
-          href={`/admin/users?role=caissiere${search ? `&q=${encodeURIComponent(search)}` : ""}`}
-          active={roleFilter === "caissiere"}
-          label={t.adminUsers.cashiers}
-        />
+        {roles.map((r) => (
+          <RoleFilter
+            key={r.slug}
+            href={`/admin/users?role=${encodeURIComponent(r.slug)}${search ? `&q=${encodeURIComponent(search)}` : ""}`}
+            active={roleFilter === r.slug}
+            label={r.name}
+          />
+        ))}
       </div>
 
       {users.length === 0 ? (
@@ -126,21 +117,16 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                       <p className="mt-0.5 truncate text-xs text-neutral-500 dark:text-neutral-400">{u.email ?? "—"}</p>
                       {u.phone && <p className="text-xs text-neutral-500 dark:text-neutral-400">{u.phone}</p>}
                     </div>
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${ROLE_BADGE[u.role] ?? ROLE_BADGE.gerant}`}
-                    >
-                      {t.adminUsers.roleLabels[u.role] ?? u.role}
-                    </span>
+                    <RoleBadge role={rolesBySlug.get(u.role)} slug={u.role} />
                   </div>
                   <div className="mt-2 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
                     <span>{formatDateTime(u.created_at, dateFmt)}</span>
                     {!isMe && (
-                      <RoleActions
+                      <RoleSelect
                         userId={u.id}
                         currentRole={u.role}
-                        promoteLabel={t.adminUsers.promoteShort}
-                        setGerantLabel={t.adminUsers.setGerant}
-                        setCashierLabel={t.adminUsers.setCashier}
+                        allRoles={roles}
+                        label={t.adminUsers.changeRole}
                       />
                     )}
                   </div>
@@ -180,23 +166,18 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                       <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">{u.phone ?? "—"}</td>
                       <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">{u.email ?? "—"}</td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${ROLE_BADGE[u.role] ?? ROLE_BADGE.gerant}`}
-                        >
-                          {t.adminUsers.roleLabels[u.role] ?? u.role}
-                        </span>
+                        <RoleBadge role={rolesBySlug.get(u.role)} slug={u.role} />
                       </td>
                       <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">
                         {formatDateTime(u.created_at, dateFmt)}
                       </td>
                       <td className="px-4 py-3 text-right">
                         {!isMe && (
-                          <RoleActions
+                          <RoleSelect
                             userId={u.id}
                             currentRole={u.role}
-                            promoteLabel={t.adminUsers.promoteShort}
-                            setGerantLabel={t.adminUsers.setGerant}
-                            setCashierLabel={t.adminUsers.setCashier}
+                            allRoles={roles}
+                            label={t.adminUsers.changeRole}
                           />
                         )}
                       </td>
@@ -213,50 +194,26 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   );
 }
 
-/**
- * Boutons d'action pour changer le rôle d'un utilisateur.
- * Le dev peut assigner n'importe quel rôle parmi les 3.
- */
-function RoleActions({
-  userId,
-  currentRole,
-  promoteLabel,
-  setGerantLabel,
-  setCashierLabel,
+function RoleBadge({
+  role,
+  slug,
 }: {
-  userId: string;
-  currentRole: AppRole;
-  promoteLabel: string;
-  setGerantLabel: string;
-  setCashierLabel: string;
+  role: RoleWithPermissions | undefined;
+  slug: string;
 }) {
-  const targets: { role: AppRole; label: string }[] = [];
-
-  if (currentRole !== "dev") {
-    targets.push({ role: "dev", label: promoteLabel });
-  }
-  if (currentRole !== "gerant") {
-    targets.push({ role: "gerant", label: setGerantLabel });
-  }
-  if (currentRole !== "caissiere") {
-    targets.push({ role: "caissiere", label: setCashierLabel });
-  }
-
+  const color = role?.color ?? "#6b7280";
   return (
-    <div className="flex items-center gap-2">
-      {targets.map((tgt) => (
-        <form key={tgt.role} action={setUserRoleAction} className="inline-flex">
-          <input type="hidden" name="user_id" value={userId} />
-          <input type="hidden" name="role" value={tgt.role} />
-          <button
-            type="submit"
-            className="text-sm font-medium text-brand-700 hover:underline dark:text-brand-400"
-          >
-            {tgt.label}
-          </button>
-        </form>
-      ))}
-    </div>
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
+      style={{
+        backgroundColor: color + "22",
+        color,
+        boxShadow: `inset 0 0 0 1px ${color}44`,
+      }}
+    >
+      {role?.icon && <span>{role.icon}</span>}
+      <span>{role?.name ?? slug}</span>
+    </span>
   );
 }
 
