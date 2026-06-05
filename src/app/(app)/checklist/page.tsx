@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { Card, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/ui";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
-import { hasSubmittedToday } from "@/domain/checklists/repository";
+import { getTodayCompleted } from "@/domain/checklists/repository";
 import { listActiveChecklistTasks } from "@/domain/checklists/tasks-repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { ChecklistForm } from "./checklist-form";
@@ -14,14 +14,12 @@ export default async function ChecklistPage() {
   const user = await requireUser();
   const profile = await getCurrentProfile();
 
-  // Caissières et devs : l'admin doit pouvoir tester la checklist
-  // sans changer de compte.
   if (profile?.role !== "caissiere" && profile?.role !== "dev") {
     redirect("/feed");
   }
 
-  const [alreadyDone, tasks] = await Promise.all([
-    hasSubmittedToday(user.id),
+  const [completed, tasks] = await Promise.all([
+    getTodayCompleted(user.id),
     listActiveChecklistTasks(),
   ]);
 
@@ -32,22 +30,14 @@ export default async function ChecklistPage() {
         description={t.checklist.description}
       />
 
-      {!alreadyDone && (
-        <Card className="border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
-          <p className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-300">
-            <span>📋</span>
-            {t.checklist.reminder}
-          </p>
-        </Card>
-      )}
-
       <ChecklistForm
-        alreadySubmittedToday={alreadyDone}
-        tasks={tasks.map((t) => ({
-          key: t.task_key,
-          section: t.section,
-          label: t.label,
+        alreadySubmittedToday={false}
+        tasks={tasks.map((tk) => ({
+          key: tk.task_key,
+          section: tk.section,
+          label: tk.label,
         }))}
+        initialCompleted={completed}
       />
     </div>
   );

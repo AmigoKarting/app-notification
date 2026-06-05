@@ -3,18 +3,29 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export async function hasSubmittedToday(userId: string): Promise<boolean> {
+/**
+ * Retourne les tâches déjà complétées aujourd'hui pour un utilisateur.
+ */
+export async function getTodayCompleted(userId: string): Promise<string[]> {
   const supabase = createClient();
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const { count } = await supabase
+  const { data } = await supabase
     .from("cashier_checklists")
-    .select("id", { count: "exact", head: true })
+    .select("completed_items")
     .eq("user_id", userId)
-    .gte("submitted_at", todayStart.toISOString());
+    .gte("submitted_at", todayStart.toISOString())
+    .order("submitted_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  return (count ?? 0) > 0;
+  return (data?.completed_items as string[]) ?? [];
+}
+
+export async function hasSubmittedToday(userId: string): Promise<boolean> {
+  const items = await getTodayCompleted(userId);
+  return items.length > 0;
 }
 
 export interface ChecklistWithProfile {
