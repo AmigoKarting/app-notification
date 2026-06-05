@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
   // Notification avec le nom de la tâche
   const notifTitle = `✅ ${cashierName}`;
-  const notifBody = task.label;
+  const notifBody = `**Tâche :** ${task.label}`;
 
   await supabase.from("feed_items").insert({
     kind: "notification" as const,
