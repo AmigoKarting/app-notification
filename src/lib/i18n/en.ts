@@ -117,6 +117,9 @@ const en: Dictionary = {
     pullToRefresh: "Pull to refresh",
     releaseToRefresh: "Release to refresh",
     refreshing: "Refreshing…",
+    copied: "Copied!",
+    copy: "Copy",
+    share: "Share",
   },
 
   adminOverview: {
@@ -921,6 +924,8 @@ const en: Dictionary = {
     greetingMorning: "Good morning",
     greetingAfternoon: "Good afternoon",
     greetingEvening: "Good evening",
+    streakSingular: "day",
+    streakPlural: "days in a row",
     sectionOpening: "Before opening",
     sectionDuring: "During shift",
     sectionClosing: "Before leaving",

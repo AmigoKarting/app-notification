@@ -1,4 +1,5 @@
 import { formatDateTime } from "@/components/ui";
+import { FeedCardActions } from "@/components/feed-card-actions";
 import { FeedComments } from "@/components/feed-comments";
 import { ReactionBar, ReadToggle } from "@/components/feed-engagement";
 import type { CommentWithAuthor } from "@/domain/comments/repository";
@@ -144,6 +145,7 @@ export function FeedCard({
               myReactions={engagement.myReactions}
             />
             <ReadToggle feedItemId={item.id} isRead={engagement.isRead} />
+            <FeedCardActions title={item.title} body={item.body} />
           </div>
         )}
 

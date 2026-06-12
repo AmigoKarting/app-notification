@@ -22,10 +22,12 @@ export function ChecklistForm({
   tasks,
   initialCompleted,
   userName,
+  streak = 0,
 }: {
   tasks: ChecklistTaskProps[];
   initialCompleted: string[];
   userName?: string;
+  streak?: number;
 }) {
   const { t } = useTranslation();
 
@@ -168,8 +170,15 @@ export function ChecklistForm({
 
   return (
     <div className="space-y-4">
-      {/* Greeting */}
-      <TimeGreeting name={userName} />
+      {/* Greeting + Streak */}
+      <div className="flex items-center justify-between">
+        <TimeGreeting name={userName} />
+        {streak >= 2 && (
+          <span className="animate-scale-in rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700 ring-1 ring-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-700">
+            🔥 {streak} {streak === 1 ? t.checklist.streakSingular : t.checklist.streakPlural}
+          </span>
+        )}
+      </div>
 
       {/* Progress / Celebration */}
       <div

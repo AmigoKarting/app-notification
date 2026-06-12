@@ -115,6 +115,9 @@ const fr = {
     pullToRefresh: "Tire pour actualiser",
     releaseToRefresh: "Relâche pour actualiser",
     refreshing: "Actualisation…",
+    copied: "Copié !",
+    copy: "Copier",
+    share: "Partager",
   },
 
   adminOverview: {
@@ -919,6 +922,8 @@ const fr = {
     greetingMorning: "Bonjour",
     greetingAfternoon: "Bon après-midi",
     greetingEvening: "Bonsoir",
+    streakSingular: "jour",
+    streakPlural: "jours de suite",
     sectionOpening: "Avant l'ouverture",
     sectionDuring: "Durant le quart",
     sectionClosing: "Avant de quitter",

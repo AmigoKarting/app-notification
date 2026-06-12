@@ -14,6 +14,7 @@ import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
 import { InstallAppBanner, InstallAppButton } from "@/components/install-app";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { PushAutoSubscribe } from "@/components/push-auto-subscribe";
+import { ScrollToTop } from "@/components/scroll-to-top";
 import { getServerDictionary } from "@/lib/i18n/server";
 
 const DEV_ONLY_PREFIXES = ["/dashboard", "/employees", "/reminders", "/admin"];
@@ -172,6 +173,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </footer>
 
       <MobileBottomNav role={profile?.role ?? "gerant"} />
+      <ScrollToTop />
       <InstallAppBanner />
       <PushAutoSubscribe />
       <OnboardingModal />
