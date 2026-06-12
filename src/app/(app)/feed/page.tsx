@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EmptyState, PageHeader, PageTip, SparkleIcon } from "@/components/ui";
 import { FeedCard } from "@/components/feed-card";
+import { PullToRefresh } from "@/components/pull-to-refresh";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { listMutedCategoryIds } from "@/domain/category-mutes/repository";
@@ -84,6 +85,7 @@ export default async function FeedPage({ searchParams }: PageProps) {
   });
 
   return (
+    <PullToRefresh>
     <div className="space-y-6">
       <PageHeader
         title={t.feed.title}
@@ -144,5 +146,6 @@ export default async function FeedPage({ searchParams }: PageProps) {
 
       <PageTip>{t.pageTips.feed}</PageTip>
     </div>
+    </PullToRefresh>
   );
 }

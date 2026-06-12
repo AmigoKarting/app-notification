@@ -37,6 +37,7 @@ export default async function ChecklistPage() {
           label: tk.label,
         }))}
         initialCompleted={completed}
+        userName={profile?.first_name || undefined}
       />
     </div>
   );

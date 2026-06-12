@@ -112,6 +112,9 @@ const fr = {
     received: "🔔 Reçue",
     searchPlaceholder: "Rechercher dans les notifications...",
     noSearchResults: "Aucune notification ne correspond à votre recherche.",
+    pullToRefresh: "Tire pour actualiser",
+    releaseToRefresh: "Relâche pour actualiser",
+    refreshing: "Actualisation…",
   },
 
   adminOverview: {
@@ -911,6 +914,11 @@ const fr = {
     sent: "Envoyé",
     taskPrefix: "Tâche",
     cashierFallback: "Caissière",
+    allDone: "Bravo, tout est fait !",
+    allDoneDesc: "Toutes les tâches ont été envoyées. Beau travail !",
+    greetingMorning: "Bonjour",
+    greetingAfternoon: "Bon après-midi",
+    greetingEvening: "Bonsoir",
     sectionOpening: "Avant l'ouverture",
     sectionDuring: "Durant le quart",
     sectionClosing: "Avant de quitter",

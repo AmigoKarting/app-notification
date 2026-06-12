@@ -114,6 +114,9 @@ const en: Dictionary = {
     received: "🔔 Active",
     searchPlaceholder: "Search notifications...",
     noSearchResults: "No notifications match your search.",
+    pullToRefresh: "Pull to refresh",
+    releaseToRefresh: "Release to refresh",
+    refreshing: "Refreshing…",
   },
 
   adminOverview: {
@@ -913,6 +916,11 @@ const en: Dictionary = {
     sent: "Sent",
     taskPrefix: "Task",
     cashierFallback: "Cashier",
+    allDone: "All done!",
+    allDoneDesc: "All tasks have been sent. Great work!",
+    greetingMorning: "Good morning",
+    greetingAfternoon: "Good afternoon",
+    greetingEvening: "Good evening",
     sectionOpening: "Before opening",
     sectionDuring: "During shift",
     sectionClosing: "Before leaving",

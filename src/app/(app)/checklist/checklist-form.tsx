@@ -13,20 +13,19 @@ const SEND_DELAY = 20; // secondes
 
 interface TaskState {
   checked: boolean;
-  /** Secondes restantes avant envoi (null = pas de timer / déjà envoyé) */
   countdown: number | null;
-  /** Envoyé avec succès */
   sent: boolean;
-  /** En cours d'envoi */
   sending: boolean;
 }
 
 export function ChecklistForm({
   tasks,
   initialCompleted,
+  userName,
 }: {
   tasks: ChecklistTaskProps[];
   initialCompleted: string[];
+  userName?: string;
 }) {
   const { t } = useTranslation();
 
@@ -43,74 +42,85 @@ export function ChecklistForm({
     return init;
   });
 
+  const [showCelebration, setShowCelebration] = useState(false);
+  const prevCompletedRef = useRef(
+    Object.values(states).filter((s) => s.sent).length,
+  );
+
   const timersRef = useRef<Record<string, ReturnType<typeof setInterval>>>({});
 
-  // Cleanup tous les timers au unmount
   useEffect(() => {
     return () => {
       Object.values(timersRef.current).forEach(clearInterval);
     };
   }, []);
 
-  const sendTask = useCallback(
-    async (taskKey: string) => {
-      setStates((prev) => ({
-        ...prev,
-        [taskKey]: { ...prev[taskKey], sending: true, countdown: null },
-      }));
+  const completedCount = Object.values(states).filter((s) => s.sent).length;
+  const totalCount = tasks.length;
 
-      try {
-        const res = await fetch("/api/checklist/complete-task", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskKey }),
-        });
+  // Detect transition to 100%
+  useEffect(() => {
+    const wasComplete = prevCompletedRef.current === totalCount;
+    const isComplete = completedCount === totalCount && totalCount > 0;
 
-        if (res.ok) {
-          setStates((prev) => ({
-            ...prev,
-            [taskKey]: { ...prev[taskKey], sent: true, sending: false },
-          }));
-        } else {
-          // En cas d'erreur, on laisse coché mais on signale l'échec
-          setStates((prev) => ({
-            ...prev,
-            [taskKey]: { ...prev[taskKey], sending: false },
-          }));
-        }
-      } catch {
+    if (isComplete && !wasComplete) {
+      setShowCelebration(true);
+      if (navigator.vibrate) navigator.vibrate([80, 60, 80]);
+    }
+
+    prevCompletedRef.current = completedCount;
+  }, [completedCount, totalCount]);
+
+  const sendTask = useCallback(async (taskKey: string) => {
+    setStates((prev) => ({
+      ...prev,
+      [taskKey]: { ...prev[taskKey], sending: true, countdown: null },
+    }));
+
+    try {
+      const res = await fetch("/api/checklist/complete-task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskKey }),
+      });
+
+      if (res.ok) {
+        setStates((prev) => ({
+          ...prev,
+          [taskKey]: { ...prev[taskKey], sent: true, sending: false },
+        }));
+        if (navigator.vibrate) navigator.vibrate(30);
+      } else {
         setStates((prev) => ({
           ...prev,
           [taskKey]: { ...prev[taskKey], sending: false },
         }));
       }
-    },
-    [],
-  );
+    } catch {
+      setStates((prev) => ({
+        ...prev,
+        [taskKey]: { ...prev[taskKey], sending: false },
+      }));
+    }
+  }, []);
 
   const handleToggle = useCallback(
     (taskKey: string) => {
       setStates((prev) => {
         const current = prev[taskKey];
         if (!current) return prev;
-
-        // Si déjà envoyé, on ne peut pas décocher
         if (current.sent) return prev;
 
         const nowChecked = !current.checked;
 
         if (nowChecked) {
-          // On coche → démarre le countdown
           const countdown = SEND_DELAY;
-
-          // Démarrer le timer
           const interval = setInterval(() => {
             setStates((s) => {
               const st = s[taskKey];
               if (!st || st.countdown === null || st.countdown <= 1) {
                 clearInterval(timersRef.current[taskKey]);
                 delete timersRef.current[taskKey];
-                // Envoyer
                 if (st && st.countdown !== null) {
                   sendTask(taskKey);
                 }
@@ -133,7 +143,6 @@ export function ChecklistForm({
             [taskKey]: { ...current, checked: true, countdown },
           };
         } else {
-          // On décoche → annule le timer
           if (timersRef.current[taskKey]) {
             clearInterval(timersRef.current[taskKey]);
             delete timersRef.current[taskKey];
@@ -154,34 +163,58 @@ export function ChecklistForm({
     { id: "closing" as const, label: t.checklist.sectionClosing },
   ];
 
-  const completedCount = Object.values(states).filter((s) => s.sent).length;
-  const totalCount = tasks.length;
+  const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  const allDone = completedCount === totalCount && totalCount > 0;
 
   return (
     <div className="space-y-4">
-      {/* Barre de progression */}
-      <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
-        <div className="mb-2 flex items-center justify-between text-sm">
-          <span className="font-medium text-neutral-700 dark:text-neutral-300">
-            {completedCount}/{totalCount}
-          </span>
-          <span className="text-xs text-neutral-500 dark:text-neutral-400">
-            {totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%
-          </span>
-        </div>
-        <div className="h-2.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              completedCount === totalCount
-                ? "bg-emerald-500"
-                : completedCount > 0
-                  ? "bg-brand-500"
-                  : "bg-neutral-300 dark:bg-neutral-600"
-            }`}
-            style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
-          />
-        </div>
+      {/* Greeting */}
+      <TimeGreeting name={userName} />
+
+      {/* Progress / Celebration */}
+      <div
+        className={`rounded-xl border p-4 transition-all duration-500 ${
+          allDone
+            ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20"
+            : "border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800/50"
+        }`}
+      >
+        {allDone ? (
+          <div className="animate-scale-in text-center">
+            <div className="text-3xl">🎉</div>
+            <p className="mt-1 font-semibold text-emerald-700 dark:text-emerald-300">
+              {t.checklist.allDone}
+            </p>
+            <p className="mt-0.5 text-xs text-emerald-600 dark:text-emerald-400">
+              {t.checklist.allDoneDesc}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="font-medium text-neutral-700 dark:text-neutral-300">
+                {completedCount}/{totalCount}
+              </span>
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                {pct}%
+              </span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  completedCount > 0
+                    ? "bg-brand-500"
+                    : "bg-neutral-300 dark:bg-neutral-600"
+                }`}
+                style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
+              />
+            </div>
+          </>
+        )}
       </div>
+
+      {/* Confetti overlay */}
+      {showCelebration && <Confetti />}
 
       {sections.map((section) => {
         const items = tasks.filter((i) => i.section === section.id);
@@ -214,13 +247,12 @@ export function ChecklistForm({
                             : "hover:bg-neutral-50 active:bg-neutral-100 dark:hover:bg-neutral-700/50 dark:active:bg-neutral-700"
                       }`}
                     >
-                      {/* Checkbox visuel */}
                       <span
-                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all ${
+                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all duration-200 ${
                           st.sent
-                            ? "border-emerald-500 bg-emerald-500 text-white"
+                            ? "scale-110 border-emerald-500 bg-emerald-500 text-white"
                             : st.checked
-                              ? "border-brand-500 bg-brand-500 text-white"
+                              ? "scale-110 border-brand-500 bg-brand-500 text-white"
                               : "border-neutral-300 dark:border-neutral-600"
                         }`}
                       >
@@ -237,10 +269,9 @@ export function ChecklistForm({
                         )}
                       </span>
 
-                      {/* Texte + état */}
                       <span className="flex-1">
                         <span
-                          className={`text-sm ${
+                          className={`text-sm transition-all duration-300 ${
                             st.sent
                               ? "text-emerald-700 line-through dark:text-emerald-400"
                               : "text-neutral-800 dark:text-neutral-200"
@@ -280,7 +311,77 @@ export function ChecklistForm({
   );
 }
 
-/** Mini anneau animé pour le countdown */
+/* ------------------------------------------------------------------ */
+/* Greeting based on time of day                                       */
+/* ------------------------------------------------------------------ */
+function TimeGreeting({ name }: { name?: string }) {
+  const { t } = useTranslation();
+  const [greeting, setGreeting] = useState<string | null>(null);
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) setGreeting(t.checklist.greetingMorning);
+    else if (hour >= 12 && hour < 17) setGreeting(t.checklist.greetingAfternoon);
+    else setGreeting(t.checklist.greetingEvening);
+  }, [t]);
+
+  if (!greeting) return null;
+
+  return (
+    <p className="animate-fade-in text-lg font-semibold text-neutral-800 dark:text-neutral-200">
+      {greeting}
+      {name ? `, ${name}` : ""} 👋
+    </p>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Confetti celebration                                                */
+/* ------------------------------------------------------------------ */
+function Confetti() {
+  const colors = [
+    "#6366f1", "#ec4899", "#f59e0b", "#10b981",
+    "#3b82f6", "#8b5cf6", "#f43f5e", "#14b8a6",
+  ];
+
+  // Deterministic pseudo-random using golden ratio
+  const pseudo = (i: number) => ((i * 2654435761) >>> 0) / 4294967296;
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const el = document.getElementById("confetti-container");
+      if (el) el.style.opacity = "0";
+    }, 3000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  return (
+    <div
+      id="confetti-container"
+      className="pointer-events-none fixed inset-0 z-[100] overflow-hidden transition-opacity duration-1000"
+    >
+      {Array.from({ length: 50 }, (_, i) => (
+        <div
+          key={i}
+          className="confetti-particle"
+          style={{
+            left: `${pseudo(i) * 100}%`,
+            width: `${6 + (i % 4) * 2}px`,
+            height: `${6 + (i % 4) * 2}px`,
+            backgroundColor: colors[i % colors.length],
+            animationDuration: `${2 + pseudo(i + 50) * 2}s`,
+            animationDelay: `${pseudo(i + 100) * 0.8}s`,
+            borderRadius: i % 3 === 0 ? "50%" : "2px",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Small sub-components                                                */
+/* ------------------------------------------------------------------ */
 function CountdownRing({ seconds, total }: { seconds: number; total: number }) {
   const pct = seconds / total;
   const r = 6;

@@ -454,6 +454,26 @@ button:not(:disabled):active,
   transition: width 200ms ease-out;
 }
 
+/* ------------------------------------------------------------------ */
+/* Confetti celebration                                                */
+/* ------------------------------------------------------------------ */
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(-20px) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(720deg);
+  }
+}
+
+.confetti-particle {
+  position: absolute;
+  top: -10px;
+  animation: confetti-fall linear forwards;
+}
+
 /* Prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
