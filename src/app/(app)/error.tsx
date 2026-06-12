@@ -4,8 +4,6 @@ import { useTranslation } from "@/lib/i18n";
 
 /**
  * Error boundary for the (app) layout group.
- * Shows the actual error message instead of the generic Next.js production message.
- * TODO: Remove this file once the crash is diagnosed and fixed.
  */
 export default function AppErrorBoundary({
   error,

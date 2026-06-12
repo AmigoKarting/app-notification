@@ -328,7 +328,8 @@ export async function updateFeedItem(id: string, input: unknown): Promise<FeedIt
 
 export async function deleteFeedItem(id: string): Promise<void> {
   if (!isUuid(id)) throw new RepositoryError("validation", "Identifiant invalide");
-  const supabase = createClient();
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const supabase = createAdminClient();
   const { error } = await supabase.from("feed_items").delete().eq("id", id);
   if (error) throw fromPostgrestError(error);
 }

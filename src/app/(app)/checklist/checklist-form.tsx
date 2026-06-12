@@ -22,11 +22,9 @@ interface TaskState {
 }
 
 export function ChecklistForm({
-  alreadySubmittedToday: _unused,
   tasks,
   initialCompleted,
 }: {
-  alreadySubmittedToday: boolean;
   tasks: ChecklistTaskProps[];
   initialCompleted: string[];
 }) {
@@ -168,7 +166,7 @@ export function ChecklistForm({
             {completedCount}/{totalCount}
           </span>
           <span className="text-xs text-neutral-500 dark:text-neutral-400">
-            {Math.round((completedCount / totalCount) * 100)}%
+            {totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%
           </span>
         </div>
         <div className="h-2.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
@@ -180,7 +178,7 @@ export function ChecklistForm({
                   ? "bg-brand-500"
                   : "bg-neutral-300 dark:bg-neutral-600"
             }`}
-            style={{ width: `${(completedCount / totalCount) * 100}%` }}
+            style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
           />
         </div>
       </div>
@@ -251,25 +249,22 @@ export function ChecklistForm({
                           {item.label}
                         </span>
 
-                        {/* Countdown */}
                         {st.countdown !== null && (
                           <span className="mt-1 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
                             <CountdownRing seconds={st.countdown} total={SEND_DELAY} />
-                            Envoi dans {st.countdown}s — touche pour annuler
+                            {t.checklist.sendingIn.replace("{seconds}", String(st.countdown))}
                           </span>
                         )}
 
-                        {/* Envoi en cours */}
                         {st.sending && (
                           <span className="mt-1 block text-xs text-brand-600 dark:text-brand-400">
-                            Envoi en cours…
+                            {t.checklist.sending}
                           </span>
                         )}
 
-                        {/* Envoyé */}
                         {st.sent && (
                           <span className="mt-1 block text-xs text-emerald-600 dark:text-emerald-400">
-                            ✓ Envoyé
+                            ✓ {t.checklist.sent}
                           </span>
                         )}
                       </span>

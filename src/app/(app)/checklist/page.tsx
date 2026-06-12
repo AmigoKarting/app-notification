@@ -31,7 +31,6 @@ export default async function ChecklistPage() {
       />
 
       <ChecklistForm
-        alreadySubmittedToday={false}
         tasks={tasks.map((tk) => ({
           key: tk.task_key,
           section: tk.section,

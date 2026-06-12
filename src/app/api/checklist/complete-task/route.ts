@@ -86,17 +86,15 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // Construire le nom de la caissière
   const cashierName =
     (profile.first_name && profile.last_name
       ? `${profile.first_name} ${profile.last_name}`
       : profile.display_name?.trim()) ||
     user.email ||
-    "Caissière";
+    t.checklist.cashierFallback;
 
-  // Notification avec le nom de la tâche
   const notifTitle = `✅ ${cashierName}`;
-  const notifBody = `**Tâche :** ${task.label}`;
+  const notifBody = `**${t.checklist.taskPrefix} :** ${task.label}`;
 
   await supabase.from("feed_items").insert({
     kind: "notification" as const,
