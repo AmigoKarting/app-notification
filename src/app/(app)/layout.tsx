@@ -90,13 +90,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Link>
 
             <span className="hidden md:contents">
-              {/* Lien Checklist : caissière (page perso) ou dev (test admin). */}
               {(isCashier || isDev) && (
-                <NavLink href="/checklist" label={t.checklist.shortTitle} />
+                <NavLink href="/checklist" label={t.checklist.shortTitle} active={pathname === "/checklist"} />
               )}
               <NavLink
                 href={isCashier ? "/feed?keep=1" : "/feed"}
                 label={t.nav.notifications}
+                active={pathname === "/feed"}
               />
               {isDev && (
                 <Link
@@ -180,13 +180,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   );
 }
 
-function NavLink({ href, label }: { href: string; label: string }) {
+function NavLink({ href, label, active }: { href: string; label: string; active?: boolean }) {
   return (
     <Link
       href={href}
-      className="rounded-md px-3 py-1.5 text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+      className={`relative rounded-md px-3 py-1.5 transition ${
+        active
+          ? "font-medium text-brand-700 dark:text-brand-300"
+          : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+      }`}
     >
       {label}
+      {active && (
+        <span className="absolute inset-x-1 -bottom-[13px] h-0.5 rounded-full bg-brand-500" />
+      )}
     </Link>
   );
 }

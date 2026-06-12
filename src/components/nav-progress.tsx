@@ -52,9 +52,9 @@ export function NavProgress() {
   if (!loading && progress === 0) return null;
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 h-0.5">
+    <div className="fixed inset-x-0 top-0 z-50">
       <div
-        className="h-full bg-brand-600 transition-all duration-200 ease-out"
+        className="nav-progress-bar"
         style={{ width: `${progress}%` }}
       />
     </div>

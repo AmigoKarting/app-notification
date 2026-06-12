@@ -49,6 +49,10 @@
   --surface-text-subtle: #6b7280; /* Texte tertiaire / hints */
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html, body {
   height: 100%;
 }
@@ -353,6 +357,101 @@ select {
 }
 .animate-subtle-pulse {
   animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* Page transition (used by template.tsx)                               */
+/* ------------------------------------------------------------------ */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-page-in {
+  animation: page-in 0.28s ease-out both;
+}
+
+/* ------------------------------------------------------------------ */
+/* Global tap / click feedback                                         */
+/* ------------------------------------------------------------------ */
+button:not(:disabled):active,
+[role="button"]:active,
+.tap-feedback:active {
+  transform: scale(0.97);
+  transition: transform 80ms ease-out;
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile bottom nav                                                   */
+/* ------------------------------------------------------------------ */
+.mobile-nav-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0 4px;
+  font-size: 11px;
+  font-weight: 500;
+  transition: color 150ms ease, transform 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-item:active {
+  transform: scale(0.90);
+}
+
+.mobile-nav-item--active {
+  color: rgb(var(--brand-600));
+}
+.dark .mobile-nav-item--active {
+  color: rgb(var(--brand-400));
+}
+
+.mobile-nav-item--active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2.5px;
+  border-radius: 0 0 4px 4px;
+  background: rgb(var(--brand-500));
+  animation: indicator-in 0.25s ease-out both;
+}
+
+@keyframes indicator-in {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 20px;
+    opacity: 1;
+  }
+}
+
+.mobile-nav-icon {
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.mobile-nav-item--active .mobile-nav-icon {
+  transform: scale(1.12);
+}
+
+/* ------------------------------------------------------------------ */
+/* Nav progress bar glow                                               */
+/* ------------------------------------------------------------------ */
+.nav-progress-bar {
+  height: 2.5px;
+  background: rgb(var(--brand-500));
+  box-shadow: 0 0 8px 1px rgb(var(--brand-500) / 0.5);
+  transition: width 200ms ease-out;
 }
 
 /* Prefer reduced motion */

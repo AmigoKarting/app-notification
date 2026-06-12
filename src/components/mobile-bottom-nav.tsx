@@ -61,13 +61,15 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
           <li key={tab.href} className="flex-1">
             <Link
               href={tab.href}
-              className={`flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition ${
+              className={`mobile-nav-item ${
                 tab.active
-                  ? "text-brand-600 dark:text-brand-400"
-                  : "text-neutral-400 active:text-neutral-600 dark:text-neutral-500 dark:active:text-neutral-300"
+                  ? "mobile-nav-item--active"
+                  : "text-neutral-400 dark:text-neutral-500"
               }`}
             >
-              <tab.icon active={tab.active} />
+              <span className="mobile-nav-icon">
+                <tab.icon active={tab.active} />
+              </span>
               <span>{tab.label}</span>
             </Link>
           </li>
