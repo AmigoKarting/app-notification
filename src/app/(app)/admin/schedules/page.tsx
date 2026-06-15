@@ -40,6 +40,7 @@ export default async function AdminSchedulesPage() {
       <PageHeader
         title={t.adminSchedules.title}
         description={t.adminSchedules.description}
+        helpHref="/admin/aide/planifier"
         action={<LinkButton href="/admin/schedules/new">{t.adminSchedules.newSchedule}</LinkButton>}
       />
       {schedules.length === 0 ? (

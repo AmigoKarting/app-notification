@@ -68,6 +68,7 @@ const fr = {
     sessions: "Sessions",
     teams: "Équipes",
     people: "Personnes",
+    team: "Équipe",
     employees: "Employés",
     users: "Utilisateurs",
     roles: "Rôles",
@@ -148,6 +149,13 @@ const fr = {
     active: "Actif",
     paused: "Pause",
     next: "Prochain :",
+    onboardingTitle: "Bienvenue ! Premiers pas",
+    onboardingDesc: "Ton espace est vide. Voici par où commencer :",
+    onboardingStep1: "Créer une catégorie (pour organiser tes notifications)",
+    onboardingStep2: "Publier ta première notification",
+    onboardingStep3: "Configurer un envoi automatique récurrent",
+    onboardingStep4: "Personnaliser le logo et le nom de l'app",
+    onboardingGuide: "Lire le guide complet",
   },
 
   adminFeed: {

@@ -18,6 +18,7 @@ export default async function AdminCategoriesPage() {
       <PageHeader
         title={t.adminCategories.title}
         description={t.adminCategories.description}
+        helpHref="/admin/aide/categories"
         action={<LinkButton href="/admin/categories/new">{t.adminCategories.newCategory}</LinkButton>}
       />
       {unclaimed > 0 && <ClaimSystemBanner count={unclaimed} />}

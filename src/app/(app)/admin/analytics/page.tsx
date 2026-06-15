@@ -27,6 +27,7 @@ export default async function AdminAnalyticsPage() {
       <PageHeader
         title={t.analytics.title}
         description={t.analytics.description}
+        helpHref="/admin/aide/suivi-admin"
       />
 
       {loadError && (

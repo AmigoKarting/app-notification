@@ -46,6 +46,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
       <PageHeader
         title={t.adminUsers.title}
         description={t.adminUsers.description}
+        helpHref="/admin/aide/utilisateurs"
       />
       <form action="/admin/users" method="get" className="flex flex-wrap items-center gap-2">
         <input

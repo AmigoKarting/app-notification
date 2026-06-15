@@ -21,6 +21,7 @@ export default async function AdminBrandingPage() {
       <PageHeader
         title={t.adminBranding.title}
         description={t.adminBranding.description}
+        helpHref="/admin/aide/personnaliser"
         action={
           <LinkButton href="/admin" variant="secondary">
             {t.common.back}

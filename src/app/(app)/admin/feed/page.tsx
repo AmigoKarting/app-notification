@@ -67,6 +67,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
       <PageHeader
         title={t.adminFeed.title}
         description={t.adminFeed.description}
+        helpHref="/admin/aide/envoyer-notification"
         action={<LinkButton href="/admin/feed/new">{t.adminFeed.newItem}</LinkButton>}
       />
       {/* Barre de recherche */}

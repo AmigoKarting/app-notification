@@ -14,6 +14,7 @@ export default async function AdminTemplatesPage() {
       <PageHeader
         title={t.adminTemplates.title}
         description={t.adminTemplates.description}
+        helpHref="/admin/aide/modeles"
         action={<LinkButton href="/admin/templates/new">{t.adminTemplates.newTemplate}</LinkButton>}
       />
       {templates.length === 0 ? (

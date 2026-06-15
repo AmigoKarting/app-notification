@@ -21,6 +21,7 @@ export default async function AdminSessionsPage({ searchParams }: PageProps) {
       <PageHeader
         title={t.adminSessions.title}
         description={t.adminSessions.description}
+        helpHref="/admin/aide/sessions"
         action={<LinkButton href="/admin/sessions/new">{t.adminSessions.newSession}</LinkButton>}
       />
       {sessions.length === 0 ? (

@@ -14,6 +14,7 @@ export default async function AdminTeamsPage() {
       <PageHeader
         title={t.adminTeams.title}
         description={t.adminTeams.description}
+        helpHref="/admin/aide/equipes"
         action={<LinkButton href="/admin/teams/new">{t.adminTeams.newTeam}</LinkButton>}
       />
       {teams.length === 0 ? (

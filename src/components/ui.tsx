@@ -128,15 +128,32 @@ export function PageHeader({
   title,
   description,
   action,
+  helpHref,
 }: {
   title: string;
   description?: string;
   action?: React.ReactNode;
+  helpHref?: string;
 }) {
   return (
     <header className="flex flex-wrap items-end justify-between gap-4 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">{title}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">{title}</h1>
+          {helpHref && (
+            <a
+              href={helpHref}
+              title="Guide"
+              className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-neutral-200 text-neutral-400 transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-600 dark:border-neutral-700 dark:text-neutral-500 dark:hover:border-brand-600 dark:hover:bg-brand-900/30 dark:hover:text-brand-400"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </a>
+          )}
+        </div>
         {description && <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">{description}</p>}
       </div>
       {action}

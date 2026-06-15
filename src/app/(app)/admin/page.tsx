@@ -44,7 +44,28 @@ export default async function AdminOverviewPage() {
       <PageHeader
         title={t.adminOverview.title}
         description={t.adminOverview.description}
+        helpHref="/admin/aide/bien-demarrer"
       />
+
+      {feed.length === 0 && categories.length === 0 && schedules.length === 0 && !loadError && (
+        <section className="rounded-xl border-2 border-dashed border-brand-200 bg-brand-50/40 p-6 dark:border-brand-700/50 dark:bg-brand-950/20">
+          <h2 className="text-lg font-semibold text-brand-900 dark:text-brand-200">{t.adminOverview.onboardingTitle}</h2>
+          <p className="mt-1 text-sm text-brand-700 dark:text-brand-400">{t.adminOverview.onboardingDesc}</p>
+          <ol className="mt-4 space-y-3">
+            <OnboardingStep number={1} href="/admin/categories/new" label={t.adminOverview.onboardingStep1} />
+            <OnboardingStep number={2} href="/admin/feed/new" label={t.adminOverview.onboardingStep2} />
+            <OnboardingStep number={3} href="/admin/schedules/new" label={t.adminOverview.onboardingStep3} />
+            <OnboardingStep number={4} href="/admin/branding" label={t.adminOverview.onboardingStep4} />
+          </ol>
+          <Link
+            href="/admin/aide/bien-demarrer"
+            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-brand-700 hover:underline dark:text-brand-400"
+          >
+            {t.adminOverview.onboardingGuide} →
+          </Link>
+        </section>
+      )}
+
       {loadError && (
         <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
           <p className="font-semibold">{t.adminOverview.loadError}</p>
@@ -248,5 +269,24 @@ function Stat({
     <Link href={href} className="block transition hover:opacity-90">
       {inner}
     </Link>
+  );
+}
+
+function OnboardingStep({ number, href, label }: { number: number; href: string; label: string }) {
+  return (
+    <li>
+      <Link
+        href={href}
+        className="group flex items-center gap-3 rounded-lg px-3 py-2 transition hover:bg-brand-100/60 dark:hover:bg-brand-900/30"
+      >
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">
+          {number}
+        </span>
+        <span className="text-sm font-medium text-neutral-800 group-hover:text-brand-900 dark:text-neutral-200 dark:group-hover:text-brand-300">
+          {label}
+        </span>
+        <span className="ml-auto text-neutral-400 transition group-hover:translate-x-1 group-hover:text-brand-600">→</span>
+      </Link>
+    </li>
   );
 }

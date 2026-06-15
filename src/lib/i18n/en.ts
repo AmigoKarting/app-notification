@@ -70,6 +70,7 @@ const en: Dictionary = {
     sessions: "Sessions",
     teams: "Teams",
     people: "People",
+    team: "Team",
     employees: "Employees",
     users: "Users",
     roles: "Roles",
@@ -150,6 +151,13 @@ const en: Dictionary = {
     active: "Active",
     paused: "Paused",
     next: "Next:",
+    onboardingTitle: "Welcome! Getting started",
+    onboardingDesc: "Your space is empty. Here's where to begin:",
+    onboardingStep1: "Create a category (to organize your notifications)",
+    onboardingStep2: "Publish your first notification",
+    onboardingStep3: "Set up an automatic recurring send",
+    onboardingStep4: "Customize the logo and app name",
+    onboardingGuide: "Read the full guide",
   },
 
   adminFeed: {

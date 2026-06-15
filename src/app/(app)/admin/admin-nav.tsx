@@ -53,9 +53,8 @@ function getNav(t: Dictionary["nav"]): NavSection[] {
       ],
     },
     {
-      label: t.people,
+      label: t.team,
       entries: [
-        { href: "/admin/employees", label: t.employees, icon: UsersIcon },
         { href: "/admin/users", label: t.users, icon: UserIcon },
         { href: "/admin/roles", label: t.roles, icon: UserIcon },
       ],
