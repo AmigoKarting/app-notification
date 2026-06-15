@@ -19,6 +19,7 @@ import type { FeedItem } from "@/domain/feed/repository";
 import type { FeedTargetMode } from "@/lib/supabase/database.types";
 import { FormattingHelp } from "@/components/form-hints";
 import { ImageUpload } from "./image-upload";
+import { BodyField } from "./body-field";
 import { useTranslation } from "@/lib/i18n";
 
 type Option = { id: string; name: string };
@@ -85,10 +86,7 @@ export function FeedItemForm(props: Props) {
           error={errors?.title}
         />
 
-        <TextAreaField
-          label={t.feedForm.body}
-          name="body"
-          rows={4}
+        <BodyField
           defaultValue={initial?.body ?? ""}
           maxLength={5000}
           placeholder={t.feedForm.bodyPlaceholder}

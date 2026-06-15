@@ -10,6 +10,7 @@ import { type FormState } from "@/domain/form-state";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
+import { logAudit } from "@/domain/audit/repository";
 import { dispatchFeedItemExternal } from "./dispatcher";
 import {
   createFeedItem,
@@ -78,6 +79,8 @@ export async function createFeedItemAction(
     return mapError(err);
   }
 
+  logAudit({ userId: profile.id, action: "create", entityType: "feed_item", entityId: created.id, summary: created.title }).catch(() => {});
+
   // Si l'utilisateur a coché email/sms et que ce n'est pas un brouillon,
   // déclencher les envois externes. Best-effort — n'échoue jamais la création.
   if (!created.is_draft && created.send_channels.length > 0) {
@@ -108,7 +111,7 @@ export async function updateFeedItemAction(
   _prev: FormState<FeedItem>,
   formData: FormData,
 ): Promise<FormState<FeedItem>> {
-  await requireDev();
+  const devProfile = await requireDev();
   const t = getServerDictionary();
   const parsed = updateFeedItemSchema.safeParse(readForm(formData));
   if (!parsed.success) {
@@ -123,6 +126,7 @@ export async function updateFeedItemAction(
   } catch (err) {
     return mapError(err);
   }
+  logAudit({ userId: devProfile.id, action: "update", entityType: "feed_item", entityId: id }).catch(() => {});
   revalidatePath("/admin/feed");
   revalidatePath(`/admin/feed/${id}`);
   revalidatePath("/feed");
@@ -130,13 +134,27 @@ export async function updateFeedItemAction(
 }
 
 export async function deleteFeedItemAction(formData: FormData): Promise<void> {
-  await requireDev();
+  const devP = await requireDev();
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await deleteFeedItem(id);
+  logAudit({ userId: devP.id, action: "delete", entityType: "feed_item", entityId: id }).catch(() => {});
   revalidatePath("/admin/feed");
   revalidatePath("/feed");
   redirect("/admin/feed");
+}
+
+export async function bulkDeleteFeedItemsAction(ids: string[]): Promise<{ deleted: number }> {
+  const devP = await requireDev();
+  const valid = ids.filter((id) => z.string().uuid().safeParse(id).success);
+  if (valid.length === 0) return { deleted: 0 };
+  const supabase = createClient();
+  const { error } = await supabase.from("feed_items").delete().in("id", valid);
+  if (error) throw error;
+  logAudit({ userId: devP.id, action: "bulk_delete", entityType: "feed_item", summary: `${valid.length} items`, metadata: { ids: valid } }).catch(() => {});
+  revalidatePath("/admin/feed");
+  revalidatePath("/feed");
+  return { deleted: valid.length };
 }
 
 /**

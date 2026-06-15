@@ -23,6 +23,7 @@ export interface ListRemindersOptions {
   status?: ReminderStatus;
   employeeId?: string;
   upcomingOnly?: boolean;
+  search?: string;
   limit?: number;
   offset?: number;
 }
@@ -65,7 +66,7 @@ export async function createReminder(
 export async function listReminders(
   opts: ListRemindersOptions = {},
 ): Promise<ReminderWithEmployee[]> {
-  const { status, employeeId, upcomingOnly, limit = 100, offset = 0 } = opts;
+  const { status, employeeId, upcomingOnly, search, limit = 100, offset = 0 } = opts;
 
   if (status && !reminderStatusEnum.safeParse(status).success) {
     throw new RepositoryError("validation", "Statut invalide");
@@ -84,6 +85,7 @@ export async function listReminders(
   if (status) query = query.eq("status", status);
   if (employeeId) query = query.eq("employee_id", employeeId);
   if (upcomingOnly) query = query.gte("scheduled_at", new Date().toISOString());
+  if (search) query = query.ilike("message", `%${search}%`);
 
   const { data, error } = await query;
   if (error) throw fromPostgrestError(error);

@@ -10,12 +10,16 @@ export type Template = Database["public"]["Tables"]["notification_templates"]["R
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const isUuid = (v: string) => UUID_RE.test(v);
 
-export async function listTemplates(): Promise<Template[]> {
+export async function listTemplates(opts?: { search?: string }): Promise<Template[]> {
   const supabase = createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("notification_templates")
     .select("*")
     .order("name", { ascending: true });
+  if (opts?.search) {
+    query = query.or(`name.ilike.%${opts.search}%,title.ilike.%${opts.search}%`);
+  }
+  const { data, error } = await query;
   if (error) throw fromPostgrestError(error);
   return data ?? [];
 }

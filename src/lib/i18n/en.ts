@@ -80,6 +80,7 @@ const en: Dictionary = {
     deliveries: "Deliveries",
     analytics: "Analytics",
     branding: "Branding",
+    auditLog: "Audit log",
     guides: "Guides",
   },
 
@@ -187,6 +188,8 @@ const en: Dictionary = {
     open: "Open",
     newItemTitle: "New item",
     newItemDesc: "Notification or reminder to publish in the feed.",
+    bulkSelected: "selected",
+    bulkDeleteConfirm: "Delete {count} item(s)? This action cannot be undone.",
   },
 
   feedForm: {
@@ -194,6 +197,9 @@ const en: Dictionary = {
     titlePlaceholder: "E.g.: Team meeting — Friday 2pm",
     body: "Message",
     bodyPlaceholder: "Message details…",
+    write: "Write",
+    preview: "Preview",
+    previewEmpty: "Nothing to show — write some text to see the preview.",
     actionLabel: "Button label (optional)",
     actionLabelPlaceholder: "E.g.: Sign up, Learn more",
     actionLabelHint: "Displayed at the bottom of the notification",
@@ -856,6 +862,21 @@ const en: Dictionary = {
     adminUsers: "List of registered users. You can change each user's role: Dev (admin), Manager, or Cashier.",
     adminBranding: "Customize the app name, logo, and tagline. These settings are visible to all users.",
     adminAnalytics: "Find here the global statistics of your application: published content, deliveries, user engagement, and recent activity.",
+  },
+
+  adminAudit: {
+    title: "Audit log",
+    description: "Log of actions performed by administrators.",
+    user: "User",
+    action: "Action",
+    entity: "Entity",
+    summary: "Summary",
+    date: "Date",
+    noLogs: "No actions recorded yet.",
+    actionCreate: "Create",
+    actionUpdate: "Update",
+    actionDelete: "Delete",
+    actionBulkDelete: "Bulk delete",
   },
 
   pagination: {

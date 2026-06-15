@@ -78,6 +78,7 @@ const fr = {
     deliveries: "Envois",
     analytics: "Statistiques",
     branding: "Marque",
+    auditLog: "Historique",
     guides: "Guides",
   },
 
@@ -185,6 +186,8 @@ const fr = {
     open: "Ouvrir",
     newItemTitle: "Nouvel élément",
     newItemDesc: "Notification ou rappel à publier dans le fil.",
+    bulkSelected: "sélectionné(s)",
+    bulkDeleteConfirm: "Supprimer {count} élément(s) ? Cette action est irréversible.",
   },
 
   feedForm: {
@@ -192,6 +195,9 @@ const fr = {
     titlePlaceholder: "Ex: Réunion équipe — vendredi 14h",
     body: "Message",
     bodyPlaceholder: "Détails du message…",
+    write: "Écrire",
+    preview: "Aperçu",
+    previewEmpty: "Rien à afficher — écris du texte pour voir l'aperçu.",
     actionLabel: "Libellé du bouton (optionnel)",
     actionLabelPlaceholder: "Ex: S'inscrire, En savoir plus",
     actionLabelHint: "Affiché en bas de la notification",
@@ -854,6 +860,21 @@ const fr = {
     adminUsers: "Liste des utilisateurs inscrits. Tu peux changer le rôle de chacun : Dev (admin), Gérant ou Caissière.",
     adminBranding: "Personnalise le nom de l'app, le logo et la tagline. Ces réglages sont visibles par tous les utilisateurs.",
     adminAnalytics: "Retrouvez ici les statistiques globales de votre application : contenu publié, envois, engagement des utilisateurs et activité récente.",
+  },
+
+  adminAudit: {
+    title: "Historique",
+    description: "Journal des actions effectuées par les administrateurs.",
+    user: "Utilisateur",
+    action: "Action",
+    entity: "Entité",
+    summary: "Résumé",
+    date: "Date",
+    noLogs: "Aucune action enregistrée pour le moment.",
+    actionCreate: "Création",
+    actionUpdate: "Modification",
+    actionDelete: "Suppression",
+    actionBulkDelete: "Suppression multiple",
   },
 
   pagination: {

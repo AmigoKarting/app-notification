@@ -19,12 +19,13 @@ const VALID_STATUSES: ReminderStatus[] = ["pending", "sent", "cancelled", "faile
 const PER_PAGE = 20;
 
 interface PageProps {
-  searchParams?: { status?: string; page?: string };
+  searchParams?: { status?: string; page?: string; q?: string };
 }
 
 export default async function RemindersPage({ searchParams }: PageProps) {
   const t = getServerDictionary();
   const locale = getLocale();
+  const search = searchParams?.q?.trim() || undefined;
   const requested = searchParams?.status;
   const status =
     requested && (VALID_STATUSES as string[]).includes(requested)
@@ -32,13 +33,14 @@ export default async function RemindersPage({ searchParams }: PageProps) {
       : undefined;
 
   const page = Math.max(1, Number(searchParams?.page) || 1);
-  const allReminders = await listReminders({ status, limit: 1000 });
+  const allReminders = await listReminders({ status, search, limit: 1000 });
   const totalPages = Math.ceil(allReminders.length / PER_PAGE);
   const reminders = allReminders.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   // Build extra params for pagination links
   const paginationParams: Record<string, string> = {};
   if (status) paginationParams.status = status;
+  if (search) paginationParams.q = search;
 
   return (
     <div className="space-y-6">
@@ -65,6 +67,25 @@ export default async function RemindersPage({ searchParams }: PageProps) {
           </div>
         }
       />
+
+      <form action="/admin/reminders" method="get" className="flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          name="q"
+          defaultValue={search ?? ""}
+          placeholder={t.common.searchPlaceholder}
+          className="w-full max-w-xs rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-neutral-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-brand-500 dark:focus:ring-brand-800"
+        />
+        {status && <input type="hidden" name="status" value={status} />}
+        <button type="submit" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600">
+          {t.common.search}
+        </button>
+        {(search || status) && (
+          <Link href="/admin/reminders" className="text-sm text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200">
+            {t.common.clear}
+          </Link>
+        )}
+      </form>
 
       <div className="flex gap-2 text-sm">
         <FilterLink href="/admin/reminders" active={!status} label={t.reminders.all} />
