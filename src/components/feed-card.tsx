@@ -8,14 +8,14 @@ import { renderMarkdown } from "@/lib/markdown";
 import { getServerDictionary, getLocale, getDateFormat } from "@/lib/i18n/server";
 
 const PRIORITY_BORDER: Record<string, string> = {
-  low: "border-l-neutral-200",
-  normal: "border-l-blue-300",
-  high: "border-l-red-400",
+  low: "border-l-neutral-200 dark:border-l-neutral-600",
+  normal: "border-l-blue-300 dark:border-l-blue-500",
+  high: "border-l-red-400 dark:border-l-red-500",
 };
 
 const KIND_BG: Record<string, string> = {
-  notification: "bg-neutral-100 text-neutral-700",
-  reminder: "bg-amber-100 text-amber-800",
+  notification: "bg-neutral-100 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200",
+  reminder: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
 };
 
 export function CategoryChip({
@@ -68,16 +68,16 @@ export function FeedCard({
 
   return (
     <article
-      className={`flex flex-col overflow-hidden rounded-lg border border-neutral-200 border-l-4 bg-white ${
+      className={`flex flex-col overflow-hidden rounded-lg border border-neutral-200 border-l-4 bg-white dark:border-neutral-700 dark:bg-neutral-800 ${
         PRIORITY_BORDER[item.priority] ?? PRIORITY_BORDER.normal
-      } ${item.is_pinned ? "ring-1 ring-brand-200" : ""}`}
+      } ${item.is_pinned ? "ring-1 ring-brand-200 dark:ring-brand-700" : ""}`}
     >
       {item.image_url && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={item.image_url}
           alt={item.title}
-          className="h-40 w-full bg-neutral-100 object-cover sm:h-44"
+          className="h-40 w-full bg-neutral-100 object-cover sm:h-44 dark:bg-neutral-700"
         />
       )}
 
@@ -86,13 +86,13 @@ export function FeedCard({
           {item.is_pinned && (
             <span
               title="Épinglé en haut du fil"
-              className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-brand-700 ring-1 ring-inset ring-brand-200"
+              className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-brand-700 ring-1 ring-inset ring-brand-200 dark:bg-brand-900/30 dark:text-brand-300 dark:ring-brand-700"
             >
               📌 {t.feed.pinned}
             </span>
           )}
           {item.is_draft && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-200">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-700">
               ✏ {t.feed.draft}
             </span>
           )}
@@ -105,21 +105,21 @@ export function FeedCard({
           </span>
           <CategoryChip category={item.category} />
           {item.session && (
-            <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 ring-1 ring-inset ring-violet-200">
+            <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 ring-1 ring-inset ring-violet-200 dark:bg-violet-900/20 dark:text-violet-300 dark:ring-violet-700">
               🗓 {item.session.name}
             </span>
           )}
           {item.priority === "high" && (
-            <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-200">
+            <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-200 dark:bg-red-900/20 dark:text-red-400 dark:ring-red-700">
               {t.feed.highPriority}
             </span>
           )}
         </header>
 
-        <h3 className="text-base font-semibold text-neutral-900">{item.title}</h3>
+        <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{item.title}</h3>
         {item.body && (
           <div
-            className="text-sm leading-relaxed text-neutral-700"
+            className="text-sm leading-relaxed text-neutral-700 dark:text-neutral-300"
             dangerouslySetInnerHTML={{ __html: renderMarkdown(item.body) }}
           />
         )}
@@ -139,7 +139,7 @@ export function FeedCard({
         )}
 
         {showEngagement && engagement && (
-          <div className="mt-2 flex flex-wrap items-center gap-3 border-t border-neutral-100 pt-3">
+          <div className="mt-2 flex flex-wrap items-center gap-3 border-t border-neutral-100 pt-3 dark:border-neutral-700">
             <ReactionBar
               feedItemId={item.id}
               counts={engagement.reactionCounts}
@@ -158,21 +158,21 @@ export function FeedCard({
           />
         )}
 
-        <footer className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500">
+        <footer className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
           <span>{t.feed.publishedOn} {formatDateTime(item.published_at, dateFmt, friendly)}</span>
           {authorLabel && (
             <span>
-              {t.feed.by} <span className="font-medium text-neutral-700">{authorLabel}</span>
+              {t.feed.by} <span className="font-medium text-neutral-700 dark:text-neutral-300">{authorLabel}</span>
             </span>
           )}
           {item.kind === "reminder" && item.due_date && (
-            <span className={isOverdue ? "font-medium text-red-600" : "text-amber-700"}>
+            <span className={isOverdue ? "font-medium text-red-600 dark:text-red-400" : "text-amber-700 dark:text-amber-400"}>
               {t.feed.deadline} {formatDateTime(item.due_date, dateFmt, friendly)} {isOverdue && t.feed.overdue}
             </span>
           )}
           {item.expires_at && <span>{t.feed.expiresOn} {formatDateTime(item.expires_at, dateFmt, friendly)}</span>}
           {item.send_channels && item.send_channels.length > 0 && (
-            <span className="text-neutral-400">
+            <span className="text-neutral-400 dark:text-neutral-500">
               · {t.feed.sentAlsoBy} {item.send_channels.map((c) => c.toUpperCase()).join(" + ")}
             </span>
           )}

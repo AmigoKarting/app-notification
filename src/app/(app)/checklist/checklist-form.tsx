@@ -52,8 +52,9 @@ export function ChecklistForm({
   const timersRef = useRef<Record<string, ReturnType<typeof setInterval>>>({});
 
   useEffect(() => {
+    const timers = timersRef.current;
     return () => {
-      Object.values(timersRef.current).forEach(clearInterval);
+      Object.values(timers).forEach(clearInterval);
     };
   }, []);
 
