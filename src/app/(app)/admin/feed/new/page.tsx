@@ -1,7 +1,7 @@
 import { Card, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { listCategories } from "@/domain/categories/repository";
 import { listSessions } from "@/domain/sessions/repository";
-import { listTeams } from "@/domain/teams/repository";
+import { listTeamsWithMemberCount } from "@/domain/teams/repository";
 import { listTemplates } from "@/domain/templates/repository";
 import { listProfilesWithEmail } from "@/domain/users/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
@@ -15,7 +15,7 @@ export default async function NewFeedItemPage() {
   const [categories, sessions, teams, users, templates] = await Promise.all([
     listCategories(),
     listSessions(),
-    listTeams(),
+    listTeamsWithMemberCount(),
     listProfilesWithEmail(),
     listTemplates(),
   ]);
@@ -37,7 +37,8 @@ export default async function NewFeedItemPage() {
           mode="create"
           categories={categories.map((c) => ({ id: c.id, name: c.name }))}
           sessions={sessions.map((s) => ({ id: s.id, name: s.name }))}
-          teams={teams.map((tm) => ({ id: tm.id, name: tm.name, color: tm.color }))}
+          teams={teams.map((tm) => ({ id: tm.id, name: tm.name, color: tm.color, memberCount: tm.member_count }))}
+          totalUsers={users.length}
           users={users.map((u) => ({
             id: u.id,
             name: u.display_name,

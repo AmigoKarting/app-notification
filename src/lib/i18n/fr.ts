@@ -188,6 +188,10 @@ const fr = {
     newItemDesc: "Notification ou rappel à publier dans le fil.",
     bulkSelected: "sélectionné(s)",
     bulkDeleteConfirm: "Supprimer {count} élément(s) ? Cette action est irréversible.",
+    sort_date_desc: "Récent",
+    sort_date_asc: "Ancien",
+    sort_priority: "Priorité",
+    sort_title: "A→Z",
   },
 
   feedForm: {
@@ -214,6 +218,7 @@ const fr = {
     sendAlsoByDesc: "En plus de l'affichage dans le fil. Nécessite un provider configuré (Resend pour email, Twilio pour SMS).",
     recipients: "Destinataires",
     recipientsQuestion: "Qui verra cette notification ?",
+    recipientCount: "destinataires",
     recipientsQuestionSchedule: "Qui recevra cette notification ?",
     everyone: "Tout le monde",
     everyoneDesc: "Tous les utilisateurs.",
@@ -465,6 +470,8 @@ const fr = {
     status: "Statut",
     provider: "Provider",
     exportCsv: "Exporter CSV",
+    searchPlaceholder: "Rechercher par destinataire…",
+    retry: "Relancer",
   },
 
   settings: {
@@ -707,6 +714,9 @@ const fr = {
     recentNotifications: "Nouvelles notifications",
     recentDeliveries: "Envois récents",
     successRate: "Taux de succès",
+    range_7d: "7 jours",
+    range_30d: "30 jours",
+    range_all: "Tout",
   },
 
   employees: {
@@ -875,6 +885,8 @@ const fr = {
     actionUpdate: "Modification",
     actionDelete: "Suppression",
     actionBulkDelete: "Suppression multiple",
+    actionRetry: "Relance",
+    filterAll: "Tout",
   },
 
   pagination: {

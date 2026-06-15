@@ -37,8 +37,9 @@ export async function listAuditLogs(opts?: {
   limit?: number;
   offset?: number;
   entityType?: string;
+  action?: string;
 }): Promise<AuditLogEntry[]> {
-  const { limit = 50, offset = 0, entityType } = opts ?? {};
+  const { limit = 50, offset = 0, entityType, action } = opts ?? {};
   const supabase = createAdminClient();
   let query = (supabase as any)
     .from("audit_logs")
@@ -47,6 +48,7 @@ export async function listAuditLogs(opts?: {
     .range(offset, offset + limit - 1);
 
   if (entityType) query = query.eq("entity_type", entityType);
+  if (action) query = query.eq("action", action);
 
   const { data, error } = await query;
   if (error) throw error;

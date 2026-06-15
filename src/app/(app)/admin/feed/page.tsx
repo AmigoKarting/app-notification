@@ -14,8 +14,11 @@ const KINDS: FeedItemKind[] = ["notification", "reminder"];
 
 const PER_PAGE = 20;
 
+const SORTS = ["date_desc", "date_asc", "priority", "title"] as const;
+type SortKey = (typeof SORTS)[number];
+
 interface PageProps {
-  searchParams?: { kind?: string; q?: string; author?: string; page?: string };
+  searchParams?: { kind?: string; q?: string; author?: string; page?: string; sort?: string };
 }
 
 export default async function AdminFeedPage({ searchParams }: PageProps) {
@@ -28,6 +31,9 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
       : undefined;
   const search = searchParams?.q?.trim() ?? "";
   const authorId = searchParams?.author?.trim() || undefined;
+  const sort: SortKey = (SORTS as readonly string[]).includes(searchParams?.sort ?? "")
+    ? (searchParams!.sort as SortKey)
+    : "date_desc";
   const page = Math.max(1, Number(searchParams?.page) || 1);
 
   const [allItems, authors] = await Promise.all([
@@ -35,6 +41,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
       kind,
       search: search || undefined,
       authorId,
+      sort: sort === "date_desc" ? undefined : sort,
       limit: 1000,
     }),
     listProfilesWithEmail(),
@@ -48,6 +55,7 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
   if (kind) paginationParams.kind = kind;
   if (search) paginationParams.q = search;
   if (authorId) paginationParams.author = authorId;
+  if (sort !== "date_desc") paginationParams.sort = sort;
 
   // Conserve le filtre kind dans l'URL de recherche
   const baseParams = new URLSearchParams();
@@ -105,6 +113,23 @@ export default async function AdminFeedPage({ searchParams }: PageProps) {
           active={kind === "reminder"}
           label={t.adminFeed.reminders}
         />
+        <span className="mx-1 text-neutral-300">|</span>
+        {SORTS.map((s) => {
+          const p = new URLSearchParams();
+          if (kind) p.set("kind", kind);
+          if (search) p.set("q", search);
+          if (authorId) p.set("author", authorId);
+          if (s !== "date_desc") p.set("sort", s);
+          const qs = p.toString();
+          return (
+            <Filter
+              key={s}
+              href={qs ? `/admin/feed?${qs}` : "/admin/feed"}
+              active={sort === s}
+              label={t.adminFeed[`sort_${s}` as keyof typeof t.adminFeed] as string}
+            />
+          );
+        })}
         <AuthorFilter
           authors={devs.map((d) => ({
             id: d.id,

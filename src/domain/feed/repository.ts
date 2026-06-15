@@ -56,6 +56,7 @@ export interface ListFeedOptions {
   excludeCategoryIds?: string[];
   /** Filtre par auteur (created_by). */
   authorId?: string;
+  sort?: "date_asc" | "date_desc" | "priority" | "title";
   limit?: number;
   offset?: number;
 }
@@ -105,6 +106,7 @@ export async function listFeedItems(
     search,
     excludeCategoryIds,
     authorId,
+    sort,
     limit = 100,
     offset = 0,
   } = opts;
@@ -113,11 +115,19 @@ export async function listFeedItems(
 
   let query = supabase
     .from("feed_items")
-    .select(SELECT)
-    // Épinglés d'abord, puis par date de publication décroissante.
-    .order("is_pinned", { ascending: false })
-    .order("published_at", { ascending: false })
-    .range(offset, offset + limit - 1);
+    .select(SELECT);
+
+  if (sort === "date_asc") {
+    query = query.order("published_at", { ascending: true });
+  } else if (sort === "priority") {
+    query = query.order("priority", { ascending: true }).order("published_at", { ascending: false });
+  } else if (sort === "title") {
+    query = query.order("title", { ascending: true });
+  } else {
+    query = query.order("is_pinned", { ascending: false }).order("published_at", { ascending: false });
+  }
+
+  query = query.range(offset, offset + limit - 1);
 
   if (kind) query = query.eq("kind", kind);
   if (categoryId) query = query.eq("category_id", categoryId);

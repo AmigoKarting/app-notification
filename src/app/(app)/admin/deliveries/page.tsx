@@ -3,6 +3,7 @@ import { Card, EmptyState, PageHeader, PageTip, formatDateTime } from "@/compone
 import { Pagination } from "@/components/pagination";
 import { channelRegistry } from "@/lib/messaging";
 import { getDeliveryCounts, listDeliveries } from "@/domain/deliveries/repository";
+import { retryDeliveryAction } from "@/domain/deliveries/actions";
 import type { DeliveryStatus, MessageChannel } from "@/lib/supabase/database.types";
 import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
@@ -14,7 +15,7 @@ const STATUSES: DeliveryStatus[] = ["queued", "sent", "failed", "skipped"];
 const PER_PAGE = 20;
 
 interface PageProps {
-  searchParams?: { channel?: string; status?: string; page?: string };
+  searchParams?: { channel?: string; status?: string; page?: string; q?: string };
 }
 
 export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
@@ -30,10 +31,11 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
       ? (searchParams.status as DeliveryStatus)
       : undefined;
 
+  const search = searchParams?.q?.trim() || undefined;
   const page = Math.max(1, Number(searchParams?.page) || 1);
 
   const [allDeliveries, counts] = await Promise.all([
-    listDeliveries({ channel, status, limit: 1000 }),
+    listDeliveries({ channel, status, search, limit: 1000 }),
     getDeliveryCounts(),
   ]);
 
@@ -44,6 +46,7 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
   const paginationParams: Record<string, string> = {};
   if (channel) paginationParams.channel = channel;
   if (status) paginationParams.status = status;
+  if (search) paginationParams.q = search;
 
   const registered = channelRegistry.list();
 
@@ -86,6 +89,21 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
           ))}
         </div>
       </Card>
+
+      <form action="/admin/deliveries" className="flex gap-2">
+        {channel && <input type="hidden" name="channel" value={channel} />}
+        {status && <input type="hidden" name="status" value={status} />}
+        <input
+          type="search"
+          name="q"
+          defaultValue={search ?? ""}
+          placeholder={t.adminDeliveries.searchPlaceholder}
+          className="w-full max-w-xs rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-neutral-600 dark:bg-neutral-800"
+        />
+        <button type="submit" className="rounded-lg bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900">
+          {t.common.search}
+        </button>
+      </form>
 
       <div className="flex flex-wrap gap-2 text-sm">
         <Filter href="/admin/deliveries" active={!channel && !status} label={t.adminDeliveries.everything} />
@@ -140,7 +158,20 @@ export default async function AdminDeliveriesPage({ searchParams }: PageProps) {
                     <p className="line-clamp-2 text-xs text-neutral-500">{d.body}</p>
                   </td>
                   <td className="px-4 py-3 align-top">
-                    <StatusPill status={d.status} />
+                    <div className="flex items-center gap-2">
+                      <StatusPill status={d.status} />
+                      {d.status === "failed" && (
+                        <form action={retryDeliveryAction}>
+                          <input type="hidden" name="id" value={d.id} />
+                          <button
+                            type="submit"
+                            className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300"
+                          >
+                            {t.adminDeliveries.retry}
+                          </button>
+                        </form>
+                      )}
+                    </div>
                     {d.error && (
                       <p
                         className="mt-1 max-w-xs truncate text-xs text-red-600"

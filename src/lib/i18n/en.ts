@@ -190,6 +190,10 @@ const en: Dictionary = {
     newItemDesc: "Notification or reminder to publish in the feed.",
     bulkSelected: "selected",
     bulkDeleteConfirm: "Delete {count} item(s)? This action cannot be undone.",
+    sort_date_desc: "Newest",
+    sort_date_asc: "Oldest",
+    sort_priority: "Priority",
+    sort_title: "A→Z",
   },
 
   feedForm: {
@@ -216,6 +220,7 @@ const en: Dictionary = {
     sendAlsoByDesc: "In addition to displaying in the feed. Requires a configured provider (Resend for email, Twilio for SMS).",
     recipients: "Recipients",
     recipientsQuestion: "Who will see this notification?",
+    recipientCount: "recipients",
     recipientsQuestionSchedule: "Who will receive this notification?",
     everyone: "Everyone",
     everyoneDesc: "All users.",
@@ -467,6 +472,8 @@ const en: Dictionary = {
     status: "Status",
     provider: "Provider",
     exportCsv: "Export CSV",
+    searchPlaceholder: "Search by recipient…",
+    retry: "Retry",
   },
 
   settings: {
@@ -709,6 +716,9 @@ const en: Dictionary = {
     recentNotifications: "New notifications",
     recentDeliveries: "Recent deliveries",
     successRate: "Success rate",
+    range_7d: "7 days",
+    range_30d: "30 days",
+    range_all: "All time",
   },
 
   employees: {
@@ -877,6 +887,8 @@ const en: Dictionary = {
     actionUpdate: "Update",
     actionDelete: "Delete",
     actionBulkDelete: "Bulk delete",
+    actionRetry: "Retry",
+    filterAll: "All",
   },
 
   pagination: {

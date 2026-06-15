@@ -12,7 +12,7 @@ import {
 import { listComments } from "@/domain/comments/repository";
 import { formatDateTime } from "@/components/ui";
 import { listSessions } from "@/domain/sessions/repository";
-import { listTeams } from "@/domain/teams/repository";
+import { listTeamsWithMemberCount } from "@/domain/teams/repository";
 import { listProfilesWithEmail } from "@/domain/users/repository";
 import { duplicateFeedItemAction } from "@/domain/feed/actions";
 import { getServerDictionary, getLocale } from "@/lib/i18n/server";
@@ -43,7 +43,7 @@ export default async function EditFeedItemPage({ params }: PageProps) {
     getFeedItemTargets(params.id),
     listCategories(),
     listSessions(),
-    listTeams(),
+    listTeamsWithMemberCount(),
     listProfilesWithEmail(),
     getReadCount(params.id),
     getReactionSummary(params.id),
@@ -207,7 +207,8 @@ export default async function EditFeedItemPage({ params }: PageProps) {
           targets={targets}
           categories={categories.map((c) => ({ id: c.id, name: c.name }))}
           sessions={sessions.map((s) => ({ id: s.id, name: s.name }))}
-          teams={teams.map((tm) => ({ id: tm.id, name: tm.name, color: tm.color }))}
+          teams={teams.map((tm) => ({ id: tm.id, name: tm.name, color: tm.color, memberCount: tm.member_count }))}
+          totalUsers={users.length}
           users={users.map((u) => ({
             id: u.id,
             name: u.display_name,

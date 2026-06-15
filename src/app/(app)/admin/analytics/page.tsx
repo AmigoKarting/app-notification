@@ -1,16 +1,27 @@
+import Link from "next/link";
 import { Card, PageHeader, PageTip } from "@/components/ui";
-import { getAnalytics } from "@/domain/analytics/repository";
+import { getAnalytics, type AnalyticsRange } from "@/domain/analytics/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminAnalyticsPage() {
+const RANGES: AnalyticsRange[] = ["7d", "30d", "all"];
+
+interface PageProps {
+  searchParams?: { range?: string };
+}
+
+export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
   const t = getServerDictionary();
+  const range: AnalyticsRange = RANGES.includes(searchParams?.range as AnalyticsRange)
+    ? (searchParams!.range as AnalyticsRange)
+    : "all";
+
   let data: Awaited<ReturnType<typeof getAnalytics>> | null = null;
   let loadError: string | null = null;
 
   try {
-    data = await getAnalytics();
+    data = await getAnalytics(range);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("[ADMIN ANALYTICS] Data fetch crashed:", msg, e);
@@ -29,6 +40,22 @@ export default async function AdminAnalyticsPage() {
         description={t.analytics.description}
         helpHref="/admin/aide/suivi-admin"
       />
+
+      <div className="flex flex-wrap gap-2 text-sm">
+        {RANGES.map((r) => (
+          <Link
+            key={r}
+            href={r === "all" ? "/admin/analytics" : `/admin/analytics?range=${r}`}
+            className={`rounded-full px-3 py-1 transition ${
+              range === r
+                ? "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900"
+                : "border border-neutral-200 bg-white hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700"
+            }`}
+          >
+            {t.analytics[`range_${r}` as keyof typeof t.analytics] ?? r}
+          </Link>
+        ))}
+      </div>
 
       {loadError && (
         <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">

@@ -30,9 +30,24 @@ export interface AnalyticsData {
   recentDeliveries: number;
 }
 
-export async function getAnalytics(): Promise<AnalyticsData> {
+export type AnalyticsRange = "7d" | "30d" | "all";
+
+export async function getAnalytics(range: AnalyticsRange = "all"): Promise<AnalyticsData> {
   const supabase = createClient();
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  const sinceMap: Record<AnalyticsRange, string | null> = {
+    "7d": new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    "30d": new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    all: null,
+  };
+  const since = sinceMap[range];
+
+  function q(table: string) {
+    let builder = supabase.from(table).select("*", { count: "exact", head: true });
+    if (since) builder = builder.gte("created_at", since);
+    return builder;
+  }
 
   const [
     totalNotifs,
@@ -50,16 +65,16 @@ export async function getAnalytics(): Promise<AnalyticsData> {
     recentNotifs,
     recentDeliveries,
   ] = await Promise.all([
-    supabase.from("feed_items").select("*", { count: "exact", head: true }).eq("kind", "notification"),
-    supabase.from("feed_items").select("*", { count: "exact", head: true }).eq("kind", "reminder"),
-    supabase.from("feed_items").select("*", { count: "exact", head: true }).eq("is_draft", true),
-    supabase.from("notification_deliveries").select("*", { count: "exact", head: true }),
-    supabase.from("notification_deliveries").select("*", { count: "exact", head: true }).eq("status", "sent"),
-    supabase.from("notification_deliveries").select("*", { count: "exact", head: true }).eq("status", "failed"),
-    supabase.from("notification_deliveries").select("*", { count: "exact", head: true }).eq("status", "skipped"),
-    supabase.from("feed_item_reads").select("*", { count: "exact", head: true }),
-    supabase.from("feed_item_reactions").select("*", { count: "exact", head: true }),
-    supabase.from("comments").select("*", { count: "exact", head: true }),
+    q("feed_items").eq("kind", "notification"),
+    q("feed_items").eq("kind", "reminder"),
+    q("feed_items").eq("is_draft", true),
+    q("notification_deliveries"),
+    q("notification_deliveries").eq("status", "sent"),
+    q("notification_deliveries").eq("status", "failed"),
+    q("notification_deliveries").eq("status", "skipped"),
+    q("feed_item_reads"),
+    q("feed_item_reactions"),
+    q("comments"),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "dev"),
     supabase.from("feed_items").select("*", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),

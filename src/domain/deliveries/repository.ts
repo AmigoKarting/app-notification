@@ -10,6 +10,7 @@ export interface ListDeliveriesOptions {
   channel?: MessageChannel;
   status?: DeliveryStatus;
   source?: string;
+  search?: string;
   limit?: number;
   offset?: number;
 }
@@ -17,7 +18,7 @@ export interface ListDeliveriesOptions {
 export async function listDeliveries(
   opts: ListDeliveriesOptions = {},
 ): Promise<Delivery[]> {
-  const { channel, status, source, limit = 100, offset = 0 } = opts;
+  const { channel, status, source, search, limit = 100, offset = 0 } = opts;
   const supabase = createClient();
 
   let query = supabase
@@ -29,10 +30,21 @@ export async function listDeliveries(
   if (channel) query = query.eq("channel", channel);
   if (status) query = query.eq("status", status);
   if (source) query = query.eq("source", source);
+  if (search) query = query.or(`recipient.ilike.%${search}%,subject.ilike.%${search}%`);
 
   const { data, error } = await query;
   if (error) throw fromPostgrestError(error);
   return data ?? [];
+}
+
+export async function retryDelivery(id: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("notification_deliveries")
+    .update({ status: "queued" as DeliveryStatus, error: null })
+    .eq("id", id)
+    .eq("status", "failed");
+  if (error) throw fromPostgrestError(error);
 }
 
 export async function getDeliveryCounts(): Promise<{

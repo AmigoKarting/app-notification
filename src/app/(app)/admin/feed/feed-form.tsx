@@ -24,13 +24,14 @@ import { useTranslation } from "@/lib/i18n";
 
 type Option = { id: string; name: string };
 type UserOption = { id: string; name: string | null; email: string | null };
-type TeamOption = { id: string; name: string; color: string };
+type TeamOption = { id: string; name: string; color: string; memberCount: number };
 
 interface CommonProps {
   categories: Option[];
   sessions: Option[];
   teams: TeamOption[];
   users: UserOption[];
+  totalUsers: number;
 }
 
 type Props =
@@ -69,6 +70,15 @@ export function FeedItemForm(props: Props) {
   const [targetMode, setTargetMode] = useState<FeedTargetMode>(
     initial?.target_mode ?? "all",
   );
+  const [selectedTeamIds, setSelectedTeamIds] = useState<Set<string>>(new Set(initialTargets.team_ids));
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set(initialTargets.user_ids));
+
+  const recipientCount =
+    targetMode === "all"
+      ? props.totalUsers
+      : targetMode === "teams"
+        ? props.teams.filter((tm) => selectedTeamIds.has(tm.id)).reduce((sum, tm) => sum + tm.memberCount, 0)
+        : selectedUserIds.size;
 
   const initialChannels = new Set(initial?.send_channels ?? []);
 
@@ -173,9 +183,14 @@ export function FeedItemForm(props: Props) {
 
       {/* ---- 2. Destinataires ---- */}
       <section className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50/40 p-5 dark:border-neutral-700 dark:bg-neutral-800/40">
-        <header>
-          <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{t.feedForm.recipients}</h3>
-          <p className="text-xs text-neutral-600 dark:text-neutral-400">{t.feedForm.recipientsQuestion}</p>
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{t.feedForm.recipients}</h3>
+            <p className="text-xs text-neutral-600 dark:text-neutral-400">{t.feedForm.recipientsQuestion}</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-brand-100 px-2.5 py-1 text-xs font-semibold text-brand-800 dark:bg-brand-900/30 dark:text-brand-300">
+            {recipientCount} {t.feedForm.recipientCount}
+          </span>
         </header>
 
         <fieldset className="grid grid-cols-1 gap-2 md:grid-cols-3">
@@ -214,6 +229,7 @@ export function FeedItemForm(props: Props) {
             }))}
             name="target_team_ids"
             initialSelected={initialTargets.team_ids}
+            onSelectionChange={setSelectedTeamIds}
           />
         )}
 
@@ -230,6 +246,7 @@ export function FeedItemForm(props: Props) {
             name="target_user_ids"
             initialSelected={initialTargets.user_ids}
             searchable
+            onSelectionChange={setSelectedUserIds}
           />
         )}
       </section>
@@ -449,6 +466,7 @@ function PickerList({
   error,
   emptyMessage,
   searchable = false,
+  onSelectionChange,
 }: {
   label: string;
   items: PickerItem[];
@@ -457,9 +475,20 @@ function PickerList({
   error?: string;
   emptyMessage: string;
   searchable?: boolean;
+  onSelectionChange?: (selected: Set<string>) => void;
 }) {
   const [search, setSearch] = useState("");
   const initial = new Set(initialSelected);
+  const [selected, setSelected] = useState(initial);
+
+  function handleToggle(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id); else next.delete(id);
+      onSelectionChange?.(next);
+      return next;
+    });
+  }
 
   const { t } = useTranslation();
   const filtered =
@@ -502,7 +531,8 @@ function PickerList({
                       type="checkbox"
                       name={name}
                       value={i.id}
-                      defaultChecked={initial.has(i.id)}
+                      checked={selected.has(i.id)}
+                      onChange={(e) => handleToggle(i.id, e.target.checked)}
                       className="h-4 w-4 rounded border-neutral-300 text-brand-600 focus:ring-brand-500"
                     />
                     {i.accentColor && (
