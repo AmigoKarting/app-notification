@@ -485,6 +485,10 @@ const fr = {
     noCategoriesYet: "Aucune catégorie pour l'instant. Les notifications sans catégorie ne peuvent pas être masquées.",
     language: "Langue",
     languageDesc: "Change la langue de l'interface.",
+    dateFormatLabel: "Format de date",
+    dateFormatDesc: "Choisis comment les dates s'affichent dans les notifications.",
+    dateFormatShort: "Compact",
+    dateFormatFriendly: "Jour et heure",
   },
 
   formatting: {

@@ -487,6 +487,10 @@ const en: Dictionary = {
     noCategoriesYet: "No categories yet. Notifications without a category cannot be muted.",
     language: "Language",
     languageDesc: "Change the interface language.",
+    dateFormatLabel: "Date format",
+    dateFormatDesc: "Choose how dates are displayed in notifications.",
+    dateFormatShort: "Compact",
+    dateFormatFriendly: "Day & time",
   },
 
   formatting: {

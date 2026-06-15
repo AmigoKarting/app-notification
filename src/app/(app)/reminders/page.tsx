@@ -11,7 +11,7 @@ import {
 import { Pagination } from "@/components/pagination";
 import { listReminders, type ReminderStatus } from "@/domain/reminders/repository";
 import { CancelReminderForm } from "./cancel-form";
-import { getServerDictionary, getLocale } from "@/lib/i18n/server";
+import { getServerDictionary, getLocale, getDateFormat } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -105,7 +105,7 @@ export default async function RemindersPage({ searchParams }: PageProps) {
                     <p className="line-clamp-2">{r.message}</p>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 align-top text-neutral-700 dark:text-neutral-300">
-                    {formatDateTime(r.scheduled_at, locale === "en" ? "en-US" : "fr-FR")}
+                    {formatDateTime(r.scheduled_at, locale === "en" ? "en-US" : "fr-FR", getDateFormat() === "friendly")}
                   </td>
                   <td className="px-4 py-3 align-top">
                     <StatusBadge status={r.status} />

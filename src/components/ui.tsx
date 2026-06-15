@@ -462,10 +462,19 @@ export function LogoMark({ className = "", size = 24 }: IconProps) {
 // ---------------------------------------------------------------------
 // Date helpers
 // ---------------------------------------------------------------------
-export function formatDateTime(iso: string, locale?: string): string {
+export function formatDateTime(iso: string, locale?: string, friendly?: boolean): string {
   const loc = locale ?? (typeof document !== "undefined"
     ? document.documentElement.lang === "en" ? "en-US" : "fr-FR"
     : "fr-FR");
+  if (friendly) {
+    return new Date(iso).toLocaleString(loc, {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
   return new Date(iso).toLocaleString(loc, {
     dateStyle: "short",
     timeStyle: "short",

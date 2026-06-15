@@ -11,7 +11,7 @@ import { listEmployees } from "@/domain/employees/repository";
 import { getReminder } from "@/domain/reminders/repository";
 import { ReminderForm } from "../reminder-form";
 import { DeleteReminderForm } from "./delete-form";
-import { getServerDictionary, getLocale } from "@/lib/i18n/server";
+import { getServerDictionary, getLocale, getDateFormat } from "@/lib/i18n/server";
 
 interface PageProps {
   params: { id: string };
@@ -21,6 +21,7 @@ export default async function ReminderDetailPage({ params }: PageProps) {
   const t = getServerDictionary();
   const locale = getLocale();
   const dateFmt = locale === "en" ? "en-US" : "fr-FR";
+  const friendly = getDateFormat() === "friendly";
 
   const [reminder, employees] = await Promise.all([
     getReminder(params.id),
@@ -31,7 +32,7 @@ export default async function ReminderDetailPage({ params }: PageProps) {
 
   const descText = t.reminders.detailDesc
     .replace("{name}", reminder.employee?.name ?? "—")
-    .replace("{date}", formatDateTime(reminder.scheduled_at, dateFmt));
+    .replace("{date}", formatDateTime(reminder.scheduled_at, dateFmt, friendly));
 
   return (
     <div className="space-y-6">

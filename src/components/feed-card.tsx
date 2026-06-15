@@ -5,7 +5,7 @@ import { ReactionBar, ReadToggle } from "@/components/feed-engagement";
 import type { CommentWithAuthor } from "@/domain/comments/repository";
 import type { FeedItemEngagement, FeedItemWithRelations } from "@/domain/feed/repository";
 import { renderMarkdown } from "@/lib/markdown";
-import { getServerDictionary, getLocale } from "@/lib/i18n/server";
+import { getServerDictionary, getLocale, getDateFormat } from "@/lib/i18n/server";
 
 const PRIORITY_BORDER: Record<string, string> = {
   low: "border-l-neutral-200",
@@ -57,6 +57,7 @@ export function FeedCard({
   const t = getServerDictionary();
   const locale = getLocale();
   const dateFmt = locale === "en" ? "en-US" : "fr-FR";
+  const friendly = getDateFormat() === "friendly";
   const isOverdue =
     item.kind === "reminder" &&
     item.due_date &&
@@ -158,7 +159,7 @@ export function FeedCard({
         )}
 
         <footer className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500">
-          <span>{t.feed.publishedOn} {formatDateTime(item.published_at, dateFmt)}</span>
+          <span>{t.feed.publishedOn} {formatDateTime(item.published_at, dateFmt, friendly)}</span>
           {authorLabel && (
             <span>
               {t.feed.by} <span className="font-medium text-neutral-700">{authorLabel}</span>
@@ -166,10 +167,10 @@ export function FeedCard({
           )}
           {item.kind === "reminder" && item.due_date && (
             <span className={isOverdue ? "font-medium text-red-600" : "text-amber-700"}>
-              {t.feed.deadline} {formatDateTime(item.due_date, dateFmt)} {isOverdue && t.feed.overdue}
+              {t.feed.deadline} {formatDateTime(item.due_date, dateFmt, friendly)} {isOverdue && t.feed.overdue}
             </span>
           )}
-          {item.expires_at && <span>{t.feed.expiresOn} {formatDateTime(item.expires_at, dateFmt)}</span>}
+          {item.expires_at && <span>{t.feed.expiresOn} {formatDateTime(item.expires_at, dateFmt, friendly)}</span>}
           {item.send_channels && item.send_channels.length > 0 && (
             <span className="text-neutral-400">
               · {t.feed.sentAlsoBy} {item.send_channels.map((c) => c.toUpperCase()).join(" + ")}

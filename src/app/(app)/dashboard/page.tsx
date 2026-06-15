@@ -15,7 +15,7 @@ import {
   formatDateTime,
 } from "@/components/ui";
 import { getReminderCounts, listReminders } from "@/domain/reminders/repository";
-import { getServerDictionary, getLocale } from "@/lib/i18n/server";
+import { getServerDictionary, getLocale, getDateFormat } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +23,7 @@ export default async function DashboardPage() {
   const t = getServerDictionary();
   const locale = getLocale();
   const dateFmt = locale === "en" ? "en-US" : "fr-FR";
+  const friendly = getDateFormat() === "friendly";
 
   const [counts, upcoming] = await Promise.all([
     getReminderCounts(),
@@ -109,7 +110,7 @@ export default async function DashboardPage() {
                       </span>
                       <span className="text-neutral-300">•</span>
                       <ClockIcon size={12} className="text-neutral-400" />
-                      {formatDateTime(r.scheduled_at, dateFmt)}
+                      {formatDateTime(r.scheduled_at, dateFmt, friendly)}
                     </p>
                   </div>
                   <StatusBadge status={r.status} />

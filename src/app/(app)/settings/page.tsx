@@ -5,10 +5,11 @@ import { listCategories } from "@/domain/categories/repository";
 import { listMutedCategoryIds } from "@/domain/category-mutes/repository";
 import { listAllBanners } from "@/domain/role-banners/repository";
 import { listRolesWithPermissions } from "@/domain/roles/repository";
-import { getServerDictionary } from "@/lib/i18n/server";
+import { getServerDictionary, getDateFormat } from "@/lib/i18n/server";
 import { PushToggle } from "@/components/push-toggle";
 import { ProfileForm } from "../profile/profile-form";
 import { BannersManager } from "./banners-manager";
+import { DateFormatSection } from "./date-format-section";
 import { MuteSection } from "./mute-section";
 import { ThemeSection } from "./theme-section";
 
@@ -102,7 +103,10 @@ export default async function SettingsPage() {
             {t.settings.appearanceDesc}
           </p>
         </div>
-        <ThemeSection />
+        <div className="space-y-6">
+          <ThemeSection />
+          <DateFormatSection initial={getDateFormat()} />
+        </div>
       </Card>
 
       {/* Sections push + mute par catégorie : réservées aux devs.
