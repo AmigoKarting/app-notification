@@ -68,9 +68,9 @@ export async function createReminderAction(
     return mapRepositoryError(err);
   }
 
-  revalidatePath("/reminders");
-  revalidatePath("/dashboard");
-  redirect("/reminders");
+  revalidatePath("/admin/reminders");
+  revalidatePath("/admin");
+  redirect("/admin/reminders");
 }
 
 // ---------------------------------------------------------------------
@@ -104,9 +104,9 @@ export async function updateReminderAction(
     return mapRepositoryError(err);
   }
 
-  revalidatePath("/reminders");
-  revalidatePath(`/reminders/${id}`);
-  revalidatePath("/dashboard");
+  revalidatePath("/admin/reminders");
+  revalidatePath(`/admin/reminders/${id}`);
+  revalidatePath("/admin");
   return { status: "success", message: t.actionMessages.saved };
 }
 
@@ -119,9 +119,9 @@ export async function deleteReminderAction(formData: FormData): Promise<void> {
   if (!id) return;
 
   await deleteReminder(id);
-  revalidatePath("/reminders");
-  revalidatePath("/dashboard");
-  redirect("/reminders");
+  revalidatePath("/admin/reminders");
+  revalidatePath("/admin");
+  redirect("/admin/reminders");
 }
 
 // ---------------------------------------------------------------------
@@ -137,6 +137,6 @@ export async function cancelReminderAction(formData: FormData): Promise<void> {
   } catch {
     // silencieux côté list
   }
-  revalidatePath("/reminders");
-  revalidatePath("/dashboard");
+  revalidatePath("/admin/reminders");
+  revalidatePath("/admin");
 }

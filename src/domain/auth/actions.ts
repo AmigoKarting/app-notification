@@ -13,7 +13,7 @@ import { type AuthFormState, loginSchema, signupSchema } from "./schema";
 
 const SAFE_REDIRECT = /^\/(?!\/)[A-Za-z0-9_\-./?=&%]*$/;
 
-function safeRedirect(target: FormDataEntryValue | null | undefined, fallback = "/dashboard"): string {
+function safeRedirect(target: FormDataEntryValue | null | undefined, fallback = "/feed"): string {
   if (typeof target !== "string") return fallback;
   return SAFE_REDIRECT.test(target) ? target : fallback;
 }
@@ -110,7 +110,7 @@ export async function signupAction(
     };
   }
 
-  return { status: "success", redirect: "/dashboard" };
+  return { status: "success", redirect: "/feed" };
 }
 
 // ---------------------------------------------------------------------

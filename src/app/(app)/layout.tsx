@@ -17,7 +17,7 @@ import { PushAutoSubscribe } from "@/components/push-auto-subscribe";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { getServerDictionary } from "@/lib/i18n/server";
 
-const DEV_ONLY_PREFIXES = ["/dashboard", "/employees", "/reminders", "/admin"];
+const DEV_ONLY_PREFIXES = ["/admin"];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();

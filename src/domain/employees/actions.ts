@@ -67,9 +67,9 @@ export async function createEmployeeAction(
     return mapRepositoryError(err);
   }
 
-  revalidatePath("/employees");
-  revalidatePath("/dashboard");
-  redirect("/employees");
+  revalidatePath("/admin/employees");
+  revalidatePath("/admin");
+  redirect("/admin/employees");
 }
 
 // ---------------------------------------------------------------------
@@ -102,8 +102,8 @@ export async function updateEmployeeAction(
     return mapRepositoryError(err);
   }
 
-  revalidatePath("/employees");
-  revalidatePath(`/employees/${id}`);
+  revalidatePath("/admin/employees");
+  revalidatePath(`/admin/employees/${id}`);
   return { status: "success", message: t.actionMessages.saved };
 }
 
@@ -116,7 +116,7 @@ export async function deleteEmployeeAction(formData: FormData): Promise<void> {
   if (!id) return;
 
   await deleteEmployee(id);
-  revalidatePath("/employees");
-  revalidatePath("/dashboard");
-  redirect("/employees");
+  revalidatePath("/admin/employees");
+  revalidatePath("/admin");
+  redirect("/admin/employees");
 }

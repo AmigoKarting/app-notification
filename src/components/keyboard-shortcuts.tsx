@@ -21,8 +21,8 @@ export function KeyboardShortcuts({ isDev }: { isDev: boolean }) {
     { key: "h", label: t.shortcuts.goHome, action: () => router.push(isDev ? "/admin" : "/feed") },
     { key: "f", label: t.shortcuts.goFeed, action: () => router.push("/feed") },
     { key: "n", label: t.shortcuts.newNotification, action: () => router.push("/admin/feed/new"), devOnly: true },
-    { key: "e", label: t.shortcuts.goEmployees, action: () => router.push("/employees"), devOnly: true },
-    { key: "r", label: t.shortcuts.goReminders, action: () => router.push("/reminders"), devOnly: true },
+    { key: "e", label: t.shortcuts.goEmployees, action: () => router.push("/admin/employees"), devOnly: true },
+    { key: "r", label: t.shortcuts.goReminders, action: () => router.push("/admin/reminders"), devOnly: true },
     { key: "s", label: t.shortcuts.goSettings, action: () => router.push("/settings") },
     { key: "a", label: t.shortcuts.goAnalytics, action: () => router.push("/admin/analytics"), devOnly: true },
     { key: "/", label: t.shortcuts.focusSearch, action: () => {

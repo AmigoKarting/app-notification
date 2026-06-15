@@ -3,12 +3,9 @@ import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { listCategories } from "@/domain/categories/repository";
 import { listMutedCategoryIds } from "@/domain/category-mutes/repository";
-import { listAllBanners } from "@/domain/role-banners/repository";
-import { listRolesWithPermissions } from "@/domain/roles/repository";
 import { getServerDictionary, getDateFormat } from "@/lib/i18n/server";
 import { PushToggle } from "@/components/push-toggle";
 import { ProfileForm } from "../profile/profile-form";
-import { BannersManager } from "./banners-manager";
 import { DateFormatSection } from "./date-format-section";
 import { MuteSection } from "./mute-section";
 import { ThemeSection } from "./theme-section";
@@ -31,11 +28,6 @@ export default async function SettingsPage() {
   const isCashier = profile?.role === "caissiere";
   const isDev = profile?.role === "dev";
   const backHref = isCashier ? "/checklist" : "/feed";
-
-  // Données admin chargées uniquement quand on est dev
-  const [banners, allRoles] = isDev
-    ? await Promise.all([listAllBanners(), listRolesWithPermissions()])
-    : [[], []];
 
   // Sépare la catégorie "checklist-caisse" du reste :
   // - elle ne doit jamais apparaître dans la section générale "Mes notifications"
@@ -113,36 +105,6 @@ export default async function SettingsPage() {
           On ne laisse pas les employés couper leurs notifications. */}
       {isDev && (
         <>
-          {/* Bannières par rôle : configurables par les devs.
-              Une bannière par rôle, avec dismiss_condition optionnel. */}
-          <Card className="p-4 sm:p-6">
-            <div className="mb-5">
-              <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
-                {t.bannersAdmin.sectionTitle}
-              </h2>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                {t.bannersAdmin.sectionDesc}
-              </p>
-            </div>
-            <BannersManager
-              banners={banners.map((b) => ({
-                role_slug: b.role_slug,
-                enabled: b.enabled,
-                message: b.message,
-                cta_label: b.cta_label,
-                cta_url: b.cta_url,
-                icon: b.icon,
-                color: b.color,
-                dismiss_condition: b.dismiss_condition,
-              }))}
-              allRoles={allRoles.map((r) => ({
-                slug: r.slug,
-                name: r.name,
-                icon: r.icon,
-              }))}
-            />
-          </Card>
-
           <Card className="p-4 sm:p-6">
             <div className="mb-5">
               <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{t.settings.pushNotifications}</h2>

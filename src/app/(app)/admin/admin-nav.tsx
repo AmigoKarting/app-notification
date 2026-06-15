@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  AlertIcon,
   BarChartIcon,
   BellIcon,
   BrushIcon,
@@ -36,6 +37,7 @@ function getNav(t: Dictionary["nav"]): NavSection[] {
       label: t.content,
       entries: [
         { href: "/admin/feed", label: t.notifications, icon: BellIcon },
+        { href: "/admin/reminders", label: t.reminders, icon: AlertIcon },
         { href: "/admin/schedules", label: t.schedules, icon: ClockIcon },
         { href: "/admin/templates", label: t.templates, icon: TagIcon },
       ],
@@ -46,16 +48,22 @@ function getNav(t: Dictionary["nav"]): NavSection[] {
         { href: "/admin/categories", label: t.categories, icon: TagIcon },
         { href: "/admin/sessions", label: t.sessions, icon: CalendarIcon },
         { href: "/admin/teams", label: t.teams, icon: UsersIcon },
+        { href: "/admin/checklists", label: t.checklists, icon: CheckIcon },
+        { href: "/admin/checklist-tasks", label: t.checklistTasks, icon: CheckIcon },
       ],
     },
     {
-      label: t.system,
+      label: t.people,
       entries: [
+        { href: "/admin/employees", label: t.employees, icon: UsersIcon },
         { href: "/admin/users", label: t.users, icon: UserIcon },
         { href: "/admin/roles", label: t.roles, icon: UserIcon },
+      ],
+    },
+    {
+      label: t.tools,
+      entries: [
         { href: "/admin/deliveries", label: t.deliveries, icon: SendIcon },
-        { href: "/admin/checklists", label: t.checklists, icon: CheckIcon },
-        { href: "/admin/checklist-tasks", label: t.checklistTasks, icon: CheckIcon },
         { href: "/admin/analytics", label: t.analytics, icon: BarChartIcon },
         { href: "/admin/branding", label: t.branding, icon: BrushIcon },
       ],

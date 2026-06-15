@@ -41,5 +41,5 @@ export async function requireUser(redirectTo?: string): Promise<User> {
  */
 export async function requireGuest(): Promise<void> {
   const user = await getCurrentUser();
-  if (user) redirect("/dashboard");
+  if (user) redirect("/feed");
 }
