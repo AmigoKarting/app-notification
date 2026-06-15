@@ -22,7 +22,7 @@ export default function GuideCustomizePage() {
       <GuideSection title="Changer le logo et le nom (marque)">
         <Steps>
           <Step number={1} title="Va sur Admin → Marque">
-            Sidebar gauche, section Système.
+            Sidebar gauche, section Outils.
           </Step>
           <Step number={2} title="Logo">
             Clique « Choisir un fichier » et sélectionne ton image (PNG, JPG ou SVG, 2 Mo max).
