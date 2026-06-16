@@ -29,7 +29,7 @@ export default function GuideCustomizePage() {
             L'aperçu apparaît immédiatement.
           </Step>
           <Step number={3} title="Nom de l'application">
-            Remplace « App Notification » par ton nom (ex: « AmigoKarting »). Affiché à côté du logo.
+            Remplace « Amigo Karting » par ton nom personnalisé. Affiché à côté du logo.
           </Step>
           <Step number={4} title="Tagline (optionnel)">
             Phrase d'accroche affichée sur la page d'accueil publique.

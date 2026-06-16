@@ -675,7 +675,7 @@ const en: Dictionary = {
     description: "Customize the app name and logo. Great for white-labeling.",
     aboutTitle: "About branding",
     aboutLogo: "The logo appears in the app header, on the login page, and on the public landing page.",
-    aboutName: "The name replaces 'App Notification' everywhere in the interface.",
+    aboutName: "The name replaces 'Amigo Karting' everywhere in the interface.",
     aboutAccent: "The accent color is set in Settings → Appearance (per user, stored in the browser).",
     aboutGlobal: "Branding here is global to the entire installation — all users see it.",
     noLogo: "No logo",

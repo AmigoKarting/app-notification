@@ -673,7 +673,7 @@ const fr = {
     description: "Personnalise le nom et le logo de l'application. Idéal pour le white-label.",
     aboutTitle: "À propos du branding",
     aboutLogo: "Le logo apparaît dans le header de l'app, sur la page de connexion et sur la landing publique.",
-    aboutName: "Le nom remplace « App Notification » partout dans l'interface.",
+    aboutName: "Le nom remplace « Amigo Karting » partout dans l'interface.",
     aboutAccent: "La couleur d'accent se règle dans Réglages → Apparence (par utilisateur, mémorisée dans le navigateur).",
     aboutGlobal: "Le branding ici est global à toute l'installation — tous les utilisateurs le voient.",
     noLogo: "Aucun logo",

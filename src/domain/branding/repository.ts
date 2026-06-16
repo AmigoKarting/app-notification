@@ -10,7 +10,7 @@ export type AppSettings = Database["public"]["Tables"]["app_settings"]["Row"];
 
 const DEFAULTS: AppSettings = {
   id: 1,
-  app_name: "App Notification",
+  app_name: "Amigo Karting",
   app_tagline: null,
   logo_url: null,
   cashier_banner_enabled: true,
