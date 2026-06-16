@@ -38,7 +38,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     console.error("[LAYOUT] getBranding error:", e);
     branding = {
       id: 1,
-      app_name: "App Notification",
+      app_name: "Amigo Karting",
       app_tagline: null,
       logo_url: null,
       cashier_banner_enabled: true,

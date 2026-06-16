@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getAppSettings } from "@/domain/branding/repository";
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  let appName = "App Notification";
+  let appName = "Amigo Karting";
   try {
     const settings = await getAppSettings();
     appName = settings.app_name;

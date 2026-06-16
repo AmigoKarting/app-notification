@@ -1,11 +1,7 @@
-import { LogoMark } from "@/components/ui";
 import { getAppSettings } from "@/domain/branding/repository";
 
-/**
- * Logo de l'app:
- *  - Image custom si app_settings.logo_url est défini
- *  - Sinon le LogoMark SVG par défaut (avec gradient)
- */
+const DEFAULT_LOGO = "/logo-amigo.png";
+
 export async function AppLogo({
   size = 28,
   className = "",
@@ -14,20 +10,19 @@ export async function AppLogo({
   className?: string;
 }) {
   const settings = await getAppSettings();
-  if (settings.logo_url) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={settings.logo_url}
-        alt={settings.app_name}
-        width={size}
-        height={size}
-        className={`shrink-0 rounded-md object-contain ${className}`}
-        style={{ width: size, height: size }}
-      />
-    );
-  }
-  return <LogoMark size={size} className={className} />;
+  const logoSrc = settings.logo_url || DEFAULT_LOGO;
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={logoSrc}
+      alt={settings.app_name}
+      width={size * 2.5}
+      height={size}
+      className={`shrink-0 object-contain ${className}`}
+      style={{ height: size }}
+    />
+  );
 }
 
 /**
