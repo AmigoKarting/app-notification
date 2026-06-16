@@ -37,18 +37,11 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
     active: pathname === "/supervisor",
   };
 
-  const supervisorHistoryTab = {
-    href: "/supervisor-history",
-    label: t.supervisor.historyTitle,
-    icon: ClipboardSvg,
-    active: pathname === "/supervisor-history",
-  };
-
   const historyTab = {
-    href: "/checklist-history",
+    href: "/supervisor-history",
     label: t.checklist.historyShort,
     icon: ClipboardSvg,
-    active: pathname === "/checklist-history",
+    active: pathname === "/supervisor-history",
   };
 
   // Caissière → Checklist d'abord (page d'accueil). Dev → accès aussi (test admin).
@@ -58,7 +51,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
       : isDev
         ? [feedTab, checklistTab]
         : isGerant
-          ? [feedTab, supervisorTab, supervisorHistoryTab]
+          ? [feedTab, supervisorTab, historyTab]
           : [feedTab]),
     ...(isDev
       ? [
