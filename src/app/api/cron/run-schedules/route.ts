@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { dispatchSchedules } from "@/domain/notification-schedules/worker";
 import { dispatchReminders } from "@/domain/reminders/dispatcher";
+import { dispatchAutoNotifications } from "@/domain/auto-notifications/engine";
 import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
@@ -55,6 +56,15 @@ async function handle(request: Request) {
     const message = err instanceof Error ? err.message : "unknown error";
     logger.error("cron.reminders.failed", { error: message });
     results.reminders = { ok: false, error: message };
+  }
+
+  // 3. Notifications automatiques superviseur (horaires saisonniers)
+  try {
+    results.autoNotifications = await dispatchAutoNotifications();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown error";
+    logger.error("cron.auto-notifications.failed", { error: message });
+    results.autoNotifications = { ok: false, error: message };
   }
 
   return NextResponse.json({ ok: true, ...results });
