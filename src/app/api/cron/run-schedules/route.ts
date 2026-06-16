@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { dispatchSchedules } from "@/domain/notification-schedules/worker";
 import { dispatchReminders } from "@/domain/reminders/dispatcher";
-import { dispatchAutoNotifications } from "@/domain/auto-notifications/engine";
+import {
+  dispatchAutoNotifications,
+  dispatchLateChecklistAlert,
+  dispatchDatedNotifications,
+} from "@/domain/auto-notifications/engine";
 import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
@@ -65,6 +69,24 @@ async function handle(request: Request) {
     const message = err instanceof Error ? err.message : "unknown error";
     logger.error("cron.auto-notifications.failed", { error: message });
     results.autoNotifications = { ok: false, error: message };
+  }
+
+  // 4. Alerte retard checklist caissière (>1h après ouverture)
+  try {
+    results.lateChecklist = await dispatchLateChecklistAlert();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown error";
+    logger.error("cron.late-checklist.failed", { error: message });
+    results.lateChecklist = { ok: false, error: message };
+  }
+
+  // 5. Notifications à dates spécifiques (recyclage, etc.)
+  try {
+    results.datedNotifications = await dispatchDatedNotifications();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown error";
+    logger.error("cron.dated-notifications.failed", { error: message });
+    results.datedNotifications = { ok: false, error: message };
   }
 
   return NextResponse.json({ ok: true, ...results });
