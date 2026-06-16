@@ -12,7 +12,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const isDev = role === "dev";
-  const isGerant = role === "gerant";
+  const isGerant = role === "superviseur";
   const isCashier = role === "caissiere";
 
   // Pour les caissières, l'onglet Checklist passe en premier (page d'accueil).

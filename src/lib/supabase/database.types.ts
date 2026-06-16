@@ -9,7 +9,7 @@ export type Json =
 export type ReminderStatus = "pending" | "sent" | "cancelled" | "failed";
 // L'enum SQL `app_role` est étendu dynamiquement via create_custom_role().
 // Côté TypeScript on garde un alias `string` pour pouvoir représenter
-// n'importe quel slug (dev, gerant, caissiere, ou tout rôle custom).
+// n'importe quel slug (dev, superviseur, caissiere, ou tout rôle custom).
 // Les helpers `isDev`, `isCashier` etc. comparent toujours à des
 // littéraux donc le confort de l'autocomplétion reste sur les rôles
 // connus côté code.

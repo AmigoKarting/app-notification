@@ -12,7 +12,7 @@ export default async function ChecklistHistoryPage() {
   await requireUser();
   const profile = await getCurrentProfile();
 
-  if (!profile || (profile.role !== "dev" && profile.role !== "gerant")) {
+  if (!profile || (profile.role !== "dev" && profile.role !== "superviseur")) {
     redirect("/feed");
   }
 

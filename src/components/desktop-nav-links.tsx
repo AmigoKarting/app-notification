@@ -12,7 +12,7 @@ export function DesktopNavLinks({ role }: DesktopNavLinksProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const isDev = role === "dev";
-  const isGerant = role === "gerant";
+  const isGerant = role === "superviseur";
   const isCashier = role === "caissiere";
 
   return (

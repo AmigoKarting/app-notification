@@ -37,10 +37,10 @@ export async function requireDev(): Promise<Profile> {
   return profile;
 }
 
-export async function requireDevOrGerant(): Promise<Profile> {
+export async function requireDevOrSuperviseur(): Promise<Profile> {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
-  if (profile.role !== "dev" && profile.role !== "gerant") redirect("/feed");
+  if (profile.role !== "dev" && profile.role !== "superviseur") redirect("/feed");
   return profile;
 }
 

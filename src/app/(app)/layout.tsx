@@ -50,7 +50,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const isDev = profile?.role === "dev";
-  const isGerant = profile?.role === "gerant";
+  const isGerant = profile?.role === "superviseur";
   const isCashier = profile?.role === "caissiere";
   const displayLabel =
     (profile?.first_name && profile?.last_name
@@ -92,7 +92,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <span className="dark:text-neutral-100">{branding.app_name}</span>
             </Link>
 
-            <DesktopNavLinks role={profile?.role ?? "gerant"} />
+            <DesktopNavLinks role={profile?.role ?? "superviseur"} />
           </nav>
 
           <div className="flex items-center gap-2 text-sm">
@@ -157,7 +157,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </footer>
 
-      <MobileBottomNav role={profile?.role ?? "gerant"} />
+      <MobileBottomNav role={profile?.role ?? "superviseur"} />
       <ScrollToTop />
       <InstallAppBanner />
       <PushAutoSubscribe />
