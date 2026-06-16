@@ -225,49 +225,19 @@ export function ChecklistForm({
         )}
       </div>
 
-      {/* Progress / Celebration */}
-      <div
-        className={`rounded-xl border p-4 transition-all duration-500 ${
-          allDone
-            ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20"
-            : "border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800/50"
-        }`}
-      >
-        {allDone ? (
-          <div className="animate-scale-in text-center">
-            <div className="text-3xl">🎉</div>
-            <p className="mt-1 font-semibold text-emerald-700 dark:text-emerald-300">
-              {t.checklist.allDone}
-            </p>
-            <p className="mt-0.5 text-xs text-emerald-600 dark:text-emerald-400">
-              {t.checklist.allDoneDesc}
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="mb-2 flex items-center justify-between text-sm">
-              <span className="font-medium text-neutral-700 dark:text-neutral-300">
-                {completedCount}/{totalCount}
-              </span>
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                {pct}%
-              </span>
-            </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  completedCount > 0
-                    ? "bg-brand-500"
-                    : "bg-neutral-300 dark:bg-neutral-600"
-                }`}
-                style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
-              />
-            </div>
-          </>
-        )}
-      </div>
+      {/* Celebration */}
+      {allDone && (
+        <div className="animate-scale-in rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-center dark:border-emerald-800 dark:bg-emerald-900/20">
+          <div className="text-3xl">🎉</div>
+          <p className="mt-1 font-semibold text-emerald-700 dark:text-emerald-300">
+            {t.checklist.allDone}
+          </p>
+          <p className="mt-0.5 text-xs text-emerald-600 dark:text-emerald-400">
+            {t.checklist.allDoneDesc}
+          </p>
+        </div>
+      )}
 
-      {/* Confetti overlay */}
       {showCelebration && <Confetti />}
 
       {sections.map((section) => {
