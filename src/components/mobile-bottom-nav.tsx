@@ -37,6 +37,13 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
     active: pathname === "/supervisor",
   };
 
+  const supervisorHistoryTab = {
+    href: "/supervisor-history",
+    label: t.supervisor.historyTitle,
+    icon: ClipboardSvg,
+    active: pathname === "/supervisor-history",
+  };
+
   const historyTab = {
     href: "/checklist-history",
     label: t.checklist.historyShort,
@@ -51,7 +58,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
       : isDev
         ? [feedTab, checklistTab]
         : isGerant
-          ? [feedTab, supervisorTab, historyTab]
+          ? [feedTab, supervisorTab, supervisorHistoryTab]
           : [feedTab]),
     ...(isDev
       ? [
