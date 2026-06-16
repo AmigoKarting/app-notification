@@ -983,7 +983,7 @@ const en: Dictionary = {
     noChecklistsDesc: "Checklists will appear here when cashiers fill them out.",
     missingItems: "Incomplete tasks",
     operatorLabel: "Who is performing the closing?",
-    operatorPlaceholder: "— Select —",
+    operatorPlaceholder: "Your name…",
     operatorRequired: "Please identify yourself before checking tasks.",
   },
 

@@ -9,11 +9,6 @@ export interface ChecklistTaskProps {
   label: string;
 }
 
-export interface OperatorOption {
-  id: string;
-  displayName: string;
-}
-
 const SEND_DELAY = 7;
 
 interface TaskState {
@@ -29,7 +24,6 @@ export function ChecklistForm({
   initialCompleted,
   initialTimestamps = {},
   initialOperator,
-  operators = [],
   userName,
   streak = 0,
 }: {
@@ -37,7 +31,6 @@ export function ChecklistForm({
   initialCompleted: string[];
   initialTimestamps?: Record<string, string>;
   initialOperator?: string;
-  operators?: OperatorOption[];
   userName?: string;
   streak?: number;
 }) {
@@ -205,31 +198,26 @@ export function ChecklistForm({
         )}
       </div>
 
-      {/* Operator dropdown */}
+      {/* Operator input */}
       <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
         <label
-          htmlFor="operator-select"
+          htmlFor="operator-input"
           className="mb-2 block text-sm font-semibold text-neutral-700 dark:text-neutral-300"
         >
           {t.checklist.operatorLabel}
         </label>
-        <select
-          id="operator-select"
+        <input
+          id="operator-input"
+          type="text"
           value={selectedOperator}
           onChange={(e) => setSelectedOperator(e.target.value)}
+          placeholder={t.checklist.operatorPlaceholder}
           className={`w-full rounded-lg border px-3.5 py-2.5 text-sm outline-none transition ${
             selectedOperator
               ? "border-brand-300 bg-brand-50 text-brand-800 ring-1 ring-brand-200 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300 dark:ring-brand-700"
               : "border-amber-300 bg-amber-50 text-neutral-800 ring-1 ring-amber-200 dark:border-amber-600 dark:bg-amber-900/20 dark:text-neutral-200 dark:ring-amber-700"
           }`}
-        >
-          <option value="">{t.checklist.operatorPlaceholder}</option>
-          {operators.map((op) => (
-            <option key={op.id} value={op.displayName}>
-              {op.displayName}
-            </option>
-          ))}
-        </select>
+        />
         {needsOperator && (
           <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
             {t.checklist.operatorRequired}

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
-import { getStreak, getTodayCompleted, listCashierProfiles } from "@/domain/checklists/repository";
+import { getStreak, getTodayCompleted } from "@/domain/checklists/repository";
 import { listActiveChecklistTasks } from "@/domain/checklists/tasks-repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { ChecklistForm } from "./checklist-form";
@@ -18,11 +18,10 @@ export default async function ChecklistPage() {
     redirect("/feed");
   }
 
-  const [todayData, tasks, streak, operators] = await Promise.all([
+  const [todayData, tasks, streak] = await Promise.all([
     getTodayCompleted(user.id),
     listActiveChecklistTasks(),
     getStreak(user.id),
-    listCashierProfiles(),
   ]);
 
   return (
@@ -41,7 +40,6 @@ export default async function ChecklistPage() {
         initialCompleted={todayData.completedItems}
         initialTimestamps={todayData.timestamps}
         initialOperator={todayData.operatorName ?? undefined}
-        operators={operators}
         userName={profile?.first_name || undefined}
         streak={streak}
       />

@@ -981,7 +981,7 @@ const fr = {
     noChecklistsDesc: "Les checklists apparaîtront ici quand les caissières les rempliront.",
     missingItems: "Tâches non complétées",
     operatorLabel: "Qui effectue la fermeture ?",
-    operatorPlaceholder: "— Sélectionner —",
+    operatorPlaceholder: "Ton nom…",
     operatorRequired: "Veuillez vous identifier avant de cocher les tâches.",
   },
 
