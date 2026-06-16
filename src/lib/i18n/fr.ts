@@ -980,6 +980,7 @@ const fr = {
     noChecklists: "Aucune checklist soumise",
     noChecklistsDesc: "Les checklists apparaîtront ici quand les caissières les rempliront.",
     missingItems: "Tâches non complétées",
+    historyShort: "Historique",
     operatorLabel: "Qui effectue la fermeture ?",
     operatorPlaceholder: "Ton nom…",
     operatorRequired: "Veuillez vous identifier avant de cocher les tâches.",

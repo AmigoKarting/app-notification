@@ -1,9 +1,9 @@
 import { headers } from "next/headers";
-import { requireDevOrGerant } from "@/domain/auth/role";
+import { requireDev } from "@/domain/auth/role";
 import { AdminMobileNav, AdminSidebar } from "./admin-nav";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireDevOrGerant();
+  await requireDev();
 
   const pathname = headers().get("x-pathname") ?? "";
   if (pathname.startsWith("/admin/aide")) {

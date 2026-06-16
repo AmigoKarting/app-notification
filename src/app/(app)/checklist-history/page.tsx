@@ -1,13 +1,21 @@
-import { Card, EmptyState, LinkButton, PageHeader, formatDateTime } from "@/components/ui";
-import { requireDev } from "@/domain/auth/role";
+import { redirect } from "next/navigation";
+import { Card, EmptyState, PageHeader, formatDateTime } from "@/components/ui";
+import { getCurrentProfile } from "@/domain/auth/role";
+import { requireUser } from "@/domain/auth/session";
 import { listRecentChecklists } from "@/domain/checklists/repository";
 import { listAllChecklistTasks } from "@/domain/checklists/tasks-repository";
 import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminChecklistsPage() {
-  await requireDev();
+export default async function ChecklistHistoryPage() {
+  await requireUser();
+  const profile = await getCurrentProfile();
+
+  if (!profile || (profile.role !== "dev" && profile.role !== "gerant")) {
+    redirect("/feed");
+  }
+
   const t = getServerDictionary();
   const locale = getLocale();
   const dateFmt = locale === "en" ? "en-US" : "fr-FR";
@@ -17,15 +25,10 @@ export default async function AdminChecklistsPage() {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6">
       <PageHeader
         title={t.checklist.adminTitle}
         description={t.checklist.adminDescription}
-        action={
-          <LinkButton href="/admin/checklist-tasks" variant="secondary">
-            {t.checklistAdmin.manageTasks}
-          </LinkButton>
-        }
       />
 
       {checklists.length === 0 ? (
@@ -71,7 +74,6 @@ export default async function AdminChecklistsPage() {
                   </span>
                 </div>
 
-                {/* Progress bar */}
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
                   <div
                     className={`h-full rounded-full transition-all ${
@@ -105,7 +107,7 @@ export default async function AdminChecklistsPage() {
 
                 {cl.notes && (
                   <p className="mt-2 rounded-lg bg-neutral-50 px-3 py-2 text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
-                    📝 {cl.notes}
+                    {cl.notes}
                   </p>
                 )}
               </Card>

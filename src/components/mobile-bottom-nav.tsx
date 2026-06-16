@@ -12,6 +12,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const isDev = role === "dev";
+  const isGerant = role === "gerant";
   const isCashier = role === "caissiere";
 
   // Pour les caissières, l'onglet Checklist passe en premier (page d'accueil).
@@ -29,13 +30,22 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
     active: pathname === "/feed",
   };
 
+  const historyTab = {
+    href: "/checklist-history",
+    label: t.checklist.historyShort,
+    icon: ClipboardSvg,
+    active: pathname === "/checklist-history",
+  };
+
   // Caissière → Checklist d'abord (page d'accueil). Dev → accès aussi (test admin).
   const tabs = [
     ...(isCashier
       ? [checklistTab, feedTab]
       : isDev
         ? [feedTab, checklistTab]
-        : [feedTab]),
+        : isGerant
+          ? [feedTab, historyTab]
+          : [feedTab]),
     ...(isDev
       ? [
           {
