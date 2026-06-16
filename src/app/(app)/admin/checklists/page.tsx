@@ -1,5 +1,5 @@
 import { Card, EmptyState, LinkButton, PageHeader, formatDateTime } from "@/components/ui";
-import { requireDev } from "@/domain/auth/role";
+import { requireDevOrGerant } from "@/domain/auth/role";
 import { listRecentChecklists } from "@/domain/checklists/repository";
 import { listAllChecklistTasks } from "@/domain/checklists/tasks-repository";
 import { getServerDictionary, getLocale } from "@/lib/i18n/server";
@@ -7,7 +7,7 @@ import { getServerDictionary, getLocale } from "@/lib/i18n/server";
 export const dynamic = "force-dynamic";
 
 export default async function AdminChecklistsPage() {
-  await requireDev();
+  await requireDevOrGerant();
   const t = getServerDictionary();
   const locale = getLocale();
   const dateFmt = locale === "en" ? "en-US" : "fr-FR";

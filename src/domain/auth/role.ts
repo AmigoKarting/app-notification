@@ -37,6 +37,13 @@ export async function requireDev(): Promise<Profile> {
   return profile;
 }
 
+export async function requireDevOrGerant(): Promise<Profile> {
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+  if (profile.role !== "dev" && profile.role !== "gerant") redirect("/feed");
+  return profile;
+}
+
 export function isDev(role: AppRole | null | undefined): boolean {
   return role === "dev";
 }
