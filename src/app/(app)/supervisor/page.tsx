@@ -4,9 +4,19 @@ import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { listActiveSupervisorTasks, getTodayDailyTasks } from "@/domain/supervisor/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { SupervisorForm } from "./supervisor-form";
+import { DatedAlerts } from "./dated-alerts";
 
 export const dynamic = "force-dynamic";
+
+function todayMontreal(): string {
+  const d = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Montreal" }));
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 export default async function SupervisorPage() {
   const user = await requireUser();
@@ -17,10 +27,23 @@ export default async function SupervisorPage() {
   }
 
   const t = getServerDictionary();
-  const [tasks, dailyTasks] = await Promise.all([
+  const today = todayMontreal();
+  const supabase = createAdminClient();
+
+  const [tasks, dailyTasks, datedRes] = await Promise.all([
     listActiveSupervisorTasks(),
     getTodayDailyTasks(user.id),
+    (supabase as any)
+      .from("dated_notifications")
+      .select("id, date, title, body, snoozed_to")
+      .eq("is_active", true)
+      .or(`date.eq.${today},snoozed_to.eq.${today}`),
   ]);
+
+  const datedNotifs = (datedRes.data ?? []).filter((n: any) => {
+    const effective = n.snoozed_to || n.date;
+    return effective === today;
+  });
 
   const initialDaily: Record<string, { assigned: boolean; verified: boolean; doneBy: string | null; rating: number | null }> = {};
   for (const task of tasks) {
@@ -39,6 +62,7 @@ export default async function SupervisorPage() {
         title={t.supervisor.title}
         description={t.supervisor.description}
       />
+      <DatedAlerts notifications={datedNotifs} />
       <SupervisorForm tasks={tasks} initialDaily={initialDaily} />
     </div>
   );
