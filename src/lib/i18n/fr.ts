@@ -1058,6 +1058,14 @@ const fr = {
     assignedCount: "assignées",
     verifiedCount: "vérifiées",
     navTitle: "Tâches",
+    historyTitle: "Tâches superviseur",
+    historyEmpty: "Aucune vérification enregistrée",
+    historyEmptyDesc: "Les vérifications de tâches apparaîtront ici.",
+    historyAssignedOnly: "Assignée (non vérifiée)",
+    historyDoneBy: "Par",
+    historyRating: "Note",
+    historyNoTime: "Pas eu le temps de terminer",
+    historyCertified: "Qualité certifiée",
   },
 } as const;
 

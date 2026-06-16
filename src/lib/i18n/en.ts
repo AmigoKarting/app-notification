@@ -1060,6 +1060,14 @@ const en: Dictionary = {
     assignedCount: "assigned",
     verifiedCount: "verified",
     navTitle: "Tasks",
+    historyTitle: "Supervisor tasks",
+    historyEmpty: "No verifications recorded",
+    historyEmptyDesc: "Task verifications will appear here.",
+    historyAssignedOnly: "Assigned (not verified)",
+    historyDoneBy: "By",
+    historyRating: "Rating",
+    historyNoTime: "Didn't have time to finish",
+    historyCertified: "Quality certified",
   },
 } as const;
 
