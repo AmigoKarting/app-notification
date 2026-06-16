@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Card, EmptyState, PageHeader, formatDateTime } from "@/components/ui";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
@@ -26,10 +27,20 @@ export default async function ChecklistHistoryPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <PageHeader
-        title={t.checklist.historyShort}
-        description={t.checklist.adminDescription}
-      />
+      <PageHeader title={t.checklist.historyShort} />
+
+      {/* Tabs */}
+      <div className="flex gap-1 rounded-lg bg-neutral-100 p-1 dark:bg-neutral-800">
+        <Link
+          href="/supervisor-history"
+          className="flex-1 rounded-md px-3 py-2 text-center text-sm font-medium text-neutral-500 transition hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+        >
+          {t.supervisor.historyTitle}
+        </Link>
+        <span className="flex-1 rounded-md bg-white px-3 py-2 text-center text-sm font-semibold text-neutral-900 shadow-sm dark:bg-neutral-700 dark:text-neutral-100">
+          {t.checklist.adminTitle}
+        </span>
+      </div>
 
       {checklists.length === 0 ? (
         <EmptyState
