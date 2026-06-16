@@ -29,6 +29,8 @@ const fr = {
     creating: "Création...",
     email: "Adresse courriel",
     emailPlaceholder: "jean@exemple.com",
+    accountName: "Nom du compte",
+    accountNamePlaceholder: "Ton nom d'affichage",
     password: "Mot de passe",
     passwordPlaceholder: "4 derniers chiffres de ton téléphone",
     passwordHint: "Les 4 derniers chiffres de ton numéro de téléphone",

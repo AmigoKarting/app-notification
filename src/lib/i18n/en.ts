@@ -31,6 +31,8 @@ const en: Dictionary = {
     creating: "Creating...",
     email: "Email address",
     emailPlaceholder: "john@example.com",
+    accountName: "Account name",
+    accountNamePlaceholder: "Your display name",
     password: "Password",
     passwordPlaceholder: "Last 4 digits of your phone number",
     passwordHint: "The last 4 digits of your phone number",
