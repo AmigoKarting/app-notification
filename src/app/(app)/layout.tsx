@@ -49,6 +49,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const isDev = profile?.role === "dev";
+  const isGerant = profile?.role === "gerant";
   const isCashier = profile?.role === "caissiere";
   const displayLabel =
     (profile?.first_name && profile?.last_name
@@ -99,6 +100,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 label={t.nav.notifications}
                 active={pathname === "/feed"}
               />
+              {(isGerant || isDev) && (
+                <NavLink href="/checklist-history" label={t.checklist.historyShort} active={pathname === "/checklist-history"} />
+              )}
               {isDev && (
                 <Link
                   href="/admin"
