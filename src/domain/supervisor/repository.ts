@@ -88,6 +88,76 @@ export interface VerifyPayload {
   qualityCertified: boolean;
 }
 
+export interface SupervisorHistoryEntry {
+  id: string;
+  date: string;
+  task_label: string;
+  task_section: string;
+  supervisor_name: string;
+  done_by: string | null;
+  rating: number | null;
+  no_time_to_finish: boolean;
+  quality_certified: boolean;
+  assigned_at: string | null;
+  verified_at: string | null;
+}
+
+export async function listRecentSupervisorHistory(limit = 50): Promise<SupervisorHistoryEntry[]> {
+  const supabase = createAdminClient();
+
+  const { data: dailyTasks, error } = await (supabase as any)
+    .from("supervisor_daily_tasks")
+    .select("id, date, task_id, supervisor_id, done_by, rating, no_time_to_finish, quality_certified, assigned_at, verified_at")
+    .order("date", { ascending: false })
+    .order("verified_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  if (!dailyTasks || dailyTasks.length === 0) return [];
+
+  const rows = dailyTasks as Array<{
+    id: string; date: string; task_id: string; supervisor_id: string;
+    done_by: string | null; rating: number | null; no_time_to_finish: boolean;
+    quality_certified: boolean; assigned_at: string | null; verified_at: string | null;
+  }>;
+
+  const taskIds = [...new Set(rows.map((r) => r.task_id))];
+  const { data: tasks } = await (supabase as any)
+    .from("supervisor_tasks")
+    .select("id, label, section")
+    .in("id", taskIds);
+  const taskMap = new Map<string, { id: string; label: string; section: string }>(
+    (tasks ?? []).map((t: any) => [t.id, t]),
+  );
+
+  const supervisorIds = [...new Set(rows.map((r) => r.supervisor_id))];
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, display_name")
+    .in("id", supervisorIds);
+  const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
+
+  return rows.map((r) => {
+    const task = taskMap.get(r.task_id);
+    const prof = profileMap.get(r.supervisor_id);
+    const supervisorName = prof
+      ? (prof.first_name && prof.last_name ? `${prof.first_name} ${prof.last_name}` : prof.display_name?.trim()) || "—"
+      : "—";
+    return {
+      id: r.id,
+      date: r.date,
+      task_label: task?.label ?? "—",
+      task_section: task?.section ?? "—",
+      supervisor_name: supervisorName,
+      done_by: r.done_by,
+      rating: r.rating,
+      no_time_to_finish: r.no_time_to_finish,
+      quality_certified: r.quality_certified,
+      assigned_at: r.assigned_at,
+      verified_at: r.verified_at,
+    };
+  });
+}
+
 export async function verifyTask(payload: VerifyPayload): Promise<void> {
   const supabase = createAdminClient();
   const today = new Date().toISOString().split("T")[0];
