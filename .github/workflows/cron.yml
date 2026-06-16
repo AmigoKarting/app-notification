@@ -1,0 +1,17 @@
+name: Auto-notifications cron
+on:
+  schedule:
+    # Every 10 minutes, 7 AM to 11 PM Montreal (11 UTC to 3 UTC next day)
+    - cron: "*/10 11-23 * * *"
+    - cron: "*/10 0-3 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  run-schedules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger auto-notifications
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://app-notification.vercel.app/api/cron/run-schedules
