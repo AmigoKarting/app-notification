@@ -8,8 +8,12 @@ const SAFE_REDIRECT = /^\/(?!\/)[A-Za-z0-9_\-./?=&%]*$/;
 
 // Lecture directe des env vars — pas d'import de env.ts pour
 // éviter tout crash au chargement du module.
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+function clean(v: string | undefined): string {
+  if (!v) return "";
+  return v.charCodeAt(0) === 0xfeff ? v.slice(1) : v;
+}
+const SUPABASE_URL = clean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+const SUPABASE_ANON_KEY = clean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 /**
  * Refresh la session Supabase à chaque requête (cookies HTTP-only) ET
