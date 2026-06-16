@@ -3,29 +3,58 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-/**
- * Retourne les tâches déjà complétées aujourd'hui pour un utilisateur.
- */
-export async function getTodayCompleted(userId: string): Promise<string[]> {
+export interface TodayChecklistData {
+  completedItems: string[];
+  timestamps: Record<string, string>;
+  operatorName: string | null;
+}
+
+export async function getTodayCompleted(userId: string): Promise<TodayChecklistData> {
   const supabase = createClient();
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const { data } = await supabase
+  const { data } = await (supabase as any)
     .from("cashier_checklists")
-    .select("completed_items")
+    .select("completed_items, completed_timestamps, operator_name")
     .eq("user_id", userId)
     .gte("submitted_at", todayStart.toISOString())
     .order("submitted_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  return (data?.completed_items as string[]) ?? [];
+  return {
+    completedItems: (data?.completed_items as string[]) ?? [],
+    timestamps: (data?.completed_timestamps as Record<string, string>) ?? {},
+    operatorName: (data?.operator_name as string) ?? null,
+  };
+}
+
+export interface CashierProfile {
+  id: string;
+  displayName: string;
+}
+
+export async function listCashierProfiles(): Promise<CashierProfile[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, display_name, role")
+    .in("role", ["caissiere", "dev"])
+    .order("first_name", { ascending: true });
+
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    displayName:
+      (p.first_name && p.last_name
+        ? `${p.first_name} ${p.last_name}`
+        : p.display_name?.trim()) || p.id.slice(0, 8),
+  }));
 }
 
 export async function hasSubmittedToday(userId: string): Promise<boolean> {
-  const items = await getTodayCompleted(userId);
-  return items.length > 0;
+  const data = await getTodayCompleted(userId);
+  return data.completedItems.length > 0;
 }
 
 export async function getStreak(userId: string): Promise<number> {
@@ -71,6 +100,8 @@ export interface ChecklistWithProfile {
   id: string;
   user_id: string;
   completed_items: string[];
+  completed_timestamps: Record<string, string>;
+  operator_name: string | null;
   total_items: number;
   notes: string | null;
   submitted_at: string;
@@ -82,15 +113,20 @@ export interface ChecklistWithProfile {
 export async function listRecentChecklists(limit = 30): Promise<ChecklistWithProfile[]> {
   const supabase = createAdminClient();
 
-  const { data: checklists } = await supabase
+  const { data: checklists } = await (supabase as any)
     .from("cashier_checklists")
-    .select("id, user_id, completed_items, total_items, notes, submitted_at")
+    .select("id, user_id, completed_items, completed_timestamps, operator_name, total_items, notes, submitted_at")
     .order("submitted_at", { ascending: false })
     .limit(limit);
 
-  if (!checklists || checklists.length === 0) return [];
+  const rows = (checklists ?? []) as Array<{
+    id: string; user_id: string; completed_items: string[];
+    completed_timestamps: Record<string, string> | null; operator_name: string | null;
+    total_items: number; notes: string | null; submitted_at: string;
+  }>;
+  if (rows.length === 0) return [];
 
-  const userIds = [...new Set(checklists.map((c) => c.user_id))];
+  const userIds = [...new Set(rows.map((c) => c.user_id))];
   const { data: profiles } = await supabase
     .from("profiles")
     .select("id, first_name, last_name, display_name")
@@ -100,10 +136,11 @@ export async function listRecentChecklists(limit = 30): Promise<ChecklistWithPro
     (profiles ?? []).map((p) => [p.id, p]),
   );
 
-  return checklists.map((c) => {
+  return rows.map((c) => {
     const profile = profileMap.get(c.user_id);
     return {
       ...c,
+      completed_timestamps: c.completed_timestamps ?? {},
       first_name: profile?.first_name ?? null,
       last_name: profile?.last_name ?? null,
       display_name: profile?.display_name ?? null,

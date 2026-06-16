@@ -982,6 +982,9 @@ const en: Dictionary = {
     noChecklists: "No checklists submitted",
     noChecklistsDesc: "Checklists will appear here when cashiers fill them out.",
     missingItems: "Incomplete tasks",
+    operatorLabel: "Who is performing the closing?",
+    operatorPlaceholder: "— Select —",
+    operatorRequired: "Please identify yourself before checking tasks.",
   },
 
   bannersAdmin: {

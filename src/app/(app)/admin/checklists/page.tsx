@@ -36,10 +36,11 @@ export default async function AdminChecklistsPage() {
       ) : (
         <div className="space-y-4">
           {checklists.map((cl) => {
-            const name =
+            const accountName =
               (cl.first_name && cl.last_name
                 ? `${cl.first_name} ${cl.last_name}`
                 : cl.display_name?.trim()) || "—";
+            const name = cl.operator_name || accountName;
             const pct = Math.round((cl.completed_items.length / cl.total_items) * 100);
             const completedSet = new Set(cl.completed_items);
             const missing = allTasks

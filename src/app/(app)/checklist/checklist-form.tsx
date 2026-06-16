@@ -9,36 +9,54 @@ export interface ChecklistTaskProps {
   label: string;
 }
 
-const SEND_DELAY = 20; // secondes
+export interface OperatorOption {
+  id: string;
+  displayName: string;
+}
+
+const SEND_DELAY = 7;
 
 interface TaskState {
   checked: boolean;
   countdown: number | null;
   sent: boolean;
   sending: boolean;
+  sentAt: string | null;
 }
 
 export function ChecklistForm({
   tasks,
   initialCompleted,
+  initialTimestamps = {},
+  initialOperator,
+  operators = [],
   userName,
   streak = 0,
 }: {
   tasks: ChecklistTaskProps[];
   initialCompleted: string[];
+  initialTimestamps?: Record<string, string>;
+  initialOperator?: string;
+  operators?: OperatorOption[];
   userName?: string;
   streak?: number;
 }) {
   const { t } = useTranslation();
 
+  const [selectedOperator, setSelectedOperator] = useState(initialOperator ?? "");
+  const operatorRef = useRef(selectedOperator);
+  useEffect(() => { operatorRef.current = selectedOperator; }, [selectedOperator]);
+
   const [states, setStates] = useState<Record<string, TaskState>>(() => {
     const init: Record<string, TaskState> = {};
     for (const task of tasks) {
+      const done = initialCompleted.includes(task.key);
       init[task.key] = {
-        checked: initialCompleted.includes(task.key),
+        checked: done,
         countdown: null,
-        sent: initialCompleted.includes(task.key),
+        sent: done,
         sending: false,
+        sentAt: initialTimestamps[task.key] ?? null,
       };
     }
     return init;
@@ -61,7 +79,6 @@ export function ChecklistForm({
   const completedCount = Object.values(states).filter((s) => s.sent).length;
   const totalCount = tasks.length;
 
-  // Detect transition to 100%
   useEffect(() => {
     const wasComplete = prevCompletedRef.current === totalCount;
     const isComplete = completedCount === totalCount && totalCount > 0;
@@ -81,16 +98,19 @@ export function ChecklistForm({
     }));
 
     try {
+      const body: Record<string, string> = { taskKey };
+      if (operatorRef.current) body.operatorName = operatorRef.current;
+
       const res = await fetch("/api/checklist/complete-task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskKey }),
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
         setStates((prev) => ({
           ...prev,
-          [taskKey]: { ...prev[taskKey], sent: true, sending: false },
+          [taskKey]: { ...prev[taskKey], sent: true, sending: false, sentAt: new Date().toISOString() },
         }));
         if (navigator.vibrate) navigator.vibrate(30);
       } else {
@@ -109,6 +129,8 @@ export function ChecklistForm({
 
   const handleToggle = useCallback(
     (taskKey: string) => {
+      if (!selectedOperator) return;
+
       setStates((prev) => {
         const current = prev[taskKey];
         if (!current) return prev;
@@ -157,7 +179,7 @@ export function ChecklistForm({
         }
       });
     },
-    [sendTask],
+    [sendTask, selectedOperator],
   );
 
   const sections = [
@@ -169,6 +191,8 @@ export function ChecklistForm({
   const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   const allDone = completedCount === totalCount && totalCount > 0;
 
+  const needsOperator = !selectedOperator;
+
   return (
     <div className="space-y-4">
       {/* Greeting + Streak */}
@@ -178,6 +202,38 @@ export function ChecklistForm({
           <span className="animate-scale-in rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700 ring-1 ring-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-700">
             🔥 {streak} {streak === 1 ? t.checklist.streakSingular : t.checklist.streakPlural}
           </span>
+        )}
+      </div>
+
+      {/* Operator dropdown */}
+      <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+        <label
+          htmlFor="operator-select"
+          className="mb-2 block text-sm font-semibold text-neutral-700 dark:text-neutral-300"
+        >
+          {t.checklist.operatorLabel}
+        </label>
+        <select
+          id="operator-select"
+          value={selectedOperator}
+          onChange={(e) => setSelectedOperator(e.target.value)}
+          className={`w-full rounded-lg border px-3.5 py-2.5 text-sm outline-none transition ${
+            selectedOperator
+              ? "border-brand-300 bg-brand-50 text-brand-800 ring-1 ring-brand-200 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300 dark:ring-brand-700"
+              : "border-amber-300 bg-amber-50 text-neutral-800 ring-1 ring-amber-200 dark:border-amber-600 dark:bg-amber-900/20 dark:text-neutral-200 dark:ring-amber-700"
+          }`}
+        >
+          <option value="">{t.checklist.operatorPlaceholder}</option>
+          {operators.map((op) => (
+            <option key={op.id} value={op.displayName}>
+              {op.displayName}
+            </option>
+          ))}
+        </select>
+        {needsOperator && (
+          <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
+            {t.checklist.operatorRequired}
+          </p>
         )}
       </div>
 
@@ -248,13 +304,15 @@ export function ChecklistForm({
                     <button
                       type="button"
                       onClick={() => handleToggle(item.key)}
-                      disabled={st.sent || st.sending}
+                      disabled={st.sent || st.sending || needsOperator}
                       className={`flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition ${
                         st.sent
                           ? "bg-emerald-50 dark:bg-emerald-900/20"
                           : st.countdown !== null
                             ? "bg-amber-50 dark:bg-amber-900/20"
-                            : "hover:bg-neutral-50 active:bg-neutral-100 dark:hover:bg-neutral-700/50 dark:active:bg-neutral-700"
+                            : needsOperator
+                              ? "cursor-not-allowed opacity-50"
+                              : "hover:bg-neutral-50 active:bg-neutral-100 dark:hover:bg-neutral-700/50 dark:active:bg-neutral-700"
                       }`}
                     >
                       <span
@@ -304,8 +362,13 @@ export function ChecklistForm({
                         )}
 
                         {st.sent && (
-                          <span className="mt-1 block text-xs text-emerald-600 dark:text-emerald-400">
+                          <span className="mt-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
                             ✓ {t.checklist.sent}
+                            {st.sentAt && (
+                              <span className="text-emerald-500 dark:text-emerald-500">
+                                — {formatTime(st.sentAt)}
+                              </span>
+                            )}
                           </span>
                         )}
                       </span>
@@ -319,6 +382,15 @@ export function ChecklistForm({
       })}
     </div>
   );
+}
+
+function formatTime(iso: string): string {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
 }
 
 /* ------------------------------------------------------------------ */

@@ -7,6 +7,7 @@ import { listActiveChecklistTasks } from "@/domain/checklists/tasks-repository";
 
 const bodySchema = z.object({
   taskKey: z.string().min(1),
+  operatorName: z.string().min(1).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
 
-  const { taskKey } = parsed.data;
+  const { taskKey, operatorName } = parsed.data;
 
   // Vérifier que la tâche existe et est active
   const activeTasks = await listActiveChecklistTasks();
@@ -49,11 +50,12 @@ export async function POST(request: NextRequest) {
   const t = getServerDictionary();
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
+  const now = new Date().toISOString();
 
   // Récupérer ou créer la checklist du jour
-  const { data: existing } = await supabase
+  const { data: existing } = await (supabase as any)
     .from("cashier_checklists")
-    .select("id, completed_items")
+    .select("id, completed_items, completed_timestamps")
     .eq("user_id", user.id)
     .gte("submitted_at", todayStart.toISOString())
     .order("submitted_at", { ascending: false })
@@ -61,32 +63,38 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   let completedItems: string[];
+  let timestamps: Record<string, string>;
 
   if (existing) {
-    // Ajouter la tâche si pas déjà dedans
-    const current = existing.completed_items as string[];
+    const current = (existing.completed_items ?? []) as string[];
     if (current.includes(taskKey)) {
       return NextResponse.json({ ok: true, alreadyDone: true });
     }
     completedItems = [...current, taskKey];
-    await supabase
+    timestamps = { ...((existing.completed_timestamps as Record<string, string>) ?? {}), [taskKey]: now };
+    await (supabase as any)
       .from("cashier_checklists")
       .update({
         completed_items: completedItems,
+        completed_timestamps: timestamps,
         total_items: activeTasks.length,
+        ...(operatorName ? { operator_name: operatorName } : {}),
       })
       .eq("id", existing.id);
   } else {
-    // Créer la checklist du jour avec cette première tâche
     completedItems = [taskKey];
-    await supabase.from("cashier_checklists").insert({
+    timestamps = { [taskKey]: now };
+    await (supabase as any).from("cashier_checklists").insert({
       user_id: user.id,
       completed_items: completedItems,
+      completed_timestamps: timestamps,
       total_items: activeTasks.length,
+      ...(operatorName ? { operator_name: operatorName } : {}),
     });
   }
 
   const cashierName =
+    operatorName ||
     (profile.first_name && profile.last_name
       ? `${profile.first_name} ${profile.last_name}`
       : profile.display_name?.trim()) ||
