@@ -66,7 +66,7 @@ export function LoginForm() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t.auth.accountNamePlaceholder}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
+          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
         />
       </label>
 
@@ -79,7 +79,7 @@ export function LoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder={t.auth.passwordPlaceholder}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-neutral-900"
+          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
         />
         <span className="mt-1 block text-xs text-neutral-500">
           {t.auth.passwordHint}
@@ -93,7 +93,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-md bg-neutral-900 py-2 font-medium text-white transition hover:bg-neutral-700 disabled:opacity-50"
+        className="btn-brand-gradient w-full rounded-md py-2 font-medium text-white shadow-sm transition disabled:opacity-50"
       >
         {pending ? t.auth.loggingIn : t.auth.login}
       </button>

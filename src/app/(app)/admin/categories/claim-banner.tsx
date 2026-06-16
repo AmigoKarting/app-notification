@@ -10,7 +10,7 @@ function ClaimButton({ label }: { label: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="rounded-md bg-violet-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-violet-500 disabled:opacity-50"
+      className="rounded-md bg-brand-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand-500 disabled:opacity-50"
     >
       {pending ? "..." : label}
     </button>
@@ -24,12 +24,12 @@ export function ClaimSystemBanner({ count }: { count: number }) {
     : t.claimBanner.unclaimedSingular.replace("{count}", String(count));
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 text-sm">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm">
       <div>
-        <p className="font-medium text-violet-900">
+        <p className="font-medium text-brand-900">
           {message}
         </p>
-        <p className="text-violet-700">
+        <p className="text-brand-700">
           {t.claimBanner.claimDesc}
         </p>
       </div>

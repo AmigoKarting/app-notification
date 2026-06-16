@@ -105,7 +105,7 @@ export function FeedCard({
           </span>
           <CategoryChip category={item.category} />
           {item.session && (
-            <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 ring-1 ring-inset ring-violet-200 dark:bg-violet-900/20 dark:text-violet-300 dark:ring-violet-700">
+            <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200 dark:bg-brand-900/20 dark:text-brand-300 dark:ring-brand-700">
               🗓 {item.session.name}
             </span>
           )}

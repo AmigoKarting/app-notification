@@ -64,7 +64,7 @@ export default function GuideCategoriesPage() {
         <Callout type="info">
           Au premier démarrage, 5 catégories sont créées automatiquement (Annonce, Urgent, RH, Formation, Sécurité).
           Pour pouvoir les modifier, va dans <Path>Catégories</Path> et clique <strong>« Tout réclamer »</strong> dans
-          le bandeau violet en haut.
+          le bandeau doré en haut.
         </Callout>
       </GuideSection>
 

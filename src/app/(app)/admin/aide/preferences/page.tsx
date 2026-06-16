@@ -61,7 +61,7 @@ export default function GuidePreferencesPage() {
 
       <GuideSection title="Couleur d'accent">
         <p>
-          Section <strong>Apparence</strong> — choisis parmi 7 palettes (violet, bleu, émeraude…).
+          Section <strong>Apparence</strong> — choisis parmi 8 palettes (Amigo doré, bleu, émeraude…).
           Le changement est immédiat et <strong>mémorisé dans ton navigateur</strong>, donc :
         </p>
         <ul className="ml-5 list-disc space-y-1">

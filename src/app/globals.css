@@ -9,16 +9,16 @@
 :root {
   color-scheme: light;
   /* Brand color en triplets RGB (modifiables via JS pour le theming) */
-  --brand-50: 245 243 255;
-  --brand-100: 237 233 254;
-  --brand-200: 221 214 254;
-  --brand-300: 196 181 253;
-  --brand-400: 167 139 250;
-  --brand-500: 139 92 246;
-  --brand-600: 124 58 237;
-  --brand-700: 109 40 217;
-  --brand-800: 91 33 182;
-  --brand-900: 76 29 149;
+  --brand-50: 255 252 235;
+  --brand-100: 254 246 205;
+  --brand-200: 253 234 149;
+  --brand-300: 252 217 82;
+  --brand-400: 249 198 42;
+  --brand-500: 245 183 49;
+  --brand-600: 213 148 12;
+  --brand-700: 175 112 8;
+  --brand-800: 142 86 14;
+  --brand-900: 117 69 15;
 
   /* Tokens de surface — light */
   --surface-0: #ffffff;

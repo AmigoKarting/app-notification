@@ -88,7 +88,7 @@ export default function GuideStartPage() {
             Dans la sidebar gauche, clique <Path>Notifications</Path>.
           </Step>
           <Step number={2} title="Clique « Nouvelle »">
-            En haut à droite, bouton violet.
+            En haut à droite, bouton doré.
           </Step>
           <Step number={3} title="Remplis 2 champs">
             Un <strong>Titre</strong> et un <strong>Message</strong>. C'est tout ce qui est obligatoire.

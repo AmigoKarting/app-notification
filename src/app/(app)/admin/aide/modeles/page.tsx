@@ -48,7 +48,7 @@ export default function GuideTemplatesPage() {
             La page de création de notification.
           </Step>
           <Step number={2} title="Sélecteur « 📋 Partir d'un modèle »">
-            En haut du formulaire (bandeau violet). Choisis ton modèle dans la liste, clique
+            En haut du formulaire (bandeau doré). Choisis ton modèle dans la liste, clique
             <strong> Charger</strong>.
           </Step>
           <Step number={3} title="Le formulaire se remplit automatiquement">

@@ -453,24 +453,24 @@ export function LogoMark({ className = "", size = 24 }: IconProps) {
     >
       <defs>
         <linearGradient id="logo-bell" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="50%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#06b6d4" />
+          <stop offset="0%" stopColor="#F5B731" />
+          <stop offset="50%" stopColor="#D5940C" />
+          <stop offset="100%" stopColor="#AF7008" />
         </linearGradient>
         <linearGradient id="logo-check" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#f97316" />
-          <stop offset="100%" stopColor="#eab308" />
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#FEF6CD" />
         </linearGradient>
         <linearGradient id="logo-bg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#1e1b4b" />
-          <stop offset="100%" stopColor="#0f172a" />
+          <stop offset="0%" stopColor="#2a2a2a" />
+          <stop offset="100%" stopColor="#1a1a1a" />
         </linearGradient>
       </defs>
       <rect width="512" height="512" rx="96" fill="url(#logo-bg)" />
       <path d="M256 100c-8 0-16 6-16 14v18c-52 10-90 56-90 110v60l-24 32c-4 5-1 14 6 14h248c7 0 10-9 6-14l-24-32v-60c0-54-38-100-90-110v-18c0-8-8-14-16-14zm-30 268c0 17 13 30 30 30s30-13 30-30z" fill="url(#logo-bell)" />
-      <rect x="68" y="210" width="48" height="10" rx="5" fill="#818cf8" opacity=".7" />
-      <rect x="56" y="240" width="60" height="10" rx="5" fill="#818cf8" opacity=".5" />
-      <rect x="68" y="270" width="48" height="10" rx="5" fill="#818cf8" opacity=".3" />
+      <rect x="68" y="210" width="48" height="10" rx="5" fill="#F5B731" opacity=".7" />
+      <rect x="56" y="240" width="60" height="10" rx="5" fill="#F5B731" opacity=".5" />
+      <rect x="68" y="270" width="48" height="10" rx="5" fill="#F5B731" opacity=".3" />
       <path d="M230 280l22 22 40-44" fill="none" stroke="url(#logo-check)" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );

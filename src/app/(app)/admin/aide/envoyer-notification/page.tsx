@@ -46,7 +46,7 @@ export default function GuideSendPage() {
             <strong>Image</strong> — PNG/JPG/WebP/SVG, 5 Mo max. Affichée en tête de la card dans le fil. Stockée dans Supabase Storage (bucket <code>notifications</code>).
           </li>
           <li>
-            <strong>Bouton (CTA)</strong> — <strong>Libellé</strong> + <strong>URL</strong> (les deux ou aucun). Renders un gros bouton violet en bas de la card qui ouvre l'URL dans un nouvel onglet.
+            <strong>Bouton (CTA)</strong> — <strong>Libellé</strong> + <strong>URL</strong> (les deux ou aucun). Renders un gros bouton doré en bas de la card qui ouvre l'URL dans un nouvel onglet.
           </li>
         </ul>
       </GuideSection>

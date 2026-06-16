@@ -7,6 +7,7 @@
  */
 
 export type ThemeName =
+  | "amigo"
   | "violet"
   | "indigo"
   | "blue"
@@ -24,6 +25,22 @@ interface ThemeDefinition {
 }
 
 export const themes: Record<ThemeName, ThemeDefinition> = {
+  amigo: {
+    name: "Amigo",
+    swatchHex: "#F5B731",
+    shades: {
+      50: "255 252 235",
+      100: "254 246 205",
+      200: "253 234 149",
+      300: "252 217 82",
+      400: "249 198 42",
+      500: "245 183 49",
+      600: "213 148 12",
+      700: "175 112 8",
+      800: "142 86 14",
+      900: "117 69 15",
+    },
+  },
   violet: {
     name: "Violet",
     swatchHex: "#7c3aed",
@@ -138,7 +155,7 @@ export const themes: Record<ThemeName, ThemeDefinition> = {
   },
 };
 
-export const DEFAULT_THEME: ThemeName = "violet";
+export const DEFAULT_THEME: ThemeName = "amigo";
 export const THEME_STORAGE_KEY = "app-theme";
 export const DARK_MODE_STORAGE_KEY = "app-dark-mode";
 
