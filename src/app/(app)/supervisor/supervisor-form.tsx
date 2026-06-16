@@ -241,29 +241,29 @@ export function SupervisorForm({
                 </div>
               </label>
 
-              {/* No time checkbox */}
-              <label className="flex items-start gap-3 rounded-lg border border-neutral-200 p-3 transition hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-700/50">
+              {/* No time radio */}
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition ${popupForm.noTime ? "border-brand-300 bg-brand-50 dark:border-brand-600 dark:bg-brand-900/30" : "border-neutral-200 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-700/50"}`}>
                 <input
                   type="checkbox"
                   checked={popupForm.noTime}
-                  onChange={(e) => setPopupForm((p) => ({ ...p, noTime: e.target.checked }))}
+                  onChange={() => setPopupForm((p) => ({ ...p, noTime: !p.noTime, certify: false }))}
                   className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-brand-600 dark:border-neutral-600 dark:bg-neutral-700"
                 />
                 <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                  {t.supervisor.noTimeLabel}
+                  Ce qui a été fait est <strong>{popupForm.rating}/10</strong> mais n'a pas eu le temps de terminer
                 </span>
               </label>
 
-              {/* Certify checkbox */}
-              <label className="flex items-start gap-3 rounded-lg border border-neutral-200 p-3 transition hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-700/50">
+              {/* Certify radio */}
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition ${popupForm.certify ? "border-emerald-300 bg-emerald-50 dark:border-emerald-600 dark:bg-emerald-900/30" : "border-neutral-200 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-700/50"}`}>
                 <input
                   type="checkbox"
                   checked={popupForm.certify}
-                  onChange={(e) => setPopupForm((p) => ({ ...p, certify: e.target.checked }))}
-                  className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-brand-600 dark:border-neutral-600 dark:bg-neutral-700"
+                  onChange={() => setPopupForm((p) => ({ ...p, certify: !p.certify, noTime: false }))}
+                  className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-emerald-600 dark:border-neutral-600 dark:bg-neutral-700"
                 />
                 <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                  {t.supervisor.certifyLabel}
+                  Je certifie que la qualité du travail est <strong>{popupForm.rating}/10</strong>
                 </span>
               </label>
             </div>
