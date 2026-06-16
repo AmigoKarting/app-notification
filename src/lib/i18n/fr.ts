@@ -1037,6 +1037,28 @@ const fr = {
     updated: "Tâche mise à jour.",
     tip: "Désactiver une tâche la cache du formulaire caissière sans perdre l'historique. La supprimer est définitif.",
   },
+
+  supervisor: {
+    title: "Tâches superviseur",
+    description: "Assigne et vérifie les tâches quotidiennes.",
+    sectionCaisse: "Caisse",
+    sectionPiste: "Piste",
+    toDoColumn: "À faire",
+    verifiedColumn: "Vérifié",
+    noTasks: "Aucune tâche disponible",
+    noTasksDesc: "Les tâches apparaîtront ici une fois configurées.",
+    popupTitle: "Vérification de la tâche",
+    doneByLabel: "Qui a fait la tâche ?",
+    doneByPlaceholder: "Nom de la personne…",
+    ratingLabel: "Quelle note sur 10 donnes-tu au travail après la première inspection ?",
+    noTimeLabel: "Ce qui a été fait est 10/10 mais n'a pas eu le temps de terminer",
+    certifyLabel: "Je certifie que la qualité du travail est 10/10",
+    submit: "Confirmer la vérification",
+    verified: "Vérifié",
+    assignedCount: "assignées",
+    verifiedCount: "vérifiées",
+    navTitle: "Tâches",
+  },
 } as const;
 
 export default fr;

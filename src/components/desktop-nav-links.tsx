@@ -26,6 +26,9 @@ export function DesktopNavLinks({ role }: DesktopNavLinksProps) {
         active={pathname === "/feed"}
       />
       {(isGerant || isDev) && (
+        <NavLink href="/supervisor" label={t.supervisor.navTitle} active={pathname === "/supervisor"} />
+      )}
+      {(isGerant || isDev) && (
         <NavLink href="/checklist-history" label={t.checklist.historyShort} active={pathname === "/checklist-history"} />
       )}
       {isDev && (

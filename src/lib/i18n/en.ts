@@ -1039,6 +1039,28 @@ const en: Dictionary = {
     updated: "Task updated.",
     tip: "Disabling a task hides it from the cashier form without losing history. Deleting it is permanent.",
   },
+
+  supervisor: {
+    title: "Supervisor tasks",
+    description: "Assign and verify daily tasks.",
+    sectionCaisse: "Cash register",
+    sectionPiste: "Track",
+    toDoColumn: "To do",
+    verifiedColumn: "Verified",
+    noTasks: "No tasks available",
+    noTasksDesc: "Tasks will appear here once configured.",
+    popupTitle: "Task verification",
+    doneByLabel: "Who did the task?",
+    doneByPlaceholder: "Person's name…",
+    ratingLabel: "What rating out of 10 do you give the work after first inspection?",
+    noTimeLabel: "Work is 10/10 but didn't have time to finish",
+    certifyLabel: "I certify that the quality of work is 10/10",
+    submit: "Confirm verification",
+    verified: "Verified",
+    assignedCount: "assigned",
+    verifiedCount: "verified",
+    navTitle: "Tasks",
+  },
 } as const;
 
 export default en;
