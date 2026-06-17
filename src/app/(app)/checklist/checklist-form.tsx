@@ -231,7 +231,17 @@ export function ChecklistForm({
             }`}
           >
             <option value="">{t.checklist.operatorPlaceholder}</option>
-            {cashiers.map((c) => (
+            {(cashiers.length > 0
+              ? cashiers
+              : [
+                  { id: "amia", name: "Amia" },
+                  { id: "ariel", name: "Ariel" },
+                  { id: "angelie", name: "Angélie" },
+                  { id: "kyana", name: "Kyana" },
+                  { id: "lili-rose", name: "Lili-Rose" },
+                  { id: "vicky", name: "Vicky" },
+                ]
+            ).map((c) => (
               <option key={c.id} value={c.name}>
                 {c.name}
               </option>
