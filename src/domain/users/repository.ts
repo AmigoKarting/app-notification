@@ -21,3 +21,20 @@ export async function listProfilesWithEmail(): Promise<ProfileWithEmail[]> {
   if (error) throw fromPostgrestError(error);
   return (data ?? []) as ProfileWithEmail[];
 }
+
+export async function listCashierNames(): Promise<{ id: string; name: string }[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, display_name, first_name, last_name")
+    .eq("role", "caissiere")
+    .order("first_name");
+  if (error) throw fromPostgrestError(error);
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    name:
+      (p.first_name && p.last_name ? `${p.first_name} ${p.last_name}` : null) ??
+      p.display_name ??
+      "—",
+  }));
+}
