@@ -211,45 +211,43 @@ export function ChecklistForm({
         )}
       </div>
 
-      {/* Operator select */}
+      {/* Operator picker */}
       <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
-        <label
-          htmlFor="operator-select"
-          className="mb-2 block text-sm font-semibold text-neutral-700 dark:text-neutral-300"
-        >
+        <p className="mb-3 text-sm font-semibold text-neutral-700 dark:text-neutral-300">
           {t.checklist.operatorLabel}
-        </label>
-        <div className="relative">
-          <select
-            id="operator-select"
-            value={selectedOperator}
-            onChange={(e) => setSelectedOperator(e.target.value)}
-            className={`w-full appearance-none rounded-lg border px-3.5 py-2.5 pr-10 text-sm outline-none transition ${
-              selectedOperator
-                ? "border-brand-300 bg-brand-50 text-brand-800 ring-1 ring-brand-200 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300 dark:ring-brand-700"
-                : "border-amber-300 bg-amber-50 text-neutral-800 ring-1 ring-amber-200 dark:border-amber-600 dark:bg-amber-900/20 dark:text-neutral-200 dark:ring-amber-700"
-            }`}
-          >
-            <option value="">{t.checklist.operatorPlaceholder}</option>
-            <option value="Amia">Amia</option>
-            <option value="Angélie">Angélie</option>
-            <option value="Ariel">Ariel</option>
-            <option value="Kyana">Kyana</option>
-            <option value="Lili-Rose">Lili-Rose</option>
-            <option value="Vicky">Vicky</option>
-          </select>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400"
-          >
-            <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { name: "Amia", color: "bg-pink-500" },
+            { name: "Angélie", color: "bg-fuchsia-500" },
+            { name: "Ariel", color: "bg-violet-500" },
+            { name: "Kyana", color: "bg-rose-500" },
+            { name: "Lili-Rose", color: "bg-purple-500" },
+            { name: "Vicky", color: "bg-amber-500" },
+          ].map((c) => (
+            <button
+              key={c.name}
+              type="button"
+              onClick={() => setSelectedOperator(selectedOperator === c.name ? "" : c.name)}
+              className={`relative rounded-xl px-2 py-3 text-sm font-bold text-white shadow-sm transition-all active:scale-95 ${c.color} ${
+                selectedOperator === c.name
+                  ? "ring-3 ring-offset-2 ring-neutral-900 scale-105 shadow-lg"
+                  : "opacity-80 hover:opacity-100 hover:shadow-md"
+              }`}
+            >
+              {c.name}
+              {selectedOperator === c.name && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2.5 6L5 8.5L9.5 3.5" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          ))}
         </div>
         {needsOperator && (
-          <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
+          <p className="mt-2.5 text-center text-xs text-amber-600 dark:text-amber-400">
             {t.checklist.operatorRequired}
           </p>
         )}
