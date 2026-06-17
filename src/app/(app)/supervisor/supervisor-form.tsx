@@ -26,6 +26,7 @@ export function SupervisorForm({
   initialDaily: Record<string, DailyState>;
 }) {
   const { t } = useTranslation();
+  const [selectedSupervisor, setSelectedSupervisor] = useState("");
   const [daily, setDaily] = useState<Record<string, DailyState>>(initialDaily);
   const [popup, setPopup] = useState<string | null>(null);
   const [popupForm, setPopupForm] = useState({ doneBy: "", rating: 7, noTime: false, certify: false });
@@ -103,6 +104,40 @@ export function SupervisorForm({
 
   return (
     <div className="space-y-6">
+      {/* Supervisor picker */}
+      <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+        <p className="mb-3 text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+          {t.supervisor.whoIsSupervisor}
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { name: "Alexy", color: "bg-blue-500" },
+            { name: "Adel", color: "bg-emerald-500" },
+            { name: "Fred", color: "bg-orange-500" },
+          ].map((s) => (
+            <button
+              key={s.name}
+              type="button"
+              onClick={() => setSelectedSupervisor(selectedSupervisor === s.name ? "" : s.name)}
+              className={`relative rounded-xl px-2 py-3 text-sm font-bold text-white shadow-sm transition-all active:scale-95 ${s.color} ${
+                selectedSupervisor === s.name
+                  ? "ring-3 ring-offset-2 ring-neutral-900 scale-105 shadow-lg"
+                  : "opacity-80 hover:opacity-100 hover:shadow-md"
+              }`}
+            >
+              {s.name}
+              {selectedSupervisor === s.name && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2.5 6L5 8.5L9.5 3.5" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Counters */}
       <div className="flex gap-4 text-sm">
         <span className="rounded-full bg-amber-100 px-3 py-1 font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">

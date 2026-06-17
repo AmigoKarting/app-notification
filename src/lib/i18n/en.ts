@@ -1070,6 +1070,7 @@ const en: Dictionary = {
     historyRating: "Rating",
     historyNoTime: "Didn't have time to finish",
     historyCertified: "Quality certified",
+    whoIsSupervisor: "Which supervisor are you?",
   },
 } as const;
 

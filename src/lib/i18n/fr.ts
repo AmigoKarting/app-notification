@@ -1068,6 +1068,7 @@ const fr = {
     historyRating: "Note",
     historyNoTime: "Pas eu le temps de terminer",
     historyCertified: "Qualité certifiée",
+    whoIsSupervisor: "Quel superviseur es-tu ?",
   },
 } as const;
 
