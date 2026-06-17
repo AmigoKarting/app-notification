@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
 import { fromPostgrestError } from "@/domain/errors";
 
@@ -23,7 +24,7 @@ export async function listProfilesWithEmail(): Promise<ProfileWithEmail[]> {
 }
 
 export async function listCashierNames(): Promise<{ id: string; name: string }[]> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("profiles")
     .select("id, display_name, first_name, last_name, role")
