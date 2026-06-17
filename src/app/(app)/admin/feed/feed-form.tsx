@@ -72,6 +72,7 @@ export function FeedItemForm(props: Props) {
   );
   const [selectedTeamIds, setSelectedTeamIds] = useState<Set<string>>(new Set(initialTargets.team_ids));
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set(initialTargets.user_ids));
+  const initialRoles = initial?.target_roles ?? null;
 
   const recipientCount =
     targetMode === "all"
@@ -216,6 +217,23 @@ export function FeedItemForm(props: Props) {
             description={t.feedForm.selectedUsersDesc}
           />
         </fieldset>
+
+        {targetMode === "all" && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            <ChannelCheckbox
+              name="target_roles"
+              value="superviseur"
+              defaultChecked={!initialRoles || initialRoles.includes("superviseur")}
+              label={t.feedForm.roleSuperviseur}
+            />
+            <ChannelCheckbox
+              name="target_roles"
+              value="caissiere"
+              defaultChecked={!initialRoles || initialRoles.includes("caissiere")}
+              label={t.feedForm.roleCaissiere}
+            />
+          </div>
+        )}
 
         {targetMode === "teams" && (
           <PickerList

@@ -10,6 +10,7 @@ interface FeedItemSummary {
   title: string;
   body: string | null;
   target_mode: "all" | "teams" | "users";
+  target_roles?: string[] | null;
   send_channels: string[];
   created_by: string;
 }
@@ -33,10 +34,15 @@ async function resolveRecipients(item: FeedItemSummary): Promise<Recipient[]> {
   const supabase = createAdminClient();
 
   if (item.target_mode === "all") {
-    const { data, error } = await supabase
+    let query = supabase
       .from("profiles")
-      .select("id, email, display_name, role")
-      .neq("role", "caissiere");
+      .select("id, email, display_name, role");
+    if (item.target_roles && item.target_roles.length > 0) {
+      query = query.in("role", item.target_roles);
+    } else {
+      query = query.neq("role", "caissiere");
+    }
+    const { data, error } = await query;
     if (error) throw error;
     return (data ?? []).map((p) => ({
       userId: p.id,

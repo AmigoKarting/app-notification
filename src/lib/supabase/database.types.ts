@@ -188,6 +188,7 @@ export interface Database {
           published_at: string;
           expires_at: string | null;
           target_mode: FeedTargetMode;
+          target_roles: string[] | null;
           is_draft: boolean;
           is_pinned: boolean;
           image_url: string | null;
@@ -211,6 +212,7 @@ export interface Database {
           published_at?: string;
           expires_at?: string | null;
           target_mode?: FeedTargetMode;
+          target_roles?: string[] | null;
           is_draft?: boolean;
           is_pinned?: boolean;
           image_url?: string | null;

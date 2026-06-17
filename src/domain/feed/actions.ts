@@ -47,6 +47,7 @@ function readForm(formData: FormData) {
     published_at: formData.get("published_at"),
     expires_at: formData.get("expires_at"),
     target_mode: formData.get("target_mode") || undefined,
+    target_roles: formData.getAll("target_roles").map(String).filter(Boolean),
     target_team_ids: formData.getAll("target_team_ids").map(String).filter(Boolean),
     target_user_ids: formData.getAll("target_user_ids").map(String).filter(Boolean),
     is_draft: formData.get("is_draft") === "on" || formData.get("is_draft") === "true",
@@ -90,6 +91,7 @@ export async function createFeedItemAction(
         title: created.title,
         body: created.body,
         target_mode: created.target_mode,
+        target_roles: created.target_roles ?? null,
         send_channels: created.send_channels,
         created_by: created.created_by,
       });

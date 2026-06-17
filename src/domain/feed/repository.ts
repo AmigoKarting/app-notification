@@ -267,6 +267,7 @@ export async function createFeedItem(createdBy: string, input: unknown): Promise
       published_at: parsed.data.published_at ?? new Date().toISOString(),
       expires_at: parsed.data.expires_at,
       target_mode: parsed.data.target_mode,
+      target_roles: parsed.data.target_roles.length > 0 ? parsed.data.target_roles : null,
       is_draft: parsed.data.is_draft,
       is_pinned: parsed.data.is_pinned,
       image_url: parsed.data.image_url,
@@ -305,6 +306,7 @@ export async function updateFeedItem(id: string, input: unknown): Promise<FeedIt
   }
   if (parsed.data.expires_at !== undefined) patch.expires_at = parsed.data.expires_at;
   if (parsed.data.target_mode !== undefined) patch.target_mode = parsed.data.target_mode;
+  if (parsed.data.target_roles !== undefined) patch.target_roles = parsed.data.target_roles.length > 0 ? parsed.data.target_roles : null;
   if (parsed.data.is_draft !== undefined) patch.is_draft = parsed.data.is_draft;
   if (parsed.data.is_pinned !== undefined) patch.is_pinned = parsed.data.is_pinned;
   if (parsed.data.image_url !== undefined) patch.image_url = parsed.data.image_url;

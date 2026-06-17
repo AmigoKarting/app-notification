@@ -44,6 +44,7 @@ export const baseFeedSchema = z.object({
   expires_at: optionalDatetime,
   // Ciblage
   target_mode: feedTargetModeEnum.default("all"),
+  target_roles: z.array(z.string()).default([]),
   target_team_ids: z.array(z.string().uuid()).default([]),
   target_user_ids: z.array(z.string().uuid()).default([]),
   // Nouvelles options de config
