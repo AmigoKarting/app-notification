@@ -243,15 +243,17 @@ export function ChecklistForm({
       {sections.map((section) => {
         const items = tasks.filter((i) => i.section === section.id);
         if (items.length === 0) return null;
+        const sectionDone = items.every((i) => states[i.key]?.sent);
+        const sectionCount = items.filter((i) => states[i.key]?.sent).length;
         return (
-          <div
+          <CollapsibleSection
             key={section.id}
-            className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800/50"
+            section={section.id}
+            label={section.label}
+            done={sectionDone}
+            count={sectionCount}
+            total={items.length}
           >
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-              <SectionIcon section={section.id} />
-              {section.label}
-            </h3>
             <ul className="space-y-1">
               {items.map((item) => {
                 const st = states[item.key];
@@ -263,7 +265,7 @@ export function ChecklistForm({
                       type="button"
                       onClick={() => handleToggle(item.key)}
                       disabled={st.sent || st.sending || needsOperator}
-                      className={`flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition ${
+                      className={`flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left transition ${
                         st.sent
                           ? "bg-emerald-50 dark:bg-emerald-900/20"
                           : st.countdown !== null
@@ -335,7 +337,7 @@ export function ChecklistForm({
                 );
               })}
             </ul>
-          </div>
+          </CollapsibleSection>
         );
       })}
     </div>
@@ -415,6 +417,75 @@ function Confetti() {
           }}
         />
       ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Collapsible section                                                 */
+/* ------------------------------------------------------------------ */
+function getDefaultSection(): "opening" | "during" | "closing" {
+  const h = new Date().getHours();
+  if (h < 12) return "opening";
+  if (h < 17) return "during";
+  return "closing";
+}
+
+function CollapsibleSection({
+  section,
+  label,
+  done,
+  count,
+  total,
+  children,
+}: {
+  section: "opening" | "during" | "closing";
+  label: string;
+  done: boolean;
+  count: number;
+  total: number;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(() => {
+    if (done) return false;
+    return section === getDefaultSection();
+  });
+
+  useEffect(() => {
+    if (done) setOpen(false);
+  }, [done]);
+
+  return (
+    <div className="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800/50">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center gap-2 px-4 py-3 text-left"
+      >
+        <SectionIcon section={section} />
+        <span className="flex-1 text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+          {label}
+        </span>
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+            done
+              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+              : "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
+          }`}
+        >
+          {count}/{total}
+        </span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          className={`shrink-0 text-neutral-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        >
+          <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && <div className="px-4 pb-3">{children}</div>}
     </div>
   );
 }
