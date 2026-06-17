@@ -35,7 +35,8 @@ async function resolveRecipients(item: FeedItemSummary): Promise<Recipient[]> {
   if (item.target_mode === "all") {
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, email, display_name");
+      .select("id, email, display_name, role")
+      .neq("role", "caissiere");
     if (error) throw error;
     return (data ?? []).map((p) => ({
       userId: p.id,
