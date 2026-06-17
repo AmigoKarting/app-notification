@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -128,30 +129,69 @@ export function AdminMobileNav() {
   const pathname = usePathname();
   const { t } = useTranslation();
   const nav = getNav(t.nav);
+  const [open, setOpen] = useState(false);
+
+  const allEntries = nav.flatMap((s) => s.entries);
+  const current = allEntries.find((e) => isActive(e.href, pathname)) ?? allEntries[0];
+  const CurrentIcon = current.icon;
 
   return (
-    <nav className="lg:hidden -mx-4 mb-4 overflow-x-auto border-b border-neutral-200 bg-neutral-50/80 px-4 sm:-mx-6 sm:px-6 dark:border-neutral-700 dark:bg-neutral-800/50">
-      <ul className="flex gap-1 whitespace-nowrap py-2 text-sm">
-        {nav.flatMap((s) => s.entries).map((entry) => {
-          const Icon = entry.icon;
-          const active = isActive(entry.href, pathname);
-          return (
-            <li key={entry.href}>
-              <Link
-                href={entry.href}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition ${
-                  active
-                    ? "bg-brand-600 font-medium text-white shadow-sm dark:bg-brand-500"
-                    : "text-neutral-600 active:bg-neutral-200 dark:text-neutral-400 dark:active:bg-neutral-700"
-                }`}
-              >
-                <Icon size={15} className={active ? "text-white" : ""} />
-                {entry.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+    <nav className="lg:hidden -mx-4 mb-4 border-b border-neutral-200 bg-neutral-50/80 px-4 sm:-mx-6 sm:px-6 dark:border-neutral-700 dark:bg-neutral-800/50">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between py-3 text-sm font-medium text-neutral-800 dark:text-neutral-200"
+      >
+        <span className="flex items-center gap-2">
+          <CurrentIcon size={16} className="text-brand-600 dark:text-brand-400" />
+          {current.label}
+        </span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`text-neutral-400 transition-transform ${open ? "rotate-180" : ""}`}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="pb-3 space-y-3">
+          {nav.map((section) => (
+            <div key={section.label}>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                {section.label}
+              </p>
+              <div className="grid grid-cols-2 gap-1">
+                {section.entries.map((entry) => {
+                  const Icon = entry.icon;
+                  const active = isActive(entry.href, pathname);
+                  return (
+                    <Link
+                      key={entry.href}
+                      href={entry.href}
+                      onClick={() => setOpen(false)}
+                      className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition ${
+                        active
+                          ? "bg-brand-100 font-medium text-brand-900 dark:bg-brand-900/30 dark:text-brand-300"
+                          : "text-neutral-600 active:bg-neutral-200 dark:text-neutral-400 dark:active:bg-neutral-700"
+                      }`}
+                    >
+                      <Icon size={15} className={active ? "text-brand-600 dark:text-brand-400" : "text-neutral-400"} />
+                      <span className="truncate">{entry.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </nav>
   );
 }

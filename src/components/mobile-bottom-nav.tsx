@@ -33,14 +33,14 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const supervisorTab = {
     href: "/supervisor",
     label: t.supervisor.navTitle,
-    icon: ClipboardSvg,
+    icon: ShieldSvg,
     active: pathname === "/supervisor",
   };
 
   const historyTab = {
     href: "/supervisor-history",
     label: t.checklist.historyShort,
-    icon: ClipboardSvg,
+    icon: HistorySvg,
     active: pathname === "/supervisor-history",
   };
 
@@ -153,6 +153,41 @@ function ClipboardSvg({ active }: { active: boolean }) {
       <path d="M12 16h4" />
       <path d="M8 11h.01" />
       <path d="M8 16h.01" />
+    </svg>
+  );
+}
+
+function ShieldSvg({ active }: { active: boolean }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill={active ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  );
+}
+
+function HistorySvg({ active }: { active: boolean }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill={active ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
     </svg>
   );
 }

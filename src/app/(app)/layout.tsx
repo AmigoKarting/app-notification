@@ -89,7 +89,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               className="mr-3 flex items-center gap-2 font-semibold tracking-tight"
             >
               <AppLogo size={28} />
-              <span className="dark:text-neutral-100">{branding.app_name}</span>
+              <span className="hidden sm:inline dark:text-neutral-100">{branding.app_name}</span>
             </Link>
 
             <DesktopNavLinks role={profile?.role ?? "superviseur"} />
