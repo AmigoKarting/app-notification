@@ -26,8 +26,8 @@ export async function listCashierNames(): Promise<{ id: string; name: string }[]
   const supabase = createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, first_name, last_name")
-    .eq("role", "caissiere")
+    .select("id, display_name, first_name, last_name, role")
+    .not("role", "in", '("dev","superviseur")')
     .order("first_name");
   if (error) throw fromPostgrestError(error);
   return (data ?? []).map((p) => ({
