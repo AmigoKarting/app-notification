@@ -23,8 +23,13 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     theme_color: "#F5B731",
     icons: [
       {
-        src: "/icon.png",
-        sizes: "any",
+        src: "/icon-pwa-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        src: "/icon-pwa-512.png",
+        sizes: "512x512",
         type: "image/png",
       },
     ],

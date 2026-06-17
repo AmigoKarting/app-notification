@@ -1,11 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
   <rect width="512" height="512" rx="96" fill="#1a1a1a"/>
+  <g opacity="0.9">
+    <rect x="0" y="0" width="64" height="40" fill="#ffffff"/>
+    <rect x="128" y="0" width="64" height="40" fill="#ffffff"/>
+    <rect x="256" y="0" width="64" height="40" fill="#ffffff"/>
+    <rect x="384" y="0" width="64" height="40" fill="#ffffff"/>
+    <rect x="64" y="0" width="64" height="40" fill="#333"/>
+    <rect x="192" y="0" width="64" height="40" fill="#333"/>
+    <rect x="320" y="0" width="64" height="40" fill="#333"/>
+    <rect x="448" y="0" width="64" height="40" fill="#333"/>
+    <rect x="0" y="40" width="64" height="40" fill="#333"/>
+    <rect x="128" y="40" width="64" height="40" fill="#333"/>
+    <rect x="256" y="40" width="64" height="40" fill="#333"/>
+    <rect x="384" y="40" width="64" height="40" fill="#333"/>
+    <rect x="64" y="40" width="64" height="40" fill="#ffffff"/>
+    <rect x="192" y="40" width="64" height="40" fill="#ffffff"/>
+    <rect x="320" y="40" width="64" height="40" fill="#ffffff"/>
+    <rect x="448" y="40" width="64" height="40" fill="#ffffff"/>
+  </g>
+  <path d="M0 0 L96 0 Q0 0 0 96 Z" fill="#1a1a1a"/>
+  <path d="M512 0 L416 0 Q512 0 512 96 Z" fill="#1a1a1a"/>
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#F5B731"/>
       <stop offset="100%" stop-color="#D5940C"/>
     </linearGradient>
   </defs>
-  <text x="256" y="390" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="380" fill="url(#g)">A</text>
-  <rect x="100" y="408" width="312" height="36" rx="18" fill="url(#g)"/>
+  <text x="256" y="360" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="260" fill="url(#g)" letter-spacing="-10">AK</text>
+  <text x="256" y="440" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="56" fill="#888888" letter-spacing="12">AMIGO</text>
 </svg>

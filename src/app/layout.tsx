@@ -30,8 +30,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#F5B731" />
-        <link rel="icon" type="image/png" href="/icon.png" />
-        <link rel="apple-touch-icon" href="/icon.png" />
+        <link rel="icon" type="image/png" href="/icon-pwa-192.png" />
+        <link rel="apple-touch-icon" href="/icon-pwa-192.png" />
       </head>
       <body className="min-h-screen antialiased transition-colors duration-300">
         <NavProgress />
