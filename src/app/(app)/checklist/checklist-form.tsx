@@ -176,15 +176,26 @@ export function ChecklistForm({
   );
 
   const sections = [
-    { id: "opening" as const, label: t.checklist.sectionOpening },
-    { id: "during" as const, label: t.checklist.sectionDuring },
-    { id: "closing" as const, label: t.checklist.sectionClosing },
+    { id: "opening" as const, label: t.checklist.sectionOpening, icon: "🌅" },
+    { id: "during" as const, label: t.checklist.sectionDuring, icon: "☀️" },
+    { id: "closing" as const, label: t.checklist.sectionClosing, icon: "🌙" },
   ];
+
+  const [activeSection, setActiveSection] = useState<"opening" | "during" | "closing">(() => {
+    const h = new Date().getHours();
+    if (h < 12) return "opening";
+    if (h < 17) return "during";
+    return "closing";
+  });
 
   const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   const allDone = completedCount === totalCount && totalCount > 0;
 
   const needsOperator = !selectedOperator;
+
+  const activeSectionData = sections.find((s) => s.id === activeSection)!;
+  const activeItems = tasks.filter((i) => i.section === activeSection);
+  const activeDoneCount = activeItems.filter((i) => states[i.key]?.sent).length;
 
   return (
     <div className="space-y-4">
@@ -240,106 +251,139 @@ export function ChecklistForm({
 
       {showCelebration && <Confetti />}
 
-      {sections.map((section) => {
-        const items = tasks.filter((i) => i.section === section.id);
-        if (items.length === 0) return null;
-        const sectionDone = items.every((i) => states[i.key]?.sent);
-        const sectionCount = items.filter((i) => states[i.key]?.sent).length;
-        return (
-          <CollapsibleSection
-            key={section.id}
-            section={section.id}
-            label={section.label}
-            done={sectionDone}
-            count={sectionCount}
-            total={items.length}
+      {/* Section selector dropdown */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <select
+            value={activeSection}
+            onChange={(e) => setActiveSection(e.target.value as "opening" | "during" | "closing")}
+            className="w-full appearance-none rounded-xl border border-neutral-200 bg-white px-4 py-3 pr-10 text-sm font-semibold text-neutral-800 shadow-sm outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-200 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-200 dark:focus:border-brand-500 dark:focus:ring-brand-800"
           >
-            <ul className="space-y-1">
-              {items.map((item) => {
-                const st = states[item.key];
-                if (!st) return null;
+            {sections.map((s) => {
+              const items = tasks.filter((i) => i.section === s.id);
+              const done = items.filter((i) => states[i.key]?.sent).length;
+              return (
+                <option key={s.id} value={s.id}>
+                  {s.icon} {s.label} ({done}/{items.length})
+                </option>
+              );
+            })}
+          </select>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400"
+          >
+            <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
+            activeDoneCount === activeItems.length && activeItems.length > 0
+              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+              : "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
+          }`}
+        >
+          {activeDoneCount}/{activeItems.length}
+        </span>
+      </div>
 
-                return (
-                  <li key={item.key}>
-                    <button
-                      type="button"
-                      onClick={() => handleToggle(item.key)}
-                      disabled={st.sent || st.sending || needsOperator}
-                      className={`flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left transition ${
+      {/* Progress bar */}
+      <div className="h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+        <div
+          className="h-full rounded-full bg-brand-500 transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      {/* Active section tasks */}
+      <div className="rounded-xl border border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-800/50">
+        <ul className="space-y-1">
+          {activeItems.map((item) => {
+            const st = states[item.key];
+            if (!st) return null;
+
+            return (
+              <li key={item.key}>
+                <button
+                  type="button"
+                  onClick={() => handleToggle(item.key)}
+                  disabled={st.sent || st.sending || needsOperator}
+                  className={`flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left transition ${
+                    st.sent
+                      ? "bg-emerald-50 dark:bg-emerald-900/20"
+                      : st.countdown !== null
+                        ? "bg-amber-50 dark:bg-amber-900/20"
+                        : needsOperator
+                          ? "cursor-not-allowed opacity-50"
+                          : "hover:bg-neutral-50 active:bg-neutral-100 dark:hover:bg-neutral-700/50 dark:active:bg-neutral-700"
+                  }`}
+                >
+                  <span
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all duration-200 ${
+                      st.sent
+                        ? "scale-110 border-emerald-500 bg-emerald-500 text-white"
+                        : st.checked
+                          ? "scale-110 border-brand-500 bg-brand-500 text-white"
+                          : "border-neutral-300 dark:border-neutral-600"
+                    }`}
+                  >
+                    {(st.sent || st.checked) && (
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path
+                          d="M2.5 6L5 8.5L9.5 3.5"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </span>
+
+                  <span className="flex-1">
+                    <span
+                      className={`text-sm transition-all duration-300 ${
                         st.sent
-                          ? "bg-emerald-50 dark:bg-emerald-900/20"
-                          : st.countdown !== null
-                            ? "bg-amber-50 dark:bg-amber-900/20"
-                            : needsOperator
-                              ? "cursor-not-allowed opacity-50"
-                              : "hover:bg-neutral-50 active:bg-neutral-100 dark:hover:bg-neutral-700/50 dark:active:bg-neutral-700"
+                          ? "text-emerald-700 line-through dark:text-emerald-400"
+                          : "text-neutral-800 dark:text-neutral-200"
                       }`}
                     >
-                      <span
-                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all duration-200 ${
-                          st.sent
-                            ? "scale-110 border-emerald-500 bg-emerald-500 text-white"
-                            : st.checked
-                              ? "scale-110 border-brand-500 bg-brand-500 text-white"
-                              : "border-neutral-300 dark:border-neutral-600"
-                        }`}
-                      >
-                        {(st.sent || st.checked) && (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path
-                              d="M2.5 6L5 8.5L9.5 3.5"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        )}
+                      {item.label}
+                    </span>
+
+                    {st.countdown !== null && (
+                      <span className="mt-1 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                        <CountdownRing seconds={st.countdown} total={SEND_DELAY} />
+                        {t.checklist.sendingIn.replace("{seconds}", String(st.countdown))}
                       </span>
+                    )}
 
-                      <span className="flex-1">
-                        <span
-                          className={`text-sm transition-all duration-300 ${
-                            st.sent
-                              ? "text-emerald-700 line-through dark:text-emerald-400"
-                              : "text-neutral-800 dark:text-neutral-200"
-                          }`}
-                        >
-                          {item.label}
-                        </span>
+                    {st.sending && (
+                      <span className="mt-1 block text-xs text-brand-600 dark:text-brand-400">
+                        {t.checklist.sending}
+                      </span>
+                    )}
 
-                        {st.countdown !== null && (
-                          <span className="mt-1 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
-                            <CountdownRing seconds={st.countdown} total={SEND_DELAY} />
-                            {t.checklist.sendingIn.replace("{seconds}", String(st.countdown))}
-                          </span>
-                        )}
-
-                        {st.sending && (
-                          <span className="mt-1 block text-xs text-brand-600 dark:text-brand-400">
-                            {t.checklist.sending}
-                          </span>
-                        )}
-
-                        {st.sent && (
-                          <span className="mt-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-                            ✓ {t.checklist.sent}
-                            {st.sentAt && (
-                              <span className="text-emerald-500 dark:text-emerald-500">
-                                — {formatTime(st.sentAt)}
-                              </span>
-                            )}
+                    {st.sent && (
+                      <span className="mt-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+                        ✓ {t.checklist.sent}
+                        {st.sentAt && (
+                          <span className="text-emerald-500 dark:text-emerald-500">
+                            — {formatTime(st.sentAt)}
                           </span>
                         )}
                       </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </CollapsibleSection>
-        );
-      })}
+                    )}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 }
@@ -422,75 +466,6 @@ function Confetti() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Collapsible section                                                 */
-/* ------------------------------------------------------------------ */
-function getDefaultSection(): "opening" | "during" | "closing" {
-  const h = new Date().getHours();
-  if (h < 12) return "opening";
-  if (h < 17) return "during";
-  return "closing";
-}
-
-function CollapsibleSection({
-  section,
-  label,
-  done,
-  count,
-  total,
-  children,
-}: {
-  section: "opening" | "during" | "closing";
-  label: string;
-  done: boolean;
-  count: number;
-  total: number;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(() => {
-    if (done) return false;
-    return section === getDefaultSection();
-  });
-
-  useEffect(() => {
-    if (done) setOpen(false);
-  }, [done]);
-
-  return (
-    <div className="rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800/50">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 px-4 py-3 text-left"
-      >
-        <SectionIcon section={section} />
-        <span className="flex-1 text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-          {label}
-        </span>
-        <span
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-            done
-              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-              : "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
-          }`}
-        >
-          {count}/{total}
-        </span>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          className={`shrink-0 text-neutral-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-        >
-          <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      {open && <div className="px-4 pb-3">{children}</div>}
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* Small sub-components                                                */
 /* ------------------------------------------------------------------ */
 function CountdownRing({ seconds, total }: { seconds: number; total: number }) {
@@ -517,13 +492,3 @@ function CountdownRing({ seconds, total }: { seconds: number; total: number }) {
   );
 }
 
-function SectionIcon({ section }: { section: "opening" | "during" | "closing" }) {
-  switch (section) {
-    case "opening":
-      return <span>🌅</span>;
-    case "during":
-      return <span>☀️</span>;
-    case "closing":
-      return <span>🌙</span>;
-  }
-}
