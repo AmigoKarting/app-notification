@@ -1,5 +1,6 @@
 import { Card, LinkButton, PageHeader, PageTip } from "@/components/ui";
 import { getCurrentProfile } from "@/domain/auth/role";
+import { logoutAction } from "@/domain/auth/actions";
 import { requireUser } from "@/domain/auth/session";
 import { listCategories } from "@/domain/categories/repository";
 import { listMutedCategoryIds } from "@/domain/category-mutes/repository";
@@ -156,6 +157,13 @@ export default async function SettingsPage() {
           </Card>
         </>
       )}
+
+      {/* Déconnexion — visible surtout sur mobile où le bouton du header est caché */}
+      <form action={logoutAction}>
+        <button className="w-full rounded-lg border border-red-200 bg-white px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50 dark:border-red-800 dark:bg-neutral-900 dark:text-red-400 dark:hover:bg-red-900/20">
+          {t.auth.logout}
+        </button>
+      </form>
 
       <PageTip>{t.pageTips.settings}</PageTip>
     </div>
