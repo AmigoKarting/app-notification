@@ -87,6 +87,7 @@ export function ChecklistForm({
   }, [completedCount, totalCount]);
 
   const sendTask = useCallback(async (taskKey: string) => {
+    console.log("[checklist] sendTask called for", taskKey);
     setStates((prev) => ({
       ...prev,
       [taskKey]: { ...prev[taskKey], sending: true, countdown: null },
@@ -96,12 +97,14 @@ export function ChecklistForm({
       const body: Record<string, string> = { taskKey };
       if (operatorRef.current) body.operatorName = operatorRef.current;
 
+      console.log("[checklist] POSTing to /api/checklist/complete-task", body);
       const res = await fetch("/api/checklist/complete-task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
+      console.log("[checklist] response status:", res.status);
       if (res.ok) {
         setStates((prev) => ({
           ...prev,
@@ -109,12 +112,15 @@ export function ChecklistForm({
         }));
         if (navigator.vibrate) navigator.vibrate(30);
       } else {
+        const text = await res.text().catch(() => "");
+        console.error("[checklist] error response:", res.status, text);
         setStates((prev) => ({
           ...prev,
           [taskKey]: { ...prev[taskKey], sending: false },
         }));
       }
-    } catch {
+    } catch (err) {
+      console.error("[checklist] fetch error:", err);
       setStates((prev) => ({
         ...prev,
         [taskKey]: { ...prev[taskKey], sending: false },
@@ -124,7 +130,10 @@ export function ChecklistForm({
 
   const handleToggle = useCallback(
     (taskKey: string) => {
-      if (!selectedOperator) return;
+      if (!selectedOperator) {
+        console.log("[checklist] no operator selected, ignoring toggle");
+        return;
+      }
 
       setStates((prev) => {
         const current = prev[taskKey];
@@ -134,15 +143,18 @@ export function ChecklistForm({
         const nowChecked = !current.checked;
 
         if (nowChecked) {
+          console.log("[checklist] task checked:", taskKey, "countdown starting");
           const countdown = SEND_DELAY;
           const interval = setInterval(() => {
+            let shouldSend = false;
+
             setStates((s) => {
               const st = s[taskKey];
               if (!st || st.countdown === null || st.countdown <= 1) {
                 clearInterval(timersRef.current[taskKey]);
                 delete timersRef.current[taskKey];
                 if (st && st.countdown !== null) {
-                  sendTask(taskKey);
+                  shouldSend = true;
                 }
                 return {
                   ...s,
@@ -154,6 +166,10 @@ export function ChecklistForm({
                 [taskKey]: { ...st, countdown: st.countdown - 1 },
               };
             });
+
+            if (shouldSend) {
+              sendTask(taskKey);
+            }
           }, 1000);
 
           timersRef.current[taskKey] = interval;
@@ -163,6 +179,7 @@ export function ChecklistForm({
             [taskKey]: { ...current, checked: true, countdown },
           };
         } else {
+          console.log("[checklist] task unchecked:", taskKey, "countdown cancelled");
           if (timersRef.current[taskKey]) {
             clearInterval(timersRef.current[taskKey]);
             delete timersRef.current[taskKey];
