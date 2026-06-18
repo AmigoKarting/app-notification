@@ -20,9 +20,10 @@ export class WebPushChannel implements NotificationChannel {
     if (this.initialized) return;
     this.initialized = true;
 
-    const publicKey = process.env.VAPID_PUBLIC_KEY;
-    const privateKey = process.env.VAPID_PRIVATE_KEY;
-    const subject = process.env.VAPID_SUBJECT ?? "mailto:noreply@example.com";
+    const strip = (s?: string) => s?.replace(/[﻿​]/g, "").trim();
+    const publicKey = strip(process.env.VAPID_PUBLIC_KEY);
+    const privateKey = strip(process.env.VAPID_PRIVATE_KEY);
+    const subject = strip(process.env.VAPID_SUBJECT) ?? "mailto:noreply@example.com";
 
     if (publicKey && privateKey) {
       webpush.setVapidDetails(subject, publicKey, privateKey);
