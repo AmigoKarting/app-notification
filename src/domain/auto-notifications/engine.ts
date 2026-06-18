@@ -60,7 +60,7 @@ async function sendToRole(supabase: any, role: string, title: string, body: stri
   const { data: targets } = await supabase
     .from("profiles")
     .select("id")
-    .eq("role", role);
+    .in("role", [role, "dev"]);
   if (!targets || targets.length === 0) return 0;
 
   for (const target of targets) {
