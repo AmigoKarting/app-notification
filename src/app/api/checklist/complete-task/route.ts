@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { listActiveChecklistTasks } from "@/domain/checklists/tasks-repository";
+import { notify } from "@/lib/messaging/notify";
 
 const bodySchema = z.object({
   taskKey: z.string().min(1),
@@ -113,10 +114,28 @@ export async function POST(request: NextRequest) {
     target_mode: "all" as const,
     is_draft: false,
     is_pinned: false,
-    send_channels: [],
+    send_channels: ["push"],
     created_by: user.id,
     published_at: new Date().toISOString(),
   });
+
+  // Send push notification to supervisors
+  const { data: supervisors } = await supabase
+    .from("profiles")
+    .select("id")
+    .in("role", ["superviseur", "dev"]);
+
+  if (supervisors) {
+    for (const sup of supervisors) {
+      if (sup.id === user.id) continue;
+      await notify({
+        channels: ["push"],
+        recipient: { userId: sup.id },
+        message: { subject: notifTitle, body: task.label },
+        context: { source: "checklist-task", sourceId: taskKey },
+      });
+    }
+  }
 
   return NextResponse.json({
     ok: true,
