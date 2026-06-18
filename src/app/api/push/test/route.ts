@@ -32,8 +32,8 @@ export async function GET() {
   const payload = JSON.stringify({
     title: "Test Amigo Karting",
     body: "Les notifications push fonctionnent!",
-    icon: "/icon-192x192.png",
-    badge: "/icon-192x192.png",
+    icon: "/icon-pwa-192.png",
+    badge: "/icon-pwa-192.png",
     data: { url: "/" },
   });
 

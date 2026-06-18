@@ -37,8 +37,8 @@ self.addEventListener("push", (event) => {
 
   const options = {
     body: payload.body || "",
-    icon: payload.icon || "/icon-192x192.png",
-    badge: payload.badge || "/icon-192x192.png",
+    icon: payload.icon || "/icon-pwa-192.png",
+    badge: payload.badge || "/icon-pwa-192.png",
     data: payload.data || { url: "/" },
     vibrate: [200, 100, 200],
     tag: payload.tag || "default",

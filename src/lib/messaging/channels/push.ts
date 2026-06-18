@@ -63,8 +63,8 @@ export class WebPushChannel implements NotificationChannel {
     const payload = JSON.stringify({
       title: message.subject,
       body: message.body,
-      icon: "/icon-192x192.png",
-      badge: "/icon-192x192.png",
+      icon: "/icon-pwa-192.png",
+      badge: "/icon-pwa-192.png",
       data: { url: "/" },
     });
 
