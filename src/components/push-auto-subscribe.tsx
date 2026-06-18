@@ -17,30 +17,37 @@ export function PushAutoSubscribe() {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
     if (Notification.permission === "denied") return;
 
-    const KEY = "push-auto-asked";
+    // Retry every session until subscription succeeds
+    const KEY = "push-subscribed-ok";
     if (sessionStorage.getItem(KEY)) return;
-    sessionStorage.setItem(KEY, "1");
 
     (async () => {
       try {
+        console.log("[push] waiting for service worker...");
         const reg = await navigator.serviceWorker.ready;
+        console.log("[push] SW ready");
         const existing = await reg.pushManager.getSubscription();
-        if (existing) return;
+        if (existing) { console.log("[push] already subscribed"); return; }
 
+        console.log("[push] requesting permission...");
         const permission = await Notification.requestPermission();
+        console.log("[push] permission:", permission);
         if (permission !== "granted") return;
 
         const res = await fetch("/api/push/vapid-key");
+        console.log("[push] vapid-key status:", res.status);
         if (!res.ok) return;
         const { publicKey } = await res.json();
 
+        console.log("[push] subscribing to push manager...");
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToArrayBuffer(publicKey),
         });
+        console.log("[push] subscribed, sending to server...");
 
         const subJson = sub.toJSON();
-        await fetch("/api/push/subscribe", {
+        const saveRes = await fetch("/api/push/subscribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -48,8 +55,10 @@ export function PushAutoSubscribe() {
             keys: subJson.keys,
           }),
         });
-      } catch {
-        // silently ignore
+        console.log("[push] server save status:", saveRes.status);
+        if (saveRes.ok) sessionStorage.setItem(KEY, "1");
+      } catch (err) {
+        console.error("[push] error:", err);
       }
     })();
   }, []);
