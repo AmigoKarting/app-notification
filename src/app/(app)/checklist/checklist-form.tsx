@@ -62,6 +62,9 @@ export function ChecklistForm({
     Object.values(states).filter((s) => s.sent).length,
   );
 
+  const statesRef = useRef(states);
+  statesRef.current = states;
+
   const timersRef = useRef<Record<string, ReturnType<typeof setInterval>>>({});
 
   useEffect(() => {
@@ -130,29 +133,17 @@ export function ChecklistForm({
 
   const handleToggle = useCallback(
     (taskKey: string) => {
-      if (!selectedOperator) {
-        console.log("[checklist] no operator selected, ignoring toggle");
-        return;
-      }
+      if (!selectedOperator) return;
 
-      let action = "none";
+      const current = statesRef.current[taskKey];
+      if (!current || current.sent || current.sending) return;
 
-      setStates((prev) => {
-        const current = prev[taskKey];
-        if (!current || current.sent) return prev;
+      if (!current.checked) {
+        setStates((prev) => ({
+          ...prev,
+          [taskKey]: { ...prev[taskKey], checked: true, countdown: SEND_DELAY },
+        }));
 
-        const nowChecked = !current.checked;
-        action = nowChecked ? "check" : "uncheck";
-
-        if (nowChecked) {
-          return { ...prev, [taskKey]: { ...current, checked: true, countdown: SEND_DELAY } };
-        } else {
-          return { ...prev, [taskKey]: { ...current, checked: false, countdown: null } };
-        }
-      });
-
-      if (action === "check") {
-        console.log("[checklist] task checked:", taskKey, "countdown starting");
         const interval = setInterval(() => {
           let shouldSend = false;
           let shouldClear = false;
@@ -172,14 +163,16 @@ export function ChecklistForm({
             delete timersRef.current[taskKey];
           }
           if (shouldSend) {
-            console.log("[checklist] countdown done, sending task:", taskKey);
             sendTask(taskKey);
           }
         }, 1000);
 
         timersRef.current[taskKey] = interval;
-      } else if (action === "uncheck") {
-        console.log("[checklist] task unchecked:", taskKey, "countdown cancelled");
+      } else {
+        setStates((prev) => ({
+          ...prev,
+          [taskKey]: { ...prev[taskKey], checked: false, countdown: null },
+        }));
         if (timersRef.current[taskKey]) {
           clearInterval(timersRef.current[taskKey]);
           delete timersRef.current[taskKey];
