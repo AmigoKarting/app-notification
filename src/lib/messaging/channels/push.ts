@@ -71,27 +71,29 @@ export class WebPushChannel implements NotificationChannel {
     let sentCount = 0;
     const staleIds: string[] = [];
 
-    for (const sub of subs) {
-      const pushSub = {
-        endpoint: sub.endpoint,
-        keys: { p256dh: sub.p256dh, auth: sub.auth },
-      };
-
-      try {
-        await webpush.sendNotification(pushSub, payload);
-        sentCount++;
-      } catch (err: unknown) {
-        const statusCode = (err as { statusCode?: number }).statusCode;
-        if (statusCode === 410 || statusCode === 404) {
-          staleIds.push(sub.id);
-        } else {
-          logger.warn("push.send.error", {
-            endpoint: sub.endpoint,
-            error: err instanceof Error ? err.message : String(err),
-          });
+    const results = await Promise.allSettled(
+      subs.map(async (sub) => {
+        const pushSub = {
+          endpoint: sub.endpoint,
+          keys: { p256dh: sub.p256dh, auth: sub.auth },
+        };
+        try {
+          await webpush.sendNotification(pushSub, payload);
+          sentCount++;
+        } catch (err: unknown) {
+          const statusCode = (err as { statusCode?: number }).statusCode;
+          if (statusCode === 410 || statusCode === 404) {
+            staleIds.push(sub.id);
+          } else {
+            logger.warn("push.send.error", {
+              endpoint: sub.endpoint,
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
         }
-      }
-    }
+      })
+    );
+    void results;
 
     if (staleIds.length > 0) {
       await supabase

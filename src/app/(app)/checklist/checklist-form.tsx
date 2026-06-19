@@ -9,7 +9,7 @@ export interface ChecklistTaskProps {
   label: string;
 }
 
-const SEND_DELAY = 7;
+const SEND_DELAY = 3;
 
 interface TaskState {
   checked: boolean;

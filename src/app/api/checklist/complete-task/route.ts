@@ -135,21 +135,24 @@ export async function POST(request: NextRequest) {
     let pushSent = 0;
     let pushErrors = 0;
     if (supervisors) {
-      for (const sup of supervisors) {
-        if (sup.id === user.id) { debugLog.push({ skip: sup.id, reason: "self" }); continue; }
-        debugLog.push({ sending: sup.id, role: sup.role });
-        const results = await notify({
-          channels: ["push"],
-          recipient: { userId: sup.id },
-          message: { subject: notifTitle, body: task.label },
-          context: { source: "checklist-task", sourceId: taskKey },
-        });
-        for (const r of results) {
-          debugLog.push({ to: sup.id, status: r.status, skip: r.skipReason, error: r.error, provider: r.provider });
-          if (r.status === "sent") pushSent++;
-          else pushErrors++;
-        }
-      }
+      const targets = supervisors.filter((s) => s.id !== user.id);
+      debugLog.push({ targets: targets.length, skippedSelf: supervisors.length - targets.length });
+      const pushResults = await Promise.allSettled(
+        targets.map(async (sup) => {
+          const results = await notify({
+            channels: ["push"],
+            recipient: { userId: sup.id },
+            message: { subject: notifTitle, body: task.label },
+            context: { source: "checklist-task", sourceId: taskKey },
+          });
+          for (const r of results) {
+            debugLog.push({ to: sup.id, status: r.status, skip: r.skipReason, error: r.error, provider: r.provider });
+            if (r.status === "sent") pushSent++;
+            else pushErrors++;
+          }
+        })
+      );
+      void pushResults;
     }
     debugLog.push({ done: true, pushSent, pushErrors });
   } catch (err) {
