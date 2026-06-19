@@ -75,11 +75,16 @@ export default async function ChecklistHistoryPage() {
                 : cl.display_name?.trim()) || "—";
             const operatorName = cl.operator_name || accountName;
             const showAccount = cl.operator_name && cl.operator_name !== accountName;
-            const pct = cl.total_items > 0 ? Math.round((cl.completed_items.length / cl.total_items) * 100) : 0;
+            const isSupervisor = cl.role === "superviseur" || cl.role === "dev";
+            const targetRole = isSupervisor ? "superviseur" : "caissiere";
+            const roleTasks = activeTasks.filter((task) => (task as any).target_role === targetRole);
+            const totalForRole = roleTasks.length;
             const completedSet = new Set(cl.completed_items);
+            const completedForRole = roleTasks.filter((task) => completedSet.has(task.task_key)).length;
+            const pct = totalForRole > 0 ? Math.round((completedForRole / totalForRole) * 100) : 0;
 
             const sectionStats = sectionOrder.map((sec) => {
-              const sectionTasks = activeTasks.filter((task) => task.section === sec);
+              const sectionTasks = roleTasks.filter((task) => task.section === sec);
               const done = sectionTasks.filter((task) => completedSet.has(task.task_key));
               const missed = sectionTasks.filter((task) => !completedSet.has(task.task_key));
               return { section: sec, total: sectionTasks.length, done, missed };
@@ -92,9 +97,18 @@ export default async function ChecklistHistoryPage() {
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-base font-bold text-neutral-900 dark:text-neutral-100">
-                      {operatorName}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-base font-bold text-neutral-900 dark:text-neutral-100">
+                        {operatorName}
+                      </p>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                        isSupervisor
+                          ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
+                          : "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300"
+                      }`}>
+                        {isSupervisor ? "Superviseur" : "Caissiere"}
+                      </span>
+                    </div>
                     {showAccount && (
                       <p className="text-[11px] text-neutral-400 dark:text-neutral-500">
                         Compte: {accountName}
@@ -113,7 +127,7 @@ export default async function ChecklistHistoryPage() {
                           : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
                     }`}
                   >
-                    {cl.completed_items.length}/{cl.total_items} ({pct}%)
+                    {completedForRole}/{totalForRole} ({pct}%)
                   </span>
                 </div>
 

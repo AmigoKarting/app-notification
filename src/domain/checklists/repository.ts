@@ -108,6 +108,7 @@ export interface ChecklistWithProfile {
   first_name: string | null;
   last_name: string | null;
   display_name: string | null;
+  role: string | null;
 }
 
 export async function listRecentChecklists(limit = 30): Promise<ChecklistWithProfile[]> {
@@ -129,7 +130,7 @@ export async function listRecentChecklists(limit = 30): Promise<ChecklistWithPro
   const userIds = [...new Set(rows.map((c) => c.user_id))];
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, display_name")
+    .select("id, first_name, last_name, display_name, role")
     .in("id", userIds);
 
   const profileMap = new Map(
@@ -144,6 +145,7 @@ export async function listRecentChecklists(limit = 30): Promise<ChecklistWithPro
       first_name: profile?.first_name ?? null,
       last_name: profile?.last_name ?? null,
       display_name: profile?.display_name ?? null,
+      role: profile?.role ?? null,
     };
   });
 }
