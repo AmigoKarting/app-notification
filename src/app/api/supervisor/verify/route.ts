@@ -11,10 +11,11 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { taskId, doneBy, rating, noTimeToFinish, qualityCertified } = body as {
+  const { taskId, doneBy, rating, comment, noTimeToFinish, qualityCertified } = body as {
     taskId: string;
     doneBy: string;
     rating: number;
+    comment?: string;
     noTimeToFinish: boolean;
     qualityCertified: boolean;
   };
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
     supervisorId: user.id,
     doneBy,
     rating,
+    comment: comment || null,
     noTimeToFinish: !!noTimeToFinish,
     qualityCertified: !!qualityCertified,
   });

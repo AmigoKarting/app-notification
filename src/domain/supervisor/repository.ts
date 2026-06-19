@@ -84,6 +84,7 @@ export interface VerifyPayload {
   supervisorId: string;
   doneBy: string;
   rating: number;
+  comment: string | null;
   noTimeToFinish: boolean;
   qualityCertified: boolean;
 }
@@ -167,6 +168,7 @@ export async function verifyTask(payload: VerifyPayload): Promise<void> {
       verified_at: new Date().toISOString(),
       done_by: payload.doneBy,
       rating: payload.rating,
+      comment: payload.comment,
       no_time_to_finish: payload.noTimeToFinish,
       quality_certified: payload.qualityCertified,
     })

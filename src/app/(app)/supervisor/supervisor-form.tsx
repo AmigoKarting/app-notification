@@ -29,7 +29,7 @@ export function SupervisorForm({
   const [selectedSupervisor, setSelectedSupervisor] = useState("");
   const [daily, setDaily] = useState<Record<string, DailyState>>(initialDaily);
   const [popup, setPopup] = useState<string | null>(null);
-  const [popupForm, setPopupForm] = useState({ doneBy: "", rating: 7, noTime: false, certify: false });
+  const [popupForm, setPopupForm] = useState({ doneBy: "", rating: 7, comment: "", noTime: false, certify: false });
   const [loading, setLoading] = useState<string | null>(null);
 
   const sections = [
@@ -64,7 +64,7 @@ export function SupervisorForm({
   }
 
   function handleVerifyClick(taskId: string) {
-    setPopupForm({ doneBy: "", rating: 7, noTime: false, certify: false });
+    setPopupForm({ doneBy: "", rating: 7, comment: "", noTime: false, certify: false });
     setPopup(taskId);
   }
 
@@ -79,6 +79,7 @@ export function SupervisorForm({
           taskId: popup,
           doneBy: popupForm.doneBy.trim(),
           rating: popupForm.rating,
+          comment: popupForm.comment.trim() || undefined,
           noTimeToFinish: popupForm.noTime,
           qualityCertified: popupForm.certify,
         }),
@@ -274,6 +275,20 @@ export function SupervisorForm({
                     {popupForm.rating}
                   </span>
                 </div>
+              </label>
+
+              {/* Comment */}
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Commentaire <span className="font-normal text-neutral-400">(optionnel)</span>
+                </span>
+                <textarea
+                  value={popupForm.comment}
+                  onChange={(e) => setPopupForm((p) => ({ ...p, comment: e.target.value }))}
+                  placeholder="Explique la note..."
+                  rows={2}
+                  className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100"
+                />
               </label>
 
               {/* No time radio */}
