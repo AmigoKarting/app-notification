@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { getStreak, getTodayCompleted } from "@/domain/checklists/repository";
 import { listActiveChecklistTasks } from "@/domain/checklists/tasks-repository";
+import { isRecyclingDay } from "@/domain/checklists/recycling";
 import { listCashierNames } from "@/domain/users/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { ChecklistForm } from "./checklist-form";
@@ -25,12 +26,17 @@ export default async function ChecklistPage() {
 
   const targetRole = isSupervisor ? "superviseur" : "caissiere";
 
-  const [todayData, tasks, streak, cashiers] = await Promise.all([
+  const [todayData, allTasks, streak, cashiers, recyclingToday] = await Promise.all([
     getTodayCompleted(user.id),
     listActiveChecklistTasks(targetRole),
     getStreak(user.id),
     listCashierNames(),
+    isSupervisor || isDev ? isRecyclingDay() : Promise.resolve(false),
   ]);
+
+  const tasks = recyclingToday
+    ? allTasks
+    : allTasks.filter((tk) => tk.task_key !== "sup_recyclage");
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
