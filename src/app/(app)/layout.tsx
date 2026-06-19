@@ -149,7 +149,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <main className="mx-auto max-w-6xl px-4 py-4 pb-20 sm:px-6 sm:py-8 md:pb-8">{children}</main>
 
 
-      <MobileBottomNav role={profile?.role ?? "superviseur"} />
+      {!isCashier && <MobileBottomNav role={profile?.role ?? "superviseur"} />}
       <ScrollToTop />
       {!isCashier && <InstallAppBanner />}
       <PushAutoSubscribe />
