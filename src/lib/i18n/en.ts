@@ -999,7 +999,7 @@ const en: Dictionary = {
     sectionDuring: "Multiple times a day",
     sectionClosing: "Before leaving",
     sectionFreeTime: "Free time",
-    adminTitle: "Cashier checklists",
+    adminTitle: "Checklists",
     adminDescription: "History of checklists completed by cashiers.",
     noChecklists: "No checklists submitted",
     noChecklistsDesc: "Checklists will appear here when cashiers fill them out.",

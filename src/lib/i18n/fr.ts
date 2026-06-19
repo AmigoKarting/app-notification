@@ -997,7 +997,7 @@ const fr = {
     sectionDuring: "Plusieurs fois par jour",
     sectionClosing: "Avant de partir",
     sectionFreeTime: "Temps libre",
-    adminTitle: "Checklists caisse",
+    adminTitle: "Checklists",
     adminDescription: "Historique des checklists remplies par les caissières.",
     noChecklists: "Aucune checklist soumise",
     noChecklistsDesc: "Les checklists apparaîtront ici quand les caissières les rempliront.",
