@@ -107,7 +107,8 @@ export function ChecklistForm({
         body: JSON.stringify(body),
       });
 
-      console.log("[checklist] response status:", res.status);
+      const resBody = await res.json().catch(() => null);
+      console.log("[checklist] response:", res.status, JSON.stringify(resBody));
       if (res.ok) {
         setStates((prev) => ({
           ...prev,

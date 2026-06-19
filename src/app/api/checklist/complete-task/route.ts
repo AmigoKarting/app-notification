@@ -123,38 +123,43 @@ export async function POST(request: NextRequest) {
   });
 
   // Send push notification to supervisors
-  const { data: supervisors, error: supError } = await supabase
-    .from("profiles")
-    .select("id, role")
-    .in("role", ["superviseur", "dev"]);
+  const debugLog: unknown[] = [];
+  try {
+    const { data: supervisors, error: supError } = await supabase
+      .from("profiles")
+      .select("id, role")
+      .in("role", ["superviseur", "dev"]);
 
-  console.log("[complete-task] supervisors query:", { count: supervisors?.length, error: supError?.message, userId: user.id });
+    debugLog.push({ step: "supervisors", count: supervisors?.length, error: supError?.message, userId: user.id });
 
-  let pushSent = 0;
-  let pushErrors = 0;
-  if (supervisors) {
-    for (const sup of supervisors) {
-      if (sup.id === user.id) continue;
-      console.log("[complete-task] sending push to", sup.id, sup.role);
-      const results = await notify({
-        channels: ["push"],
-        recipient: { userId: sup.id },
-        message: { subject: notifTitle, body: task.label },
-        context: { source: "checklist-task", sourceId: taskKey },
-      });
-      for (const r of results) {
-        console.log("[complete-task] notify result:", { to: sup.id, status: r.status, skip: r.skipReason, error: r.error });
-        if (r.status === "sent") pushSent++;
-        else pushErrors++;
+    let pushSent = 0;
+    let pushErrors = 0;
+    if (supervisors) {
+      for (const sup of supervisors) {
+        if (sup.id === user.id) { debugLog.push({ skip: sup.id, reason: "self" }); continue; }
+        debugLog.push({ sending: sup.id, role: sup.role });
+        const results = await notify({
+          channels: ["push"],
+          recipient: { userId: sup.id },
+          message: { subject: notifTitle, body: task.label },
+          context: { source: "checklist-task", sourceId: taskKey },
+        });
+        for (const r of results) {
+          debugLog.push({ to: sup.id, status: r.status, skip: r.skipReason, error: r.error, provider: r.provider });
+          if (r.status === "sent") pushSent++;
+          else pushErrors++;
+        }
       }
     }
+    debugLog.push({ done: true, pushSent, pushErrors });
+  } catch (err) {
+    debugLog.push({ crash: err instanceof Error ? err.message : String(err) });
   }
-
-  console.log("[complete-task] done:", { taskKey, pushSent, pushErrors });
 
   return NextResponse.json({
     ok: true,
     completed: completedItems.length,
     total: activeTasks.length,
+    _debug: debugLog,
   });
 }
