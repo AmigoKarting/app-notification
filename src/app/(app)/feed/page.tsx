@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { EmptyState, PageHeader, PageTip, SparkleIcon } from "@/components/ui";
+import { EmptyState, PageHeader, SparkleIcon } from "@/components/ui";
 import { FeedCard } from "@/components/feed-card";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 import { getCurrentProfile } from "@/domain/auth/role";
@@ -144,7 +144,6 @@ export default async function FeedPage({ searchParams }: PageProps) {
         </div>
       )}
 
-      <PageTip>{t.pageTips.feed}</PageTip>
     </div>
     </PullToRefresh>
   );
