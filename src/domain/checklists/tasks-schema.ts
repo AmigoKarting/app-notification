@@ -10,8 +10,9 @@ const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
 
+export const targetRoleEnum = z.enum(["caissiere", "superviseur"]);
+
 export const createChecklistTaskSchema = z.object({
-  // task_key optionnel — généré depuis le label si absent
   task_key: z
     .string()
     .trim()
@@ -25,6 +26,7 @@ export const createChecklistTaskSchema = z.object({
   is_active: z
     .preprocess((v) => v === "on" || v === "true" || v === true, z.boolean())
     .default(true),
+  target_role: targetRoleEnum.default("caissiere"),
 }).transform((v) => ({
   ...v,
   task_key: v.task_key && v.task_key.length > 0 ? v.task_key : slugify(v.label).slice(0, 80) || "task",
@@ -38,6 +40,7 @@ export const updateChecklistTaskSchema = z.object({
   is_active: z
     .preprocess((v) => v === "on" || v === "true" || v === true, z.boolean())
     .default(true),
+  target_role: targetRoleEnum.default("caissiere"),
 });
 
 export type CreateChecklistTaskInput = z.infer<typeof createChecklistTaskSchema>;

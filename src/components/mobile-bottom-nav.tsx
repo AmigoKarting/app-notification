@@ -51,7 +51,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
       : isDev
         ? [feedTab, checklistTab]
         : isGerant
-          ? [feedTab, supervisorTab, historyTab]
+          ? [feedTab, checklistTab, supervisorTab, historyTab]
           : [feedTab]),
     ...(isDev
       ? [

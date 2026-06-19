@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (!profile || (profile.role !== "caissiere" && profile.role !== "dev")) {
+  if (!profile || !["caissiere", "superviseur", "dev"].includes(profile.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -134,13 +134,16 @@ export async function POST(request: NextRequest) {
     published_at: new Date().toISOString(),
   });
 
-  // Send push notification to supervisors
+  // Send push notification to the right recipients
+  const isSupervisorTask = profile.role === "superviseur";
+  const notifyRoles = isSupervisorTask ? ["dev"] : ["superviseur", "dev"];
+
   const debugLog: unknown[] = [];
   try {
     const { data: supervisors, error: supError } = await supabase
       .from("profiles")
       .select("id, role")
-      .in("role", ["superviseur", "dev"]);
+      .in("role", notifyRoles);
 
     debugLog.push({ step: "supervisors", count: supervisors?.length, error: supError?.message, userId: user.id });
 

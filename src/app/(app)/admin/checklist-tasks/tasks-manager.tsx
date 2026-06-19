@@ -19,6 +19,7 @@ type Task = {
   label: string;
   sort_order: number;
   is_active: boolean;
+  target_role: string;
 };
 
 interface Props {
@@ -92,12 +93,16 @@ export function TasksManager({ tasks }: Props) {
             placeholder={t.checklistAdmin.taskLabelPlaceholder}
             error={createState.status === "error" ? createState.fieldErrors?.label : undefined}
           />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <SelectField label={t.checklistAdmin.section} name="section" defaultValue="opening">
               <option value="opening">{sectionLabels.opening}</option>
               <option value="during">{sectionLabels.during}</option>
               <option value="closing">{sectionLabels.closing}</option>
               <option value="free_time">{sectionLabels.free_time}</option>
+            </SelectField>
+            <SelectField label="Rôle cible" name="target_role" defaultValue="caissiere">
+              <option value="caissiere">Caissière</option>
+              <option value="superviseur">Superviseur</option>
             </SelectField>
             <Field
               label={t.checklistAdmin.sortOrder}
@@ -135,25 +140,31 @@ export function TasksManager({ tasks }: Props) {
         </form>
       </div>
 
-      {/* Liste par section */}
-      {(["opening", "during", "closing"] as const).map((section) => {
-        const list = tasks.filter((task) => task.section === section);
+      {/* Liste par rôle + section */}
+      {(["caissiere", "superviseur"] as const).map((role) => {
+        const roleTasks = tasks.filter((t) => t.target_role === role);
+        if (roleTasks.length === 0) return null;
         return (
-          <div key={section} className="space-y-2">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-              {sectionLabels[section]}
-            </h3>
-            {list.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-neutral-300 px-4 py-3 text-sm italic text-neutral-500 dark:border-neutral-700 dark:text-neutral-400">
-                {t.checklistAdmin.emptySection}
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {list.map((task) => (
-                  <TaskRow key={task.id} task={task} sectionLabels={sectionLabels} />
-                ))}
-              </ul>
-            )}
+          <div key={role} className="space-y-4">
+            <h2 className="text-base font-bold text-neutral-800 dark:text-neutral-200">
+              {role === "caissiere" ? "Caissières" : "Superviseurs"}
+            </h2>
+            {(["opening", "during", "closing", "free_time"] as const).map((section) => {
+              const list = roleTasks.filter((task) => task.section === section);
+              if (list.length === 0) return null;
+              return (
+                <div key={section} className="space-y-2">
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                    {sectionLabels[section]}
+                  </h3>
+                  <ul className="space-y-2">
+                    {list.map((task) => (
+                      <TaskRow key={task.id} task={task} sectionLabels={sectionLabels} />
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
         );
       })}
@@ -191,12 +202,16 @@ function TaskRow({
             maxLength={300}
             error={updateState.status === "error" ? updateState.fieldErrors?.label : undefined}
           />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <SelectField label={t.checklistAdmin.section} name="section" defaultValue={task.section}>
               <option value="opening">{sectionLabels.opening}</option>
               <option value="during">{sectionLabels.during}</option>
               <option value="closing">{sectionLabels.closing}</option>
               <option value="free_time">{sectionLabels.free_time}</option>
+            </SelectField>
+            <SelectField label="Rôle cible" name="target_role" defaultValue={task.target_role}>
+              <option value="caissiere">Caissière</option>
+              <option value="superviseur">Superviseur</option>
             </SelectField>
             <Field
               label={t.checklistAdmin.sortOrder}

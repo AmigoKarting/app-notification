@@ -15,13 +15,19 @@ export default async function ChecklistPage() {
   const user = await requireUser();
   const profile = await getCurrentProfile();
 
-  if (profile?.role !== "caissiere" && profile?.role !== "dev") {
+  const isCashier = profile?.role === "caissiere";
+  const isSupervisor = profile?.role === "superviseur";
+  const isDev = profile?.role === "dev";
+
+  if (!isCashier && !isSupervisor && !isDev) {
     redirect("/feed");
   }
 
+  const targetRole = isSupervisor ? "superviseur" : "caissiere";
+
   const [todayData, tasks, streak, cashiers] = await Promise.all([
     getTodayCompleted(user.id),
-    listActiveChecklistTasks(),
+    listActiveChecklistTasks(targetRole),
     getStreak(user.id),
     listCashierNames(),
   ]);
@@ -45,6 +51,7 @@ export default async function ChecklistPage() {
         userName={profile?.first_name || undefined}
         streak={streak}
         cashiers={cashiers}
+        role={targetRole}
       />
     </div>
   );

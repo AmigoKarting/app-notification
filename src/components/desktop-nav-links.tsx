@@ -17,7 +17,7 @@ export function DesktopNavLinks({ role }: DesktopNavLinksProps) {
 
   return (
     <span className="hidden md:contents">
-      {(isCashier || isDev) && (
+      {(isCashier || isGerant || isDev) && (
         <NavLink href="/checklist" label={t.checklist.shortTitle} active={pathname === "/checklist"} />
       )}
       {!isCashier && (

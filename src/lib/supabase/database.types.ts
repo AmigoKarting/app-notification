@@ -566,6 +566,7 @@ export interface Database {
           label: string;
           sort_order: number;
           is_active: boolean;
+          target_role: string;
           created_at: string;
           updated_at: string;
         };
@@ -576,6 +577,7 @@ export interface Database {
           label: string;
           sort_order?: number;
           is_active?: boolean;
+          target_role?: string;
           created_at?: string;
           updated_at?: string;
         };

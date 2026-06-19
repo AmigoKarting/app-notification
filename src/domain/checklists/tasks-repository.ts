@@ -27,16 +27,19 @@ export async function listAllChecklistTasks(): Promise<ChecklistTask[]> {
   return data ?? [];
 }
 
-/** Liste les tâches actives (à afficher dans le formulaire caissière). */
-export async function listActiveChecklistTasks(): Promise<ChecklistTask[]> {
+/** Liste les tâches actives filtrées par rôle cible. */
+export async function listActiveChecklistTasks(targetRole?: string): Promise<ChecklistTask[]> {
   const supabase = createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("checklist_tasks")
     .select("*")
-    .eq("is_active", true)
+    .eq("is_active", true);
+  if (targetRole) query = query.eq("target_role", targetRole);
+  query = query
     .order("section", { ascending: true })
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
+  const { data, error } = await query;
   if (error) throw fromPostgrestError(error);
   return data ?? [];
 }
@@ -72,6 +75,7 @@ export async function createChecklistTask(input: unknown): Promise<ChecklistTask
       label: parsed.data.label,
       sort_order: sortOrder,
       is_active: parsed.data.is_active,
+      target_role: parsed.data.target_role,
     })
     .select("*")
     .single();
@@ -98,6 +102,7 @@ export async function updateChecklistTask(input: unknown): Promise<ChecklistTask
       label: parsed.data.label,
       sort_order: parsed.data.sort_order,
       is_active: parsed.data.is_active,
+      target_role: parsed.data.target_role,
     })
     .eq("id", parsed.data.id)
     .select("*")
