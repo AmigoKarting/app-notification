@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
   if (existing) {
     const current = (existing.completed_items ?? []) as string[];
     if (current.includes(taskKey)) {
+      console.log("[complete-task] alreadyDone, skipping push", { taskKey });
       return NextResponse.json({ ok: true, alreadyDone: true });
     }
     completedItems = [...current, taskKey];
