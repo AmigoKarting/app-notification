@@ -39,3 +39,20 @@ export async function listCashierNames(): Promise<{ id: string; name: string }[]
       "—",
   }));
 }
+
+export async function listSupervisorNames(): Promise<{ id: string; name: string }[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, display_name, first_name, last_name, role")
+    .in("role", ["superviseur", "gerant"])
+    .order("first_name");
+  if (error) throw fromPostgrestError(error);
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    name:
+      (p.first_name && p.last_name ? `${p.first_name} ${p.last_name}` : null) ??
+      p.display_name ??
+      "—",
+  }));
+}

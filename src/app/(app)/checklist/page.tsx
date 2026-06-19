@@ -5,7 +5,7 @@ import { requireUser } from "@/domain/auth/session";
 import { getStreak, getTodayCompleted } from "@/domain/checklists/repository";
 import { listActiveChecklistTasks } from "@/domain/checklists/tasks-repository";
 import { isRecyclingDay } from "@/domain/checklists/recycling";
-import { listCashierNames } from "@/domain/users/repository";
+import { listCashierNames, listSupervisorNames } from "@/domain/users/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { ChecklistForm } from "./checklist-form";
 
@@ -26,11 +26,12 @@ export default async function ChecklistPage() {
 
   const targetRole = isSupervisor ? "superviseur" : "caissiere";
 
-  const [todayData, allTasks, streak, cashiers, recyclingToday] = await Promise.all([
+  const [todayData, allTasks, streak, cashiers, supervisors, recyclingToday] = await Promise.all([
     getTodayCompleted(user.id),
     listActiveChecklistTasks(targetRole),
     getStreak(user.id),
     listCashierNames(),
+    listSupervisorNames(),
     isSupervisor || isDev ? isRecyclingDay() : Promise.resolve(false),
   ]);
 
@@ -56,7 +57,7 @@ export default async function ChecklistPage() {
         initialOperator={todayData.operatorName ?? undefined}
         userName={profile?.first_name || undefined}
         streak={streak}
-        cashiers={cashiers}
+        operators={isSupervisor ? supervisors : cashiers}
         role={targetRole}
       />
     </div>

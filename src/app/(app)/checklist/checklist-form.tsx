@@ -28,7 +28,7 @@ export function ChecklistForm({
   initialOperator,
   userName,
   streak = 0,
-  cashiers = [],
+  operators = [],
   role = "caissiere",
   lockedTasks = [],
 }: {
@@ -38,7 +38,7 @@ export function ChecklistForm({
   initialOperator?: string;
   userName?: string;
   streak?: number;
-  cashiers?: { id: string; name: string }[];
+  operators?: { id: string; name: string }[];
   role?: "caissiere" | "superviseur";
   lockedTasks?: string[];
 }) {
@@ -46,7 +46,7 @@ export function ChecklistForm({
 
   const isSupervisor = role === "superviseur";
 
-  const [selectedOperator, setSelectedOperator] = useState(isSupervisor ? (userName ?? "Superviseur") : (initialOperator ?? ""));
+  const [selectedOperator, setSelectedOperator] = useState(initialOperator ?? "");
   const operatorRef = useRef(selectedOperator);
   useEffect(() => { operatorRef.current = selectedOperator; }, [selectedOperator]);
 
@@ -261,7 +261,7 @@ export function ChecklistForm({
   const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   const allDone = completedCount === totalCount && totalCount > 0;
 
-  const needsOperator = !isSupervisor && !selectedOperator;
+  const needsOperator = !selectedOperator;
 
   const activeSectionData = sections.find((s) => s.id === activeSection)!;
   const activeItems = tasks.filter((i) => i.section === activeSection);
@@ -279,33 +279,32 @@ export function ChecklistForm({
         )}
       </div>
 
-      {/* Operator picker (cashiers only) */}
-      {!isSupervisor && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
-          <p className="mb-3 text-sm font-semibold text-neutral-700 dark:text-neutral-300">
-            {t.checklist.operatorLabel}
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { name: "Amia", color: "bg-pink-500" },
-              { name: "Angélie", color: "bg-fuchsia-500" },
-              { name: "Ariel", color: "bg-violet-500" },
-              { name: "Kyana", color: "bg-rose-500" },
-              { name: "Lili-Rose", color: "bg-purple-500" },
-              { name: "Vicky", color: "bg-amber-500" },
-            ].map((c) => (
+      {/* Operator picker */}
+      <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+        <p className="mb-3 text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+          {t.checklist.operatorLabel}
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {operators.map((op, i) => {
+            const colors = [
+              "bg-pink-500", "bg-fuchsia-500", "bg-violet-500",
+              "bg-rose-500", "bg-purple-500", "bg-amber-500",
+              "bg-cyan-500", "bg-teal-500", "bg-indigo-500",
+            ];
+            const color = colors[i % colors.length];
+            return (
               <button
-                key={c.name}
+                key={op.id}
                 type="button"
-                onClick={() => setSelectedOperator(selectedOperator === c.name ? "" : c.name)}
-                className={`relative rounded-xl px-2 py-3 text-sm font-bold text-white shadow-sm transition-all active:scale-95 ${c.color} ${
-                  selectedOperator === c.name
+                onClick={() => setSelectedOperator(selectedOperator === op.name ? "" : op.name)}
+                className={`relative rounded-xl px-2 py-3 text-sm font-bold text-white shadow-sm transition-all active:scale-95 ${color} ${
+                  selectedOperator === op.name
                     ? "ring-3 ring-offset-2 ring-neutral-900 scale-105 shadow-lg"
                     : "opacity-80 hover:opacity-100 hover:shadow-md"
                 }`}
               >
-                {c.name}
-                {selectedOperator === c.name && (
+                {op.name}
+                {selectedOperator === op.name && (
                   <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                       <path d="M2.5 6L5 8.5L9.5 3.5" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -313,15 +312,15 @@ export function ChecklistForm({
                   </span>
                 )}
               </button>
-            ))}
-          </div>
-          {needsOperator && (
-            <p className="mt-2.5 text-center text-xs text-amber-600 dark:text-amber-400">
-              {t.checklist.operatorRequired}
-            </p>
-          )}
+            );
+          })}
         </div>
-      )}
+        {needsOperator && (
+          <p className="mt-2.5 text-center text-xs text-amber-600 dark:text-amber-400">
+            {t.checklist.operatorRequired}
+          </p>
+        )}
+      </div>
 
       {/* Celebration */}
       {allDone && (
