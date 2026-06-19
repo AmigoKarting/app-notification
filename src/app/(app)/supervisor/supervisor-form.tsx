@@ -137,6 +137,11 @@ export function SupervisorForm({
             </button>
           ))}
         </div>
+        {!selectedSupervisor && (
+          <p className="mt-2.5 text-center text-xs text-amber-600 dark:text-amber-400">
+            Veuillez vous identifier avant de cocher les tâches.
+          </p>
+        )}
       </div>
 
       {/* Counters */}
@@ -200,7 +205,7 @@ export function SupervisorForm({
                       <input
                         type="checkbox"
                         checked={state.assigned}
-                        disabled={isLoading || state.verified}
+                        disabled={isLoading || state.verified || !selectedSupervisor}
                         onChange={(e) => handleAssign(task.id, e.target.checked)}
                         className="h-5 w-5 cursor-pointer rounded border-neutral-300 text-amber-600 transition focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-700"
                       />
@@ -216,7 +221,7 @@ export function SupervisorForm({
                         <input
                           type="checkbox"
                           checked={false}
-                          disabled={!state.assigned || isLoading}
+                          disabled={!state.assigned || isLoading || !selectedSupervisor}
                           onChange={() => handleVerifyClick(task.id)}
                           className="h-5 w-5 cursor-pointer rounded border-neutral-300 text-emerald-600 transition focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-700"
                         />
