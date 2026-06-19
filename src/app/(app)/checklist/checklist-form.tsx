@@ -30,6 +30,7 @@ export function ChecklistForm({
   streak = 0,
   cashiers = [],
   role = "caissiere",
+  lockedTasks = [],
 }: {
   tasks: ChecklistTaskProps[];
   initialCompleted: string[];
@@ -39,6 +40,7 @@ export function ChecklistForm({
   streak?: number;
   cashiers?: { id: string; name: string }[];
   role?: "caissiere" | "superviseur";
+  lockedTasks?: string[];
 }) {
   const { t } = useTranslation();
 
@@ -388,33 +390,42 @@ export function ChecklistForm({
           {activeItems.map((item) => {
             const st = states[item.key];
             if (!st) return null;
+            const isLocked = lockedTasks.includes(item.key);
 
             return (
               <li key={item.key}>
                 <button
                   type="button"
-                  onClick={() => handleToggle(item.key)}
-                  disabled={st.sent || st.sending || needsOperator}
+                  onClick={() => !isLocked && handleToggle(item.key)}
+                  disabled={st.sent || st.sending || needsOperator || isLocked}
                   className={`flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left transition ${
-                    st.sent
-                      ? "bg-emerald-50 dark:bg-emerald-900/20"
-                      : st.countdown !== null
-                        ? "bg-amber-50 dark:bg-amber-900/20"
-                        : needsOperator
-                          ? "cursor-not-allowed opacity-50"
-                          : "hover:bg-neutral-50 active:bg-neutral-100 dark:hover:bg-neutral-700/50 dark:active:bg-neutral-700"
+                    isLocked
+                      ? "cursor-not-allowed opacity-50 bg-neutral-100 dark:bg-neutral-800"
+                      : st.sent
+                        ? "bg-emerald-50 dark:bg-emerald-900/20"
+                        : st.countdown !== null
+                          ? "bg-amber-50 dark:bg-amber-900/20"
+                          : needsOperator
+                            ? "cursor-not-allowed opacity-50"
+                            : "hover:bg-neutral-50 active:bg-neutral-100 dark:hover:bg-neutral-700/50 dark:active:bg-neutral-700"
                   }`}
                 >
                   <span
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all duration-200 ${
-                      st.sent
-                        ? "scale-110 border-emerald-500 bg-emerald-500 text-white"
-                        : st.checked
-                          ? "scale-110 border-brand-500 bg-brand-500 text-white"
-                          : "border-neutral-300 dark:border-neutral-600"
+                      isLocked
+                        ? "border-neutral-300 bg-neutral-200 text-neutral-400 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-500"
+                        : st.sent
+                          ? "scale-110 border-emerald-500 bg-emerald-500 text-white"
+                          : st.checked
+                            ? "scale-110 border-brand-500 bg-brand-500 text-white"
+                            : "border-neutral-300 dark:border-neutral-600"
                     }`}
                   >
-                    {(st.sent || st.checked) && (
+                    {isLocked ? (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/>
+                      </svg>
+                    ) : (st.sent || st.checked) ? (
                       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                         <path
                           d="M2.5 6L5 8.5L9.5 3.5"
@@ -424,7 +435,7 @@ export function ChecklistForm({
                           strokeLinejoin="round"
                         />
                       </svg>
-                    )}
+                    ) : null}
                   </span>
 
                   <span className="flex-1">
@@ -440,13 +451,19 @@ export function ChecklistForm({
                       {item.label}
                     </span>
 
+                    {isLocked && (
+                      <span className="mt-1 block text-xs text-neutral-400 dark:text-neutral-500">
+                        Pas un jour de recyclage
+                      </span>
+                    )}
+
                     {st.duringCount > 0 && item.section === "during" && (
                       <span className="ml-2 inline-flex rounded-full bg-brand-100 px-1.5 py-0.5 text-[11px] font-bold text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
                         x{st.duringCount}
                       </span>
                     )}
 
-                    {st.countdown !== null && (
+                    {!isLocked && st.countdown !== null && (
                       <span className="mt-1 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
                         <CountdownRing seconds={st.countdown} total={SEND_DELAY} />
                         {t.checklist.sendingIn.replace("{seconds}", String(st.countdown))}

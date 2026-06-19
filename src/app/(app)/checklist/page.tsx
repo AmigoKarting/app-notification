@@ -34,9 +34,8 @@ export default async function ChecklistPage() {
     isSupervisor || isDev ? isRecyclingDay() : Promise.resolve(false),
   ]);
 
-  const tasks = recyclingToday
-    ? allTasks
-    : allTasks.filter((tk) => tk.task_key !== "sup_recyclage");
+  const tasks = allTasks;
+  const lockedTasks = recyclingToday ? [] : ["sup_recyclage"];
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
@@ -51,6 +50,7 @@ export default async function ChecklistPage() {
           section: tk.section,
           label: tk.label,
         }))}
+        lockedTasks={lockedTasks}
         initialCompleted={todayData.completedItems}
         initialTimestamps={todayData.timestamps}
         initialOperator={todayData.operatorName ?? undefined}
