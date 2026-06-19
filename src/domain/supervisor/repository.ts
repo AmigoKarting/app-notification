@@ -99,6 +99,7 @@ export interface SupervisorHistoryEntry {
   rating: number | null;
   no_time_to_finish: boolean;
   quality_certified: boolean;
+  comment: string | null;
   assigned_at: string | null;
   verified_at: string | null;
 }
@@ -108,7 +109,7 @@ export async function listRecentSupervisorHistory(limit = 50): Promise<Superviso
 
   const { data: dailyTasks, error } = await (supabase as any)
     .from("supervisor_daily_tasks")
-    .select("id, date, task_id, supervisor_id, done_by, rating, no_time_to_finish, quality_certified, assigned_at, verified_at")
+    .select("id, date, task_id, supervisor_id, done_by, rating, comment, no_time_to_finish, quality_certified, assigned_at, verified_at")
     .order("date", { ascending: false })
     .order("verified_at", { ascending: false })
     .limit(limit);
@@ -117,8 +118,9 @@ export async function listRecentSupervisorHistory(limit = 50): Promise<Superviso
 
   const rows = dailyTasks as Array<{
     id: string; date: string; task_id: string; supervisor_id: string;
-    done_by: string | null; rating: number | null; no_time_to_finish: boolean;
-    quality_certified: boolean; assigned_at: string | null; verified_at: string | null;
+    done_by: string | null; rating: number | null; comment: string | null;
+    no_time_to_finish: boolean; quality_certified: boolean;
+    assigned_at: string | null; verified_at: string | null;
   }>;
 
   const taskIds = [...new Set(rows.map((r) => r.task_id))];
@@ -151,6 +153,7 @@ export async function listRecentSupervisorHistory(limit = 50): Promise<Superviso
       supervisor_name: supervisorName,
       done_by: r.done_by,
       rating: r.rating,
+      comment: r.comment,
       no_time_to_finish: r.no_time_to_finish,
       quality_certified: r.quality_certified,
       assigned_at: r.assigned_at,

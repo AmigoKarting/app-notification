@@ -62,50 +62,87 @@ export default async function SupervisorHistoryPage() {
                   year: "numeric",
                 })}
               </p>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {entries.map((entry) => (
-                  <Card key={entry.id} className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-neutral-900 dark:text-neutral-100">
-                          {entry.task_label}
-                        </p>
-                        <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
-                          <span className="capitalize">{entry.task_section}</span>
-                          {" · "}
-                          {entry.supervisor_name}
-                        </p>
-                      </div>
+                  <Card key={entry.id} className="overflow-hidden">
+                    {/* Header: section badge + note */}
+                    <div className="flex items-center justify-between border-b border-neutral-100 bg-neutral-50 px-4 py-2 dark:border-neutral-700 dark:bg-neutral-800/60">
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        entry.task_section === "caisse"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                          : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                      }`}>
+                        {entry.task_section === "caisse" ? "🏪 Caisse" : "🏎️ Piste"}
+                      </span>
                       {entry.verified_at ? (
-                        <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-sm font-bold text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
                           {entry.rating}/10
                         </span>
                       ) : (
-                        <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                        <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
                           {t.supervisor.historyAssignedOnly}
                         </span>
                       )}
                     </div>
 
-                    {entry.verified_at && (
-                      <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                        {entry.done_by && (
-                          <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300">
-                            {t.supervisor.historyDoneBy}: {entry.done_by}
-                          </span>
-                        )}
-                        {entry.no_time_to_finish && (
-                          <span className="rounded-md bg-amber-50 px-2 py-0.5 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                            {t.supervisor.historyNoTime}
-                          </span>
-                        )}
-                        {entry.quality_certified && (
-                          <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                            {t.supervisor.historyCertified}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    <div className="space-y-3 p-4">
+                      {/* Task name */}
+                      <p className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+                        {entry.task_label}
+                      </p>
+
+                      {entry.verified_at && (
+                        <>
+                          {/* Details grid */}
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="rounded-lg bg-neutral-50 p-2.5 dark:bg-neutral-800">
+                              <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-400">
+                                Superviseur
+                              </p>
+                              <p className="mt-0.5 font-semibold text-neutral-900 dark:text-neutral-100">
+                                {entry.supervisor_name}
+                              </p>
+                            </div>
+                            {entry.done_by && (
+                              <div className="rounded-lg bg-neutral-50 p-2.5 dark:bg-neutral-800">
+                                <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-400">
+                                  Fait par
+                                </p>
+                                <p className="mt-0.5 font-semibold text-neutral-900 dark:text-neutral-100">
+                                  {entry.done_by}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Status badges */}
+                          <div className="flex flex-wrap gap-2">
+                            {entry.no_time_to_finish && (
+                              <span className="rounded-md bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                                ⏱ Pas eu le temps de terminer
+                              </span>
+                            )}
+                            {entry.quality_certified && (
+                              <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                                ✓ Qualité certifiée
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Comment */}
+                          {entry.comment && (
+                            <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-700 dark:bg-neutral-800">
+                              <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-neutral-400">
+                                💬 Commentaire
+                              </p>
+                              <p className="text-sm text-neutral-700 dark:text-neutral-300">
+                                {entry.comment}
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </Card>
                 ))}
               </div>
