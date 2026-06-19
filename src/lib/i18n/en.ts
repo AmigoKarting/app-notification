@@ -80,6 +80,7 @@ const en: Dictionary = {
     checklistTasks: "Tasks",
     tools: "Tools",
     deliveries: "Deliveries",
+    notifHistory: "Notif history",
     analytics: "Analytics",
     branding: "Branding",
     auditLog: "Audit log",
@@ -478,6 +479,22 @@ const en: Dictionary = {
     exportCsv: "Export CSV",
     searchPlaceholder: "Search by recipient…",
     retry: "Retry",
+  },
+
+  notifHistory: {
+    title: "Notification history",
+    description: "Notifications sent this month, grouped by week.",
+    week: "Week",
+    noNotifs: "No notifications this month",
+    noNotifsDay: "No notifications this day.",
+    total: "Total",
+    monday: "Monday",
+    tuesday: "Tuesday",
+    wednesday: "Wednesday",
+    thursday: "Thursday",
+    friday: "Friday",
+    saturday: "Saturday",
+    sunday: "Sunday",
   },
 
   settings: {

@@ -78,6 +78,7 @@ const fr = {
     checklistTasks: "Tâches",
     tools: "Outils",
     deliveries: "Envois",
+    notifHistory: "Historique notifs",
     analytics: "Statistiques",
     branding: "Marque",
     auditLog: "Historique",
@@ -476,6 +477,22 @@ const fr = {
     exportCsv: "Exporter CSV",
     searchPlaceholder: "Rechercher par destinataire…",
     retry: "Relancer",
+  },
+
+  notifHistory: {
+    title: "Historique des notifications",
+    description: "Notifications envoyées ce mois-ci, groupées par semaine.",
+    week: "Semaine",
+    noNotifs: "Aucune notification ce mois-ci",
+    noNotifsDay: "Aucune notification ce jour.",
+    total: "Total",
+    monday: "Lundi",
+    tuesday: "Mardi",
+    wednesday: "Mercredi",
+    thursday: "Jeudi",
+    friday: "Vendredi",
+    saturday: "Samedi",
+    sunday: "Dimanche",
   },
 
   settings: {

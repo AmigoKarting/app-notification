@@ -64,6 +64,7 @@ function getNav(t: Dictionary["nav"]): NavSection[] {
       label: t.tools,
       entries: [
         { href: "/admin/deliveries", label: t.deliveries, icon: SendIcon },
+        { href: "/admin/notification-history", label: t.notifHistory, icon: ClockIcon },
         { href: "/admin/analytics", label: t.analytics, icon: BarChartIcon },
         { href: "/admin/audit", label: t.auditLog, icon: ClockIcon },
         { href: "/admin/branding", label: t.branding, icon: BrushIcon },
