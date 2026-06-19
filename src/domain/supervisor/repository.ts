@@ -164,6 +164,63 @@ export async function listRecentSupervisorHistory(limit = 50): Promise<Superviso
   });
 }
 
+export interface UnfinishedTask {
+  id: string;
+  date: string;
+  task_label: string;
+  task_section: string;
+  supervisor_name: string | null;
+  done_by: string | null;
+  rating: number | null;
+  comment: string | null;
+  supervisor_id: string;
+}
+
+export async function listUnfinishedTasks(): Promise<UnfinishedTask[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await (supabase as any)
+    .from("supervisor_daily_tasks")
+    .select("id, date, task_id, supervisor_id, supervisor_name, done_by, rating, comment")
+    .eq("no_time_to_finish", true)
+    .is("resolved_at", null)
+    .order("date", { ascending: false });
+  if (error) throw error;
+  if (!data || data.length === 0) return [];
+
+  const taskIds = [...new Set(data.map((r: any) => r.task_id))];
+  const { data: tasks } = await (supabase as any)
+    .from("supervisor_tasks")
+    .select("id, label, section")
+    .in("id", taskIds);
+  const taskMap = new Map<string, { id: string; label: string; section: string }>(
+    (tasks ?? []).map((t: any) => [t.id, t]),
+  );
+
+  return data.map((r: any) => {
+    const task = taskMap.get(r.task_id);
+    return {
+      id: r.id,
+      date: r.date,
+      task_label: task?.label ?? "—",
+      task_section: task?.section ?? "—",
+      supervisor_name: r.supervisor_name,
+      done_by: r.done_by,
+      rating: r.rating,
+      comment: r.comment,
+      supervisor_id: r.supervisor_id,
+    };
+  });
+}
+
+export async function resolveUnfinishedTask(taskId: string): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await (supabase as any)
+    .from("supervisor_daily_tasks")
+    .update({ resolved_at: new Date().toISOString() })
+    .eq("id", taskId);
+  if (error) throw error;
+}
+
 export async function verifyTask(payload: VerifyPayload): Promise<void> {
   const supabase = createAdminClient();
   const today = new Date().toISOString().split("T")[0];

@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
-import { listActiveSupervisorTasks, getTodayDailyTasks } from "@/domain/supervisor/repository";
+import { listActiveSupervisorTasks, getTodayDailyTasks, listUnfinishedTasks } from "@/domain/supervisor/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SupervisorForm } from "./supervisor-form";
+import { UnfinishedBanner } from "./unfinished-banner";
 import { DatedAlerts } from "./dated-alerts";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +31,7 @@ export default async function SupervisorPage() {
   const today = todayMontreal();
   const supabase = createAdminClient();
 
-  const [tasks, dailyTasks, datedRes] = await Promise.all([
+  const [tasks, dailyTasks, datedRes, unfinished] = await Promise.all([
     listActiveSupervisorTasks(),
     getTodayDailyTasks(user.id),
     (supabase as any)
@@ -38,6 +39,7 @@ export default async function SupervisorPage() {
       .select("id, date, title, body, snoozed_to")
       .eq("is_active", true)
       .or(`date.eq.${today},snoozed_to.eq.${today}`),
+    listUnfinishedTasks(),
   ]);
 
   const datedNotifs = (datedRes.data ?? []).filter((n: any) => {
@@ -63,6 +65,7 @@ export default async function SupervisorPage() {
         description={t.supervisor.description}
       />
       <DatedAlerts notifications={datedNotifs} />
+      {unfinished.length > 0 && <UnfinishedBanner tasks={unfinished} />}
       <SupervisorForm tasks={tasks} initialDaily={initialDaily} />
     </div>
   );
