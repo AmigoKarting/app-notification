@@ -148,14 +148,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
       <main className="mx-auto max-w-6xl px-4 py-4 pb-20 sm:px-6 sm:py-8 md:pb-8">{children}</main>
 
-      <footer className="hidden border-t border-neutral-200 bg-white/60 backdrop-blur-sm md:block dark:border-neutral-800 dark:bg-neutral-900/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <p className="text-xs text-neutral-400 dark:text-neutral-500">
-            {branding.app_name}
-          </p>
-          {!isCashier && <InstallAppButton />}
-        </div>
-      </footer>
+      {!isCashier && (
+        <footer className="hidden border-t border-neutral-200 bg-white/60 backdrop-blur-sm md:block dark:border-neutral-800 dark:bg-neutral-900/60">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+            <p className="text-xs text-neutral-400 dark:text-neutral-500">
+              {branding.app_name}
+            </p>
+            <InstallAppButton />
+          </div>
+        </footer>
+      )}
 
       <MobileBottomNav role={profile?.role ?? "superviseur"} />
       <ScrollToTop />
