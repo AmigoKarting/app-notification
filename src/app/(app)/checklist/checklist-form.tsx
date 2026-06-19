@@ -185,7 +185,7 @@ export function ChecklistForm({
     { id: "free_time" as const, label: t.checklist.sectionFreeTime, icon: "🧹" },
   ];
 
-  const [activeSection, setActiveSection] = useState<"opening" | "during" | "closing">(() => {
+  const [activeSection, setActiveSection] = useState<"opening" | "during" | "closing" | "free_time">(() => {
     const h = new Date().getHours();
     if (h < 12) return "opening";
     if (h < 17) return "during";
@@ -270,43 +270,42 @@ export function ChecklistForm({
 
       {showCelebration && <Confetti />}
 
-      {/* Section selector dropdown */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1">
-          <select
-            value={activeSection}
-            onChange={(e) => setActiveSection(e.target.value as "opening" | "during" | "closing")}
-            className="w-full appearance-none rounded-xl border border-neutral-200 bg-white px-4 py-3 pr-10 text-sm font-semibold text-neutral-800 shadow-sm outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-200 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-200 dark:focus:border-brand-500 dark:focus:ring-brand-800"
-          >
-            {sections.map((s) => {
-              const items = tasks.filter((i) => i.section === s.id);
-              const done = items.filter((i) => states[i.key]?.sent).length;
-              return (
-                <option key={s.id} value={s.id}>
-                  {s.icon} {s.label} ({done}/{items.length})
-                </option>
-              );
-            })}
-          </select>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400"
-          >
-            <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-        <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
-            activeDoneCount === activeItems.length && activeItems.length > 0
-              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-              : "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
-          }`}
-        >
-          {activeDoneCount}/{activeItems.length}
-        </span>
+      {/* Section selector */}
+      <div className="grid grid-cols-2 gap-2">
+        {sections.map((s) => {
+          const items = tasks.filter((i) => i.section === s.id);
+          const done = items.filter((i) => states[i.key]?.sent).length;
+          const allSectionDone = done === items.length && items.length > 0;
+          const isActive = activeSection === s.id;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setActiveSection(s.id)}
+              className={`relative rounded-xl px-3 py-3 text-sm font-bold shadow-sm transition-all active:scale-95 ${
+                isActive
+                  ? "bg-brand-600 text-white ring-3 ring-offset-2 ring-neutral-900 scale-[1.02] shadow-lg dark:ring-offset-neutral-900"
+                  : "bg-white text-neutral-700 border border-neutral-200 opacity-80 hover:opacity-100 hover:shadow-md dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-700"
+              }`}
+            >
+              <span>{s.icon} {s.label}</span>
+              <span className={`ml-1.5 inline-flex rounded-full px-1.5 py-0.5 text-[11px] font-bold ${
+                isActive
+                  ? allSectionDone ? "bg-emerald-400/30 text-emerald-100" : "bg-white/20 text-white/90"
+                  : allSectionDone ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400" : "bg-neutral-100 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400"
+              }`}>
+                {done}/{items.length}
+              </span>
+              {isActive && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow">
+                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                    <path d="M2.5 6L5 8.5L9.5 3.5" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Progress bar */}
