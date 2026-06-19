@@ -3,6 +3,9 @@ import "server-only";
 import { logger } from "@/lib/logger";
 import { persistDelivery } from "./persistence";
 import { channelRegistry } from "./registry";
+import { EmailChannel } from "./channels/email";
+import { WebPushChannel } from "./channels/push";
+import { SmsChannel } from "./channels/sms";
 import {
   ChannelSkip,
   type ChannelId,
@@ -11,6 +14,15 @@ import {
   type NotifyContext,
   type Recipient,
 } from "./types";
+
+let _bootstrapped = false;
+function ensureChannels() {
+  if (_bootstrapped) return;
+  _bootstrapped = true;
+  channelRegistry.register(new EmailChannel());
+  channelRegistry.register(new SmsChannel());
+  channelRegistry.register(new WebPushChannel());
+}
 
 export interface NotifyParams {
   /** Liste ordonnée des canaux à essayer */
@@ -34,6 +46,7 @@ export interface NotifyParams {
  * Toujours retourne: ne lance jamais. L'appelant inspecte les statuts.
  */
 export async function notify(params: NotifyParams): Promise<DeliveryResult[]> {
+  ensureChannels();
   const { channels, recipient, message, context } = params;
   const results: DeliveryResult[] = [];
 
