@@ -145,38 +145,33 @@ export function ChecklistForm({
         }));
 
         const interval = setInterval(() => {
-          let shouldSend = false;
-          let shouldClear = false;
-
           setStates((s) => {
             const st = s[taskKey];
-            if (!st || st.countdown === null || st.countdown <= 1) {
-              shouldClear = true;
-              if (st && st.countdown !== null) shouldSend = true;
-              return { ...s, [taskKey]: { ...st!, countdown: null } };
+            if (!st || st.countdown === null) {
+              clearInterval(timersRef.current[taskKey]);
+              delete timersRef.current[taskKey];
+              return s;
+            }
+            if (st.countdown <= 1) {
+              clearInterval(timersRef.current[taskKey]);
+              delete timersRef.current[taskKey];
+              sendTask(taskKey);
+              return { ...s, [taskKey]: { ...st, countdown: null } };
             }
             return { ...s, [taskKey]: { ...st, countdown: st.countdown - 1 } };
           });
-
-          if (shouldClear) {
-            clearInterval(timersRef.current[taskKey]);
-            delete timersRef.current[taskKey];
-          }
-          if (shouldSend) {
-            sendTask(taskKey);
-          }
         }, 1000);
 
         timersRef.current[taskKey] = interval;
       } else {
-        setStates((prev) => ({
-          ...prev,
-          [taskKey]: { ...prev[taskKey], checked: false, countdown: null },
-        }));
         if (timersRef.current[taskKey]) {
           clearInterval(timersRef.current[taskKey]);
           delete timersRef.current[taskKey];
         }
+        setStates((prev) => ({
+          ...prev,
+          [taskKey]: { ...prev[taskKey], checked: false, countdown: null },
+        }));
       }
     },
     [sendTask, selectedOperator],
