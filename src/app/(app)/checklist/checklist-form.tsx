@@ -5,7 +5,7 @@ import { useTranslation } from "@/lib/i18n";
 
 export interface ChecklistTaskProps {
   key: string;
-  section: "opening" | "during" | "closing";
+  section: "opening" | "during" | "closing" | "free_time";
   label: string;
 }
 
@@ -182,6 +182,7 @@ export function ChecklistForm({
     { id: "opening" as const, label: t.checklist.sectionOpening, icon: "🌅" },
     { id: "during" as const, label: t.checklist.sectionDuring, icon: "☀️" },
     { id: "closing" as const, label: t.checklist.sectionClosing, icon: "🌙" },
+    { id: "free_time" as const, label: t.checklist.sectionFreeTime, icon: "🧹" },
   ];
 
   const [activeSection, setActiveSection] = useState<"opening" | "during" | "closing">(() => {

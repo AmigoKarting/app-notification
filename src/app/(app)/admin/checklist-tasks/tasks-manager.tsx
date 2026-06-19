@@ -15,7 +15,7 @@ import { useTranslation } from "@/lib/i18n";
 type Task = {
   id: string;
   task_key: string;
-  section: "opening" | "during" | "closing";
+  section: "opening" | "during" | "closing" | "free_time";
   label: string;
   sort_order: number;
   is_active: boolean;
@@ -73,6 +73,7 @@ export function TasksManager({ tasks }: Props) {
     opening: t.checklist.sectionOpening,
     during: t.checklist.sectionDuring,
     closing: t.checklist.sectionClosing,
+    free_time: t.checklist.sectionFreeTime,
   };
 
   return (
@@ -96,6 +97,7 @@ export function TasksManager({ tasks }: Props) {
               <option value="opening">{sectionLabels.opening}</option>
               <option value="during">{sectionLabels.during}</option>
               <option value="closing">{sectionLabels.closing}</option>
+              <option value="free_time">{sectionLabels.free_time}</option>
             </SelectField>
             <Field
               label={t.checklistAdmin.sortOrder}
@@ -194,6 +196,7 @@ function TaskRow({
               <option value="opening">{sectionLabels.opening}</option>
               <option value="during">{sectionLabels.during}</option>
               <option value="closing">{sectionLabels.closing}</option>
+              <option value="free_time">{sectionLabels.free_time}</option>
             </SelectField>
             <Field
               label={t.checklistAdmin.sortOrder}
