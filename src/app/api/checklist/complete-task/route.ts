@@ -12,12 +12,14 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  console.log("[complete-task] POST received");
   const supabaseAuth = createClient();
   const {
     data: { user },
   } = await supabaseAuth.auth.getUser();
 
   if (!user) {
+    console.log("[complete-task] no user, 401");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -120,22 +122,36 @@ export async function POST(request: NextRequest) {
   });
 
   // Send push notification to supervisors
-  const { data: supervisors } = await supabase
+  const { data: supervisors, error: supError } = await supabase
     .from("profiles")
-    .select("id")
+    .select("id, role")
     .in("role", ["superviseur", "dev"]);
 
+  console.log("[complete-task] supervisors query:", { count: supervisors?.length, error: supError?.message, userId: user.id });
+
+  let pushSent = 0;
+  let pushErrors = 0;
   if (supervisors) {
     for (const sup of supervisors) {
       if (sup.id === user.id) continue;
-      await notify({
-        channels: ["push"],
-        recipient: { userId: sup.id },
-        message: { subject: notifTitle, body: task.label },
-        context: { source: "checklist-task", sourceId: taskKey },
-      });
+      try {
+        console.log("[complete-task] sending push to", sup.id, sup.role);
+        await notify({
+          channels: ["push"],
+          recipient: { userId: sup.id },
+          message: { subject: notifTitle, body: task.label },
+          context: { source: "checklist-task", sourceId: taskKey },
+        });
+        pushSent++;
+        console.log("[complete-task] push sent OK to", sup.id);
+      } catch (err) {
+        pushErrors++;
+        console.error("[complete-task] push error for", sup.id, err instanceof Error ? err.message : String(err));
+      }
     }
   }
+
+  console.log("[complete-task] done:", { taskKey, pushSent, pushErrors });
 
   return NextResponse.json({
     ok: true,
