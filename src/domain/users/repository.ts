@@ -45,7 +45,7 @@ export async function listSupervisorNames(): Promise<{ id: string; name: string 
   const { data, error } = await supabase
     .from("profiles")
     .select("id, display_name, first_name, last_name, role")
-    .in("role", ["superviseur", "gerant"])
+    .eq("role", "superviseur")
     .order("first_name");
   if (error) throw fromPostgrestError(error);
   return (data ?? []).map((p) => ({
