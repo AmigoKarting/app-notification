@@ -144,7 +144,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      {activeBanner && <RoleBanner banner={activeBanner} />}
+      {activeBanner && !isCashier && <RoleBanner banner={activeBanner} />}
 
       <main className="mx-auto max-w-6xl px-4 py-4 pb-20 sm:px-6 sm:py-8 md:pb-8">{children}</main>
 
@@ -153,13 +153,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <p className="text-xs text-neutral-400 dark:text-neutral-500">
             {branding.app_name}
           </p>
-          <InstallAppButton />
+          {!isCashier && <InstallAppButton />}
         </div>
       </footer>
 
       <MobileBottomNav role={profile?.role ?? "superviseur"} />
       <ScrollToTop />
-      <InstallAppBanner />
+      {!isCashier && <InstallAppBanner />}
       <PushAutoSubscribe />
       <OnboardingModal />
       <KeyboardShortcuts isDev={isDev} />

@@ -20,11 +20,13 @@ export function DesktopNavLinks({ role }: DesktopNavLinksProps) {
       {(isCashier || isDev) && (
         <NavLink href="/checklist" label={t.checklist.shortTitle} active={pathname === "/checklist"} />
       )}
-      <NavLink
-        href={isCashier ? "/feed?keep=1" : "/feed"}
-        label={t.nav.notifications}
-        active={pathname === "/feed"}
-      />
+      {!isCashier && (
+        <NavLink
+          href="/feed"
+          label={t.nav.notifications}
+          active={pathname === "/feed"}
+        />
+      )}
       {(isGerant || isDev) && (
         <NavLink href="/supervisor" label={t.supervisor.navTitle} active={pathname === "/supervisor"} />
       )}
