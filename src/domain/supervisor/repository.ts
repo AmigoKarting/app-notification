@@ -82,6 +82,7 @@ export async function unassignTask(taskId: string, supervisorId: string): Promis
 export interface VerifyPayload {
   taskId: string;
   supervisorId: string;
+  supervisorName: string | null;
   doneBy: string;
   rating: number;
   comment: string | null;
@@ -109,7 +110,7 @@ export async function listRecentSupervisorHistory(limit = 50): Promise<Superviso
 
   const { data: dailyTasks, error } = await (supabase as any)
     .from("supervisor_daily_tasks")
-    .select("id, date, task_id, supervisor_id, done_by, rating, comment, no_time_to_finish, quality_certified, assigned_at, verified_at")
+    .select("id, date, task_id, supervisor_id, supervisor_name, done_by, rating, comment, no_time_to_finish, quality_certified, assigned_at, verified_at")
     .order("date", { ascending: false })
     .order("verified_at", { ascending: false })
     .limit(limit);
@@ -118,8 +119,8 @@ export async function listRecentSupervisorHistory(limit = 50): Promise<Superviso
 
   const rows = dailyTasks as Array<{
     id: string; date: string; task_id: string; supervisor_id: string;
-    done_by: string | null; rating: number | null; comment: string | null;
-    no_time_to_finish: boolean; quality_certified: boolean;
+    supervisor_name: string | null; done_by: string | null; rating: number | null;
+    comment: string | null; no_time_to_finish: boolean; quality_certified: boolean;
     assigned_at: string | null; verified_at: string | null;
   }>;
 
@@ -142,9 +143,10 @@ export async function listRecentSupervisorHistory(limit = 50): Promise<Superviso
   return rows.map((r) => {
     const task = taskMap.get(r.task_id);
     const prof = profileMap.get(r.supervisor_id);
-    const supervisorName = prof
+    const profileName = prof
       ? (prof.first_name && prof.last_name ? `${prof.first_name} ${prof.last_name}` : prof.display_name?.trim()) || "—"
       : "—";
+    const supervisorName = r.supervisor_name || profileName;
     return {
       id: r.id,
       date: r.date,
@@ -172,6 +174,7 @@ export async function verifyTask(payload: VerifyPayload): Promise<void> {
       done_by: payload.doneBy,
       rating: payload.rating,
       comment: payload.comment,
+      supervisor_name: payload.supervisorName,
       no_time_to_finish: payload.noTimeToFinish,
       quality_certified: payload.qualityCertified,
     })

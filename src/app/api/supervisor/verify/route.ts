@@ -30,6 +30,7 @@ export async function POST(request: Request) {
   await verifyTask({
     taskId,
     supervisorId: user.id,
+    supervisorName: supervisorName || null,
     doneBy,
     rating,
     comment: comment || null,
