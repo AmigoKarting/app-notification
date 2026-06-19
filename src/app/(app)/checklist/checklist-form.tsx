@@ -28,7 +28,6 @@ export function ChecklistForm({
   initialOperator,
   userName,
   streak = 0,
-  operators = [],
   role = "caissiere",
   lockedTasks = [],
 }: {
@@ -38,7 +37,6 @@ export function ChecklistForm({
   initialOperator?: string;
   userName?: string;
   streak?: number;
-  operators?: { id: string; name: string }[];
   role?: "caissiere" | "superviseur";
   lockedTasks?: string[];
 }) {
@@ -285,20 +283,19 @@ export function ChecklistForm({
           {t.checklist.operatorLabel}
         </p>
         <div className="grid grid-cols-3 gap-2">
-          {(isSupervisor ? operators : [
+          {(isSupervisor ? [
+            { name: "Alexy", color: "bg-blue-500" },
+            { name: "Adel", color: "bg-emerald-500" },
+            { name: "Fred", color: "bg-orange-500" },
+          ] : [
             { name: "Amia", color: "bg-pink-500" },
             { name: "Angélie", color: "bg-fuchsia-500" },
             { name: "Ariel", color: "bg-violet-500" },
             { name: "Kyana", color: "bg-rose-500" },
             { name: "Lili-Rose", color: "bg-purple-500" },
             { name: "Vicky", color: "bg-amber-500" },
-          ]).map((op, i) => {
-            const dynamicColors = [
-              "bg-pink-500", "bg-fuchsia-500", "bg-violet-500",
-              "bg-rose-500", "bg-purple-500", "bg-amber-500",
-              "bg-cyan-500", "bg-teal-500", "bg-indigo-500",
-            ];
-            const color = "color" in op ? op.color : dynamicColors[i % dynamicColors.length];
+          ]).map((op) => {
+            const color = op.color;
             return (
               <button
                 key={op.name}
