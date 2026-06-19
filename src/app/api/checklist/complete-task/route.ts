@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { listActiveChecklistTasks } from "@/domain/checklists/tasks-repository";
-import { notify } from "@/lib/messaging/notify";
+import { notify } from "@/lib/messaging";
 
 const bodySchema = z.object({
   taskKey: z.string().min(1),
@@ -134,19 +134,17 @@ export async function POST(request: NextRequest) {
   if (supervisors) {
     for (const sup of supervisors) {
       if (sup.id === user.id) continue;
-      try {
-        console.log("[complete-task] sending push to", sup.id, sup.role);
-        await notify({
-          channels: ["push"],
-          recipient: { userId: sup.id },
-          message: { subject: notifTitle, body: task.label },
-          context: { source: "checklist-task", sourceId: taskKey },
-        });
-        pushSent++;
-        console.log("[complete-task] push sent OK to", sup.id);
-      } catch (err) {
-        pushErrors++;
-        console.error("[complete-task] push error for", sup.id, err instanceof Error ? err.message : String(err));
+      console.log("[complete-task] sending push to", sup.id, sup.role);
+      const results = await notify({
+        channels: ["push"],
+        recipient: { userId: sup.id },
+        message: { subject: notifTitle, body: task.label },
+        context: { source: "checklist-task", sourceId: taskKey },
+      });
+      for (const r of results) {
+        console.log("[complete-task] notify result:", { to: sup.id, status: r.status, skip: r.skipReason, error: r.error });
+        if (r.status === "sent") pushSent++;
+        else pushErrors++;
       }
     }
   }
