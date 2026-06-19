@@ -66,16 +66,28 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   let completedItems: string[];
-  let timestamps: Record<string, string>;
+  let timestamps: Record<string, string | string[]>;
+  const isDuringTask = task.section === "during";
 
   if (existing) {
     const current = (existing.completed_items ?? []) as string[];
-    if (current.includes(taskKey)) {
+    const existingTs = (existing.completed_timestamps ?? {}) as Record<string, string | string[]>;
+
+    if (current.includes(taskKey) && !isDuringTask) {
       console.log("[complete-task] alreadyDone, skipping push", { taskKey });
       return NextResponse.json({ ok: true, alreadyDone: true });
     }
-    completedItems = [...current, taskKey];
-    timestamps = { ...((existing.completed_timestamps as Record<string, string>) ?? {}), [taskKey]: now };
+
+    completedItems = current.includes(taskKey) ? current : [...current, taskKey];
+
+    if (isDuringTask) {
+      const prev = existingTs[taskKey];
+      const arr = Array.isArray(prev) ? prev : prev ? [prev] : [];
+      timestamps = { ...existingTs, [taskKey]: [...arr, now] };
+    } else {
+      timestamps = { ...existingTs, [taskKey]: now };
+    }
+
     await (supabase as any)
       .from("cashier_checklists")
       .update({
@@ -87,7 +99,7 @@ export async function POST(request: NextRequest) {
       .eq("id", existing.id);
   } else {
     completedItems = [taskKey];
-    timestamps = { [taskKey]: now };
+    timestamps = { [taskKey]: isDuringTask ? [now] : now };
     await (supabase as any).from("cashier_checklists").insert({
       user_id: user.id,
       completed_items: completedItems,

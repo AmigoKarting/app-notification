@@ -979,7 +979,7 @@ const en: Dictionary = {
     streakSingular: "day",
     streakPlural: "days in a row",
     sectionOpening: "Once a day",
-    sectionDuring: "Multiple times a day",
+    sectionDuring: "Recurring (every 2h)",
     sectionClosing: "Before leaving",
     sectionFreeTime: "Free time",
     adminTitle: "Cashier checklists",

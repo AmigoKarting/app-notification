@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface TodayChecklistData {
   completedItems: string[];
-  timestamps: Record<string, string>;
+  timestamps: Record<string, string | string[]>;
   operatorName: string | null;
 }
 
@@ -25,7 +25,7 @@ export async function getTodayCompleted(userId: string): Promise<TodayChecklistD
 
   return {
     completedItems: (data?.completed_items as string[]) ?? [],
-    timestamps: (data?.completed_timestamps as Record<string, string>) ?? {},
+    timestamps: (data?.completed_timestamps as Record<string, string | string[]>) ?? {},
     operatorName: (data?.operator_name as string) ?? null,
   };
 }
@@ -100,7 +100,7 @@ export interface ChecklistWithProfile {
   id: string;
   user_id: string;
   completed_items: string[];
-  completed_timestamps: Record<string, string>;
+  completed_timestamps: Record<string, string | string[]>;
   operator_name: string | null;
   total_items: number;
   notes: string | null;

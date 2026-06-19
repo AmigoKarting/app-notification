@@ -10,6 +10,7 @@ export interface ChecklistTaskProps {
 }
 
 const SEND_DELAY = 3;
+const DURING_RESET_MS = 2 * 60 * 60 * 1000;
 
 interface TaskState {
   checked: boolean;
@@ -17,6 +18,7 @@ interface TaskState {
   sent: boolean;
   sending: boolean;
   sentAt: string | null;
+  duringCount: number;
 }
 
 export function ChecklistForm({
@@ -30,7 +32,7 @@ export function ChecklistForm({
 }: {
   tasks: ChecklistTaskProps[];
   initialCompleted: string[];
-  initialTimestamps?: Record<string, string>;
+  initialTimestamps?: Record<string, string | string[]>;
   initialOperator?: string;
   userName?: string;
   streak?: number;
@@ -45,14 +47,31 @@ export function ChecklistForm({
   const [states, setStates] = useState<Record<string, TaskState>>(() => {
     const init: Record<string, TaskState> = {};
     for (const task of tasks) {
-      const done = initialCompleted.includes(task.key);
-      init[task.key] = {
-        checked: done,
-        countdown: null,
-        sent: done,
-        sending: false,
-        sentAt: initialTimestamps[task.key] ?? null,
-      };
+      const ts = initialTimestamps[task.key];
+      if (task.section === "during") {
+        const arr = Array.isArray(ts) ? ts : ts ? [ts] : [];
+        const lastTs = arr.length > 0 ? arr[arr.length - 1] : null;
+        const elapsed = lastTs ? Date.now() - new Date(lastTs).getTime() : Infinity;
+        const needsReset = elapsed > DURING_RESET_MS;
+        init[task.key] = {
+          checked: !needsReset && arr.length > 0,
+          countdown: null,
+          sent: !needsReset && arr.length > 0,
+          sending: false,
+          sentAt: lastTs,
+          duringCount: arr.length,
+        };
+      } else {
+        const done = initialCompleted.includes(task.key);
+        init[task.key] = {
+          checked: done,
+          countdown: null,
+          sent: done,
+          sending: false,
+          sentAt: (typeof ts === "string" ? ts : null),
+          duringCount: 0,
+        };
+      }
     }
     return init;
   });
@@ -73,6 +92,30 @@ export function ChecklistForm({
       Object.values(timers).forEach(clearInterval);
     };
   }, []);
+
+  // Auto-reset "during" tasks after 2 hours
+  const duringKeys = tasks.filter((t) => t.section === "during").map((t) => t.key);
+  useEffect(() => {
+    if (duringKeys.length === 0) return;
+    const check = setInterval(() => {
+      setStates((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const key of duringKeys) {
+          const st = next[key];
+          if (st?.sent && st.sentAt) {
+            const elapsed = Date.now() - new Date(st.sentAt).getTime();
+            if (elapsed > DURING_RESET_MS) {
+              next[key] = { ...st, checked: false, sent: false, sentAt: null };
+              changed = true;
+            }
+          }
+        }
+        return changed ? next : prev;
+      });
+    }, 60_000);
+    return () => clearInterval(check);
+  }, [duringKeys.join()]);
 
   const completedCount = Object.values(states).filter((s) => s.sent).length;
   const totalCount = tasks.length;
@@ -112,7 +155,13 @@ export function ChecklistForm({
       if (res.ok) {
         setStates((prev) => ({
           ...prev,
-          [taskKey]: { ...prev[taskKey], sent: true, sending: false, sentAt: new Date().toISOString() },
+          [taskKey]: {
+            ...prev[taskKey],
+            sent: true,
+            sending: false,
+            sentAt: new Date().toISOString(),
+            duringCount: prev[taskKey].duringCount + 1,
+          },
         }));
         if (navigator.vibrate) navigator.vibrate(30);
       } else {
@@ -364,13 +413,21 @@ export function ChecklistForm({
                   <span className="flex-1">
                     <span
                       className={`text-sm transition-all duration-300 ${
-                        st.sent
+                        st.sent && item.section !== "during"
                           ? "text-emerald-700 line-through dark:text-emerald-400"
-                          : "text-neutral-800 dark:text-neutral-200"
+                          : st.sent
+                            ? "text-emerald-700 dark:text-emerald-400"
+                            : "text-neutral-800 dark:text-neutral-200"
                       }`}
                     >
                       {item.label}
                     </span>
+
+                    {st.duringCount > 0 && item.section === "during" && (
+                      <span className="ml-2 inline-flex rounded-full bg-brand-100 px-1.5 py-0.5 text-[11px] font-bold text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
+                        x{st.duringCount}
+                      </span>
+                    )}
 
                     {st.countdown !== null && (
                       <span className="mt-1 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
