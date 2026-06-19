@@ -82,6 +82,7 @@ export function SupervisorForm({
           comment: popupForm.comment.trim() || undefined,
           noTimeToFinish: popupForm.noTime,
           qualityCertified: popupForm.certify,
+          supervisorName: selectedSupervisor || undefined,
         }),
       });
       if (res.ok) {
