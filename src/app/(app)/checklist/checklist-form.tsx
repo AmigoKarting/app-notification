@@ -10,7 +10,7 @@ export interface ChecklistTaskProps {
 }
 
 const SEND_DELAY = 3;
-const DURING_RESET_MS = 2 * 60 * 60 * 1000;
+const DURING_RESET_MS = 1 * 60 * 60 * 1000;
 
 interface TaskState {
   checked: boolean;
