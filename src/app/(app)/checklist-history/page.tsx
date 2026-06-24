@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Card, EmptyState, PageHeader, formatDateTime } from "@/components/ui";
+import { EmptyState, PageHeader } from "@/components/ui";
 import { getCurrentProfile } from "@/domain/auth/role";
 import { requireUser } from "@/domain/auth/session";
 import { listRecentChecklists } from "@/domain/checklists/repository";
 import { listAllChecklistTasks } from "@/domain/checklists/tasks-repository";
 import { getServerDictionary, getLocale } from "@/lib/i18n/server";
+import { ChecklistHistoryCard } from "./checklist-history-card";
 
 export const dynamic = "force-dynamic";
 
@@ -15,15 +16,6 @@ const SECTION_META: Record<string, { label: string; icon: string; color: string;
   closing: { label: "Avant de partir", icon: "🌙", color: "bg-indigo-100 text-indigo-700", darkColor: "dark:bg-indigo-900/30 dark:text-indigo-300" },
   free_time: { label: "Temps libre", icon: "🎯", color: "bg-purple-100 text-purple-700", darkColor: "dark:bg-purple-900/30 dark:text-purple-300" },
 };
-
-function formatTime(ts: string): string {
-  try {
-    const d = new Date(ts);
-    return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Montreal" });
-  } catch {
-    return "";
-  }
-}
 
 export default async function ChecklistHistoryPage() {
   await requireUser();
@@ -93,105 +85,32 @@ export default async function ChecklistHistoryPage() {
             const timestamps = cl.completed_timestamps ?? {};
 
             return (
-              <Card key={cl.id} className="p-4">
-                {/* Header */}
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-neutral-900 dark:text-neutral-100">
-                      {operatorName}
-                    </p>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                      isSupervisor
-                        ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
-                        : "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300"
-                    }`}>
-                      {isSupervisor ? "Superviseur" : "Caissiere"}
-                    </span>
-                  </div>
-                  <span className={`text-sm font-bold ${
-                    pct === 100
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : pct >= 70
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-red-600 dark:text-red-400"
-                  }`}>
-                    {completedForRole}/{totalForRole}
-                  </span>
-                </div>
-
-                <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                  {formatDateTime(cl.submitted_at, dateFmt)}
-                  {showAccount && <span> · Compte: {accountName}</span>}
-                </p>
-
-                {/* Progress bar */}
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
-                  <div
-                    className={`h-full rounded-full ${
-                      pct === 100 ? "bg-emerald-500" : pct >= 70 ? "bg-amber-500" : "bg-red-500"
-                    }`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-
-                {/* Section breakdown */}
-                <div className="mt-4 space-y-3">
-                  {sectionStats.map(({ section, total, done, missed }) => {
-                    const meta = SECTION_META[section] ?? { label: section, icon: "📋", color: "bg-neutral-100 text-neutral-700", darkColor: "dark:bg-neutral-800 dark:text-neutral-300" };
-
-                    return (
-                      <div key={section}>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
-                            {meta.icon} {meta.label}
-                          </span>
-                          <span className={`text-xs font-semibold ${
-                            done.length === total
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-neutral-500"
-                          }`}>
-                            {done.length}/{total}
-                          </span>
-                        </div>
-
-                        <div className="mt-1 space-y-0.5 pl-5">
-                          {done.map((task) => {
-                            const ts = timestamps[task.task_key];
-                            const timeStr = typeof ts === "string" ? formatTime(ts) : Array.isArray(ts) && ts.length > 0 ? formatTime(ts[ts.length - 1]) : "";
-                            return (
-                              <div key={task.task_key} className="flex items-center justify-between text-xs">
-                                <span className="text-neutral-700 dark:text-neutral-300">
-                                  ✓ {task.label}
-                                  {Array.isArray(ts) && ts.length > 1 && (
-                                    <span className="ml-1 text-emerald-600 dark:text-emerald-400">×{ts.length}</span>
-                                  )}
-                                </span>
-                                {timeStr && (
-                                  <span className="ml-2 shrink-0 text-neutral-400">{timeStr}</span>
-                                )}
-                              </div>
-                            );
-                          })}
-                          {missed.map((task) => (
-                            <p key={task.task_key} className="text-xs text-neutral-400 dark:text-neutral-500">
-                              ✗ {task.label}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Notes */}
-                {cl.notes && (
-                  <div className="mt-3 border-t border-neutral-100 pt-3 dark:border-neutral-800">
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                      💬 {cl.notes}
-                    </p>
-                  </div>
-                )}
-              </Card>
+              <ChecklistHistoryCard
+                key={cl.id}
+                id={cl.id}
+                operatorName={operatorName}
+                accountName={accountName}
+                showAccount={!!showAccount}
+                isSupervisor={isSupervisor}
+                completedForRole={completedForRole}
+                totalForRole={totalForRole}
+                pct={pct}
+                submittedAt={cl.submitted_at}
+                dateFmt={dateFmt}
+                sections={sectionStats.map((s) => {
+                  const meta = SECTION_META[s.section] ?? { label: s.section, icon: "📋" };
+                  return {
+                    section: s.section,
+                    label: meta.label,
+                    icon: meta.icon,
+                    total: s.total,
+                    done: s.done.map((tk) => ({ task_key: tk.task_key, label: tk.label })),
+                    missed: s.missed.map((tk) => ({ task_key: tk.task_key, label: tk.label })),
+                  };
+                })}
+                timestamps={timestamps}
+                notes={cl.notes}
+              />
             );
           })}
         </div>
