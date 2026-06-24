@@ -7,6 +7,7 @@ import { listActiveChecklistTasks } from "@/domain/checklists/tasks-repository";
 import { isRecyclingDay } from "@/domain/checklists/recycling";
 import { listCashierNames } from "@/domain/users/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
+import { LiveClock } from "@/components/live-clock";
 import { ChecklistForm } from "./checklist-form";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +40,7 @@ export default async function ChecklistPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
+      <LiveClock />
       <PageHeader
         title={t.checklist.title}
         description={t.checklist.description}

@@ -5,6 +5,7 @@ import { requireUser } from "@/domain/auth/session";
 import { listActiveSupervisorTasks, getTodayDailyTasks, listUnfinishedTasks } from "@/domain/supervisor/repository";
 import { getServerDictionary } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { LiveClock } from "@/components/live-clock";
 import { SupervisorForm } from "./supervisor-form";
 import { UnfinishedBanner } from "./unfinished-banner";
 import { DatedAlerts } from "./dated-alerts";
@@ -60,6 +61,7 @@ export default async function SupervisorPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <LiveClock />
       <PageHeader
         title={t.supervisor.title}
         description={t.supervisor.description}
