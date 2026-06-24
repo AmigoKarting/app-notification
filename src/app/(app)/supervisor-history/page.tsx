@@ -54,7 +54,7 @@ export default async function SupervisorHistoryPage() {
         <div className="space-y-5">
           {[...byDate.entries()].map(([date, entries]) => (
             <div key={date}>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+              <p className="mb-2 text-sm font-bold text-neutral-700 dark:text-neutral-300">
                 {new Date(date + "T12:00:00").toLocaleDateString(dateFmt, {
                   weekday: "long",
                   day: "numeric",

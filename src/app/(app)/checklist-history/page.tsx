@@ -114,7 +114,7 @@ export default async function ChecklistHistoryPage() {
                         Compte: {accountName}
                       </p>
                     )}
-                    <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
                       {formatDateTime(cl.submitted_at, dateFmt)}
                     </p>
                   </div>
