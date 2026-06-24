@@ -29,7 +29,7 @@ export function LiveClock() {
   });
 
   return (
-    <p className="text-center text-sm text-neutral-500 dark:text-neutral-400">
+    <p className="text-center text-sm text-neutral-700 dark:text-neutral-300">
       <span className="capitalize">{date}</span> — <span className="tabular-nums">{time}</span>
     </p>
   );
