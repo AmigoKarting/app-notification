@@ -54,14 +54,16 @@ export default async function SupervisorHistoryPage() {
         <div className="space-y-5">
           {[...byDate.entries()].map(([date, entries]) => (
             <div key={date}>
-              <p className="mb-2 text-sm font-bold text-neutral-700 dark:text-neutral-300">
-                {new Date(date + "T12:00:00").toLocaleDateString(dateFmt, {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </p>
+              <div className="mb-3 rounded-lg bg-neutral-100 px-4 py-2.5 dark:bg-neutral-800">
+                <p className="text-base font-bold capitalize text-neutral-900 dark:text-neutral-100">
+                  {new Date(date + "T12:00:00").toLocaleDateString(dateFmt, {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
               <div className="space-y-3">
                 {entries.map((entry) => (
                   <Card key={entry.id} className="overflow-hidden">
