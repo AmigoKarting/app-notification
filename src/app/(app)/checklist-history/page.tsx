@@ -93,127 +93,91 @@ export default async function ChecklistHistoryPage() {
             const timestamps = cl.completed_timestamps ?? {};
 
             return (
-              <Card key={cl.id} className="p-4 sm:p-5">
+              <Card key={cl.id} className="p-4">
                 {/* Header */}
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-base font-bold text-neutral-900 dark:text-neutral-100">
-                        {operatorName}
-                      </p>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                        isSupervisor
-                          ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
-                          : "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300"
-                      }`}>
-                        {isSupervisor ? "Superviseur" : "Caissiere"}
-                      </span>
-                    </div>
-                    {showAccount && (
-                      <p className="text-[11px] text-neutral-400 dark:text-neutral-500">
-                        Compte: {accountName}
-                      </p>
-                    )}
-                    <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
-                      {formatDateTime(cl.submitted_at, dateFmt)}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-neutral-900 dark:text-neutral-100">
+                      {operatorName}
                     </p>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                      isSupervisor
+                        ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
+                        : "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300"
+                    }`}>
+                      {isSupervisor ? "Superviseur" : "Caissiere"}
+                    </span>
                   </div>
-                  <span
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
-                      pct === 100
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
-                        : pct >= 70
-                          ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-                          : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                    }`}
-                  >
-                    {completedForRole}/{totalForRole} ({pct}%)
+                  <span className={`text-sm font-bold ${
+                    pct === 100
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : pct >= 70
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-red-600 dark:text-red-400"
+                  }`}>
+                    {completedForRole}/{totalForRole}
                   </span>
                 </div>
 
+                <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                  {formatDateTime(cl.submitted_at, dateFmt)}
+                  {showAccount && <span> · Compte: {accountName}</span>}
+                </p>
+
                 {/* Progress bar */}
-                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
                   <div
-                    className={`h-full rounded-full transition-all ${
-                      pct === 100
-                        ? "bg-emerald-500"
-                        : pct >= 70
-                          ? "bg-amber-500"
-                          : "bg-red-500"
+                    className={`h-full rounded-full ${
+                      pct === 100 ? "bg-emerald-500" : pct >= 70 ? "bg-amber-500" : "bg-red-500"
                     }`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
 
                 {/* Section breakdown */}
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 space-y-3">
                   {sectionStats.map(({ section, total, done, missed }) => {
                     const meta = SECTION_META[section] ?? { label: section, icon: "📋", color: "bg-neutral-100 text-neutral-700", darkColor: "dark:bg-neutral-800 dark:text-neutral-300" };
-                    const secPct = Math.round((done.length / total) * 100);
 
                     return (
-                      <div key={section} className="rounded-lg border border-neutral-200 dark:border-neutral-700">
-                        {/* Section header */}
-                        <div className="flex items-center justify-between px-3 py-2">
-                          <div className="flex items-center gap-2">
-                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${meta.color} ${meta.darkColor}`}>
-                              {meta.icon} {meta.label}
-                            </span>
-                          </div>
+                      <div key={section}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                            {meta.icon} {meta.label}
+                          </span>
                           <span className={`text-xs font-semibold ${
-                            secPct === 100
+                            done.length === total
                               ? "text-emerald-600 dark:text-emerald-400"
-                              : secPct >= 70
-                                ? "text-amber-600 dark:text-amber-400"
-                                : "text-red-600 dark:text-red-400"
+                              : "text-neutral-500"
                           }`}>
                             {done.length}/{total}
                           </span>
                         </div>
 
-                        {/* Completed tasks */}
-                        {done.length > 0 && (
-                          <div className="border-t border-neutral-100 px-3 py-2 dark:border-neutral-700/50">
-                            <ul className="space-y-1">
-                              {done.map((task) => {
-                                const ts = timestamps[task.task_key];
-                                const timeStr = typeof ts === "string" ? formatTime(ts) : Array.isArray(ts) && ts.length > 0 ? formatTime(ts[ts.length - 1]) : "";
-                                return (
-                                  <li key={task.task_key} className="flex items-center justify-between gap-2 text-xs">
-                                    <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
-                                      <span className="text-[10px]">✅</span>
-                                      {task.label}
-                                      {Array.isArray(ts) && ts.length > 1 && (
-                                        <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                                          x{ts.length}
-                                        </span>
-                                      )}
-                                    </span>
-                                    {timeStr && (
-                                      <span className="shrink-0 text-[10px] text-neutral-400 dark:text-neutral-500">
-                                        {timeStr}
-                                      </span>
-                                    )}
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                          </div>
-                        )}
-
-                        {/* Missing tasks */}
-                        {missed.length > 0 && (
-                          <div className="border-t border-neutral-100 px-3 py-2 dark:border-neutral-700/50">
-                            <ul className="space-y-1">
-                              {missed.map((task) => (
-                                <li key={task.task_key} className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
-                                  <span className="text-[10px]">❌</span>
-                                  {task.label}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                        <div className="mt-1 space-y-0.5 pl-5">
+                          {done.map((task) => {
+                            const ts = timestamps[task.task_key];
+                            const timeStr = typeof ts === "string" ? formatTime(ts) : Array.isArray(ts) && ts.length > 0 ? formatTime(ts[ts.length - 1]) : "";
+                            return (
+                              <div key={task.task_key} className="flex items-center justify-between text-xs">
+                                <span className="text-neutral-700 dark:text-neutral-300">
+                                  ✓ {task.label}
+                                  {Array.isArray(ts) && ts.length > 1 && (
+                                    <span className="ml-1 text-emerald-600 dark:text-emerald-400">×{ts.length}</span>
+                                  )}
+                                </span>
+                                {timeStr && (
+                                  <span className="ml-2 shrink-0 text-neutral-400">{timeStr}</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                          {missed.map((task) => (
+                            <p key={task.task_key} className="text-xs text-neutral-400 dark:text-neutral-500">
+                              ✗ {task.label}
+                            </p>
+                          ))}
+                        </div>
                       </div>
                     );
                   })}
@@ -221,12 +185,9 @@ export default async function ChecklistHistoryPage() {
 
                 {/* Notes */}
                 {cl.notes && (
-                  <div className="mt-3 rounded-lg bg-neutral-50 px-3 py-2 dark:bg-neutral-800">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                      Notes
-                    </p>
-                    <p className="mt-0.5 text-xs text-neutral-600 dark:text-neutral-400">
-                      {cl.notes}
+                  <div className="mt-3 border-t border-neutral-100 pt-3 dark:border-neutral-800">
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      💬 {cl.notes}
                     </p>
                   </div>
                 )}
