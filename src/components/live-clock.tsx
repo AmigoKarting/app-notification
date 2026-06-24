@@ -29,13 +29,8 @@ export function LiveClock() {
   });
 
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white px-4 py-3 text-center shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
-      <p className="text-lg font-bold tabular-nums text-neutral-900 dark:text-neutral-100">
-        {time}
-      </p>
-      <p className="mt-0.5 text-sm capitalize text-neutral-500 dark:text-neutral-400">
-        {date}
-      </p>
-    </div>
+    <p className="text-center text-sm text-neutral-500 dark:text-neutral-400">
+      <span className="capitalize">{date}</span> — <span className="tabular-nums">{time}</span>
+    </p>
   );
 }
