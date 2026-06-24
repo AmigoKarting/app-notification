@@ -483,18 +483,24 @@ export function formatDateTime(iso: string, locale?: string, friendly?: boolean)
   const loc = locale ?? (typeof document !== "undefined"
     ? document.documentElement.lang === "en" ? "en-US" : "fr-FR"
     : "fr-FR");
+  const d = new Date(iso);
   if (friendly) {
-    return new Date(iso).toLocaleString(loc, {
+    return d.toLocaleString(loc, {
       weekday: "long",
       day: "numeric",
       month: "long",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "America/Montreal",
     });
   }
-  return new Date(iso).toLocaleString(loc, {
-    dateStyle: "short",
-    timeStyle: "short",
+  return d.toLocaleString(loc, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Montreal",
   });
 }
 
