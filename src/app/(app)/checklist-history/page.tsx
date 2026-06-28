@@ -11,9 +11,9 @@ import { ChecklistHistoryCard } from "./checklist-history-card";
 export const dynamic = "force-dynamic";
 
 const SECTION_META: Record<string, { label: string; icon: string; color: string; darkColor: string }> = {
-  opening: { label: "Une fois par jour", icon: "🌅", color: "bg-sky-100 text-sky-700", darkColor: "dark:bg-sky-900/30 dark:text-sky-300" },
-  during: { label: "Plusieurs fois par jour", icon: "☀️", color: "bg-amber-100 text-amber-700", darkColor: "dark:bg-amber-900/30 dark:text-amber-300" },
-  closing: { label: "Avant de partir", icon: "🌙", color: "bg-indigo-100 text-indigo-700", darkColor: "dark:bg-indigo-900/30 dark:text-indigo-300" },
+  opening: { label: "Avant l'ouverture", icon: "🌅", color: "bg-sky-100 text-sky-700", darkColor: "dark:bg-sky-900/30 dark:text-sky-300" },
+  during: { label: "Pendant la journée", icon: "☀️", color: "bg-amber-100 text-amber-700", darkColor: "dark:bg-amber-900/30 dark:text-amber-300" },
+  closing: { label: "Avant de quitter", icon: "🌙", color: "bg-indigo-100 text-indigo-700", darkColor: "dark:bg-indigo-900/30 dark:text-indigo-300" },
   free_time: { label: "Temps libre", icon: "🎯", color: "bg-purple-100 text-purple-700", darkColor: "dark:bg-purple-900/30 dark:text-purple-300" },
 };
 
