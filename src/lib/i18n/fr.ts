@@ -994,7 +994,7 @@ const fr = {
     streakSingular: "jour",
     streakPlural: "jours de suite",
     sectionOpening: "Avant l'ouverture",
-    sectionDuring: "Pendant la journée",
+    sectionDuring: "Plusieurs fois par jour",
     sectionClosing: "Avant de quitter",
     sectionFreeTime: "Temps libre",
     adminTitle: "Checklists",
