@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listUnfinishedTasks, listAssignedButUnverifiedTasks } from "@/domain/supervisor/repository";
+import { listUnfinishedTasks, listAssignedButUnverifiedTasks, markReminderSent } from "@/domain/supervisor/repository";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notify } from "@/lib/messaging";
 
@@ -72,6 +72,7 @@ async function handle(request: Request) {
       message: { subject: title, body },
       context: { source: "unverified-reminder", sourceId: task.id },
     });
+    await markReminderSent(task.id);
     sent++;
   }
 

@@ -230,6 +230,7 @@ export async function listAssignedButUnverifiedTasks(): Promise<AssignedUnverifi
     .select("id, date, task_id, supervisor_id, supervisor_name, assigned_at")
     .not("assigned_at", "is", null)
     .is("verified_at", null)
+    .is("reminder_sent_at", null)
     .eq("no_time_to_finish", false)
     .gte("date", twoDaysAgo)
     .order("assigned_at", { ascending: true });
@@ -261,6 +262,15 @@ export async function listAssignedButUnverifiedTasks(): Promise<AssignedUnverifi
       assigned_at: r.assigned_at,
     };
   });
+}
+
+export async function markReminderSent(taskId: string): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await (supabase as any)
+    .from("supervisor_daily_tasks")
+    .update({ reminder_sent_at: new Date().toISOString() })
+    .eq("id", taskId);
+  if (error) throw error;
 }
 
 export async function resolveUnfinishedTask(taskId: string): Promise<void> {
