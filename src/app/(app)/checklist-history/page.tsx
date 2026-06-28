@@ -58,63 +58,90 @@ export default async function ChecklistHistoryPage() {
           title={t.checklist.noChecklists}
           description={t.checklist.noChecklistsDesc}
         />
-      ) : (
-        <div className="space-y-4">
-          {checklists.map((cl) => {
-            const accountName =
-              (cl.first_name && cl.last_name
-                ? `${cl.first_name} ${cl.last_name}`
-                : cl.display_name?.trim()) || "—";
-            const operatorName = cl.operator_name || accountName;
-            const showAccount = cl.operator_name && cl.operator_name !== accountName;
-            const isSupervisor = cl.role === "superviseur" || cl.role === "dev";
-            const targetRole = isSupervisor ? "superviseur" : "caissiere";
-            const roleTasks = activeTasks.filter((task) => (task as any).target_role === targetRole);
-            const totalForRole = roleTasks.length;
-            const completedSet = new Set(cl.completed_items);
-            const completedForRole = roleTasks.filter((task) => completedSet.has(task.task_key)).length;
-            const pct = totalForRole > 0 ? Math.round((completedForRole / totalForRole) * 100) : 0;
+      ) : (() => {
+        const byDate = new Map<string, typeof checklists>();
+        for (const cl of checklists) {
+          const d = new Date(cl.submitted_at);
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+          const list = byDate.get(key) ?? [];
+          list.push(cl);
+          byDate.set(key, list);
+        }
 
-            const sectionStats = sectionOrder.map((sec) => {
-              const sectionTasks = roleTasks.filter((task) => task.section === sec);
-              const done = sectionTasks.filter((task) => completedSet.has(task.task_key));
-              const missed = sectionTasks.filter((task) => !completedSet.has(task.task_key));
-              return { section: sec, total: sectionTasks.length, done, missed };
-            }).filter((s) => s.total > 0);
+        return (
+          <div className="space-y-5">
+            {[...byDate.entries()].map(([dateKey, entries]) => (
+              <div key={dateKey}>
+                <div className="mb-3 rounded-lg bg-neutral-100 px-4 py-2.5 dark:bg-neutral-800">
+                  <p className="text-base font-bold capitalize text-neutral-900 dark:text-neutral-100">
+                    {new Date(dateKey + "T12:00:00").toLocaleDateString(dateFmt, {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {entries.map((cl) => {
+                    const accountName =
+                      (cl.first_name && cl.last_name
+                        ? `${cl.first_name} ${cl.last_name}`
+                        : cl.display_name?.trim()) || "—";
+                    const operatorName = cl.operator_name || accountName;
+                    const showAccount = cl.operator_name && cl.operator_name !== accountName;
+                    const isSupervisor = cl.role === "superviseur" || cl.role === "dev";
+                    const targetRole = isSupervisor ? "superviseur" : "caissiere";
+                    const roleTasks = activeTasks.filter((task) => (task as any).target_role === targetRole);
+                    const totalForRole = roleTasks.length;
+                    const completedSet = new Set(cl.completed_items);
+                    const completedForRole = roleTasks.filter((task) => completedSet.has(task.task_key)).length;
+                    const pct = totalForRole > 0 ? Math.round((completedForRole / totalForRole) * 100) : 0;
 
-            const timestamps = cl.completed_timestamps ?? {};
+                    const sectionStats = sectionOrder.map((sec) => {
+                      const sectionTasks = roleTasks.filter((task) => task.section === sec);
+                      const done = sectionTasks.filter((task) => completedSet.has(task.task_key));
+                      const missed = sectionTasks.filter((task) => !completedSet.has(task.task_key));
+                      return { section: sec, total: sectionTasks.length, done, missed };
+                    }).filter((s) => s.total > 0);
 
-            return (
-              <ChecklistHistoryCard
-                key={cl.id}
-                id={cl.id}
-                operatorName={operatorName}
-                accountName={accountName}
-                showAccount={!!showAccount}
-                isSupervisor={isSupervisor}
-                completedForRole={completedForRole}
-                totalForRole={totalForRole}
-                pct={pct}
-                submittedAt={cl.submitted_at}
-                dateFmt={dateFmt}
-                sections={sectionStats.map((s) => {
-                  const meta = SECTION_META[s.section] ?? { label: s.section, icon: "📋" };
-                  return {
-                    section: s.section,
-                    label: meta.label,
-                    icon: meta.icon,
-                    total: s.total,
-                    done: s.done.map((tk) => ({ task_key: tk.task_key, label: tk.label })),
-                    missed: s.missed.map((tk) => ({ task_key: tk.task_key, label: tk.label })),
-                  };
-                })}
-                timestamps={timestamps}
-                notes={cl.notes}
-              />
-            );
-          })}
-        </div>
-      )}
+                    const timestamps = cl.completed_timestamps ?? {};
+
+                    return (
+                      <ChecklistHistoryCard
+                        key={cl.id}
+                        id={cl.id}
+                        operatorName={operatorName}
+                        accountName={accountName}
+                        showAccount={!!showAccount}
+                        isSupervisor={isSupervisor}
+                        completedForRole={completedForRole}
+                        totalForRole={totalForRole}
+                        pct={pct}
+                        submittedAt={cl.submitted_at}
+                        dateFmt={dateFmt}
+                        sections={sectionStats.map((s) => {
+                          const meta = SECTION_META[s.section] ?? { label: s.section, icon: "📋" };
+                          return {
+                            section: s.section,
+                            label: meta.label,
+                            icon: meta.icon,
+                            total: s.total,
+                            done: s.done.map((tk) => ({ task_key: tk.task_key, label: tk.label })),
+                            missed: s.missed.map((tk) => ({ task_key: tk.task_key, label: tk.label })),
+                          };
+                        })}
+                        timestamps={timestamps}
+                        notes={cl.notes}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 }
