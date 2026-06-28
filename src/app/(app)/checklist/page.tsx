@@ -42,7 +42,7 @@ export default async function ChecklistPage() {
     <div className="mx-auto max-w-lg space-y-4">
       <LiveClock />
       <PageHeader
-        title={t.checklist.title}
+        title={isSupervisor || isDev ? "Checklist superviseur" : t.checklist.title}
         description={t.checklist.description}
       />
 
