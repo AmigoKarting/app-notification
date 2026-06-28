@@ -212,6 +212,57 @@ export async function listUnfinishedTasks(): Promise<UnfinishedTask[]> {
   });
 }
 
+export interface AssignedUnverifiedTask {
+  id: string;
+  date: string;
+  task_label: string;
+  task_section: string;
+  supervisor_id: string;
+  supervisor_name: string | null;
+  assigned_at: string;
+}
+
+export async function listAssignedButUnverifiedTasks(): Promise<AssignedUnverifiedTask[]> {
+  const supabase = createAdminClient();
+  const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const { data, error } = await (supabase as any)
+    .from("supervisor_daily_tasks")
+    .select("id, date, task_id, supervisor_id, supervisor_name, assigned_at")
+    .not("assigned_at", "is", null)
+    .is("verified_at", null)
+    .eq("no_time_to_finish", false)
+    .gte("date", twoDaysAgo)
+    .order("assigned_at", { ascending: true });
+  if (error) throw error;
+  if (!data || data.length === 0) return [];
+
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+  const stale = data.filter((r: any) => r.assigned_at < twoHoursAgo);
+  if (stale.length === 0) return [];
+
+  const taskIds = [...new Set(stale.map((r: any) => r.task_id))];
+  const { data: tasks } = await (supabase as any)
+    .from("supervisor_tasks")
+    .select("id, label, section")
+    .in("id", taskIds);
+  const taskMap = new Map<string, { label: string; section: string }>(
+    (tasks ?? []).map((t: any) => [t.id, t]),
+  );
+
+  return stale.map((r: any) => {
+    const task = taskMap.get(r.task_id);
+    return {
+      id: r.id,
+      date: r.date,
+      task_label: task?.label ?? "—",
+      task_section: task?.section ?? "—",
+      supervisor_id: r.supervisor_id,
+      supervisor_name: r.supervisor_name,
+      assigned_at: r.assigned_at,
+    };
+  });
+}
+
 export async function resolveUnfinishedTask(taskId: string): Promise<void> {
   const supabase = createAdminClient();
   const { error } = await (supabase as any)

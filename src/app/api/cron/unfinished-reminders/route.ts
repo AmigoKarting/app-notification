@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listUnfinishedTasks } from "@/domain/supervisor/repository";
+import { listUnfinishedTasks, listAssignedButUnverifiedTasks } from "@/domain/supervisor/repository";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notify } from "@/lib/messaging";
 
@@ -23,46 +23,59 @@ async function handle(request: Request) {
   }
 
   const unfinished = await listUnfinishedTasks();
-  if (unfinished.length === 0) {
-    return NextResponse.json({ ok: true, sent: 0 });
-  }
-
-  const supabase = createAdminClient();
-  const { data: devs } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("role", "dev");
-
-  const { data: supervisors } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("role", "superviseur");
-
-  const recipients = [...(devs ?? []), ...(supervisors ?? [])];
   let sent = 0;
 
-  for (const task of unfinished) {
-    const who = task.supervisor_name || "Superviseur";
-    const section = task.task_section === "caisse" ? "Caisse" : "Piste";
-    const commentLine = task.comment ? `\n💬 ${task.comment}` : "";
+  if (unfinished.length > 0) {
+    const supabase = createAdminClient();
+    const { data: devs } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "dev");
 
-    const title = `⚠️ Tache non terminee — ${task.task_label}`;
-    const body = `${section} · ${who} · ${task.rating}/10\nFait par: ${task.done_by}${commentLine}\n📅 ${task.date}`;
+    const { data: supervisors } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "superviseur");
 
-    await Promise.allSettled(
-      recipients.map((r) =>
-        notify({
-          channels: ["push"],
-          recipient: { userId: r.id },
-          message: { subject: title, body },
-          context: { source: "unfinished-reminder", sourceId: task.id },
-        })
-      )
-    );
+    const recipients = [...(devs ?? []), ...(supervisors ?? [])];
+
+    for (const task of unfinished) {
+      const who = task.supervisor_name || "Superviseur";
+      const section = task.task_section === "caisse" ? "Caisse" : "Piste";
+      const commentLine = task.comment ? `\n💬 ${task.comment}` : "";
+
+      const title = `⚠️ Tache non terminee — ${task.task_label}`;
+      const body = `${section} · ${who} · ${task.rating}/10\nFait par: ${task.done_by}${commentLine}\n📅 ${task.date}`;
+
+      await Promise.allSettled(
+        recipients.map((r) =>
+          notify({
+            channels: ["push"],
+            recipient: { userId: r.id },
+            message: { subject: title, body },
+            context: { source: "unfinished-reminder", sourceId: task.id },
+          })
+        )
+      );
+      sent++;
+    }
+  }
+
+  const unverified = await listAssignedButUnverifiedTasks();
+  for (const task of unverified) {
+    const title = `🔔 Rappel — tâche à vérifier`;
+    const body = `« ${task.task_label} » a été assignée il y a un moment mais pas encore vérifiée. N'oublie pas d'aller vérifier!`;
+
+    await notify({
+      channels: ["push"],
+      recipient: { userId: task.supervisor_id },
+      message: { subject: title, body },
+      context: { source: "unverified-reminder", sourceId: task.id },
+    });
     sent++;
   }
 
-  return NextResponse.json({ ok: true, sent, tasks: unfinished.length });
+  return NextResponse.json({ ok: true, sent, tasks: unfinished.length, unverified: unverified.length });
 }
 
 export async function GET(request: Request) {
