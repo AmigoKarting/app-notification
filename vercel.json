@@ -10,19 +10,27 @@
     },
     {
       "path": "/api/cron/unfinished-reminders",
-      "schedule": "0 14 * * *"
+      "schedule": "0 13 * * *"
     },
     {
       "path": "/api/cron/unfinished-reminders",
-      "schedule": "0 18 * * *"
+      "schedule": "0 15 * * *"
     },
     {
       "path": "/api/cron/unfinished-reminders",
-      "schedule": "0 22 * * *"
+      "schedule": "0 17 * * *"
     },
     {
       "path": "/api/cron/unfinished-reminders",
-      "schedule": "0 1 * * *"
+      "schedule": "0 19 * * *"
+    },
+    {
+      "path": "/api/cron/unfinished-reminders",
+      "schedule": "0 21 * * *"
+    },
+    {
+      "path": "/api/cron/unfinished-reminders",
+      "schedule": "0 23 * * *"
     }
   ]
 }
