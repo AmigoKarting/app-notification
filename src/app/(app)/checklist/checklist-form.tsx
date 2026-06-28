@@ -293,7 +293,6 @@ export function ChecklistForm({
             { name: "Ariel", color: "bg-violet-500" },
             { name: "Kyana", color: "bg-rose-500" },
             { name: "Lili-Rose", color: "bg-purple-500" },
-            { name: "Vicky", color: "bg-amber-500" },
           ]).map((op) => {
             const color = op.color;
             return (
