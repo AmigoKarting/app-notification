@@ -674,8 +674,8 @@ function CashReconciliation({ operatorName }: { operatorName: string }) {
               <td className="py-1.5 pr-2 font-medium text-neutral-700 dark:text-neutral-300">Ce que j&apos;ai</td>
               <td className="p-1">
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={cashCounted}
                   onChange={(e) => { setCashCounted(e.target.value); schedSave(); }}
                   placeholder="0.00"
@@ -684,8 +684,8 @@ function CashReconciliation({ operatorName }: { operatorName: string }) {
               </td>
               <td className="p-1">
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={interacCounted}
                   onChange={(e) => { setInteracCounted(e.target.value); schedSave(); }}
                   placeholder="0.00"
@@ -700,8 +700,8 @@ function CashReconciliation({ operatorName }: { operatorName: string }) {
               <td className="py-1.5 pr-2 font-medium text-neutral-700 dark:text-neutral-300">Ce que Apex dit</td>
               <td className="p-1">
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={cashApex}
                   onChange={(e) => { setCashApex(e.target.value); schedSave(); }}
                   placeholder="0.00"
@@ -710,8 +710,8 @@ function CashReconciliation({ operatorName }: { operatorName: string }) {
               </td>
               <td className="p-1">
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={interacApex}
                   onChange={(e) => { setInteracApex(e.target.value); schedSave(); }}
                   placeholder="0.00"
