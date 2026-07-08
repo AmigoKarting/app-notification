@@ -495,6 +495,10 @@ export function ChecklistForm({
           })}
         </ul>
       </div>
+      {/* Cash reconciliation form — cashiers only */}
+      {!isSupervisor && selectedOperator && (
+        <CashReconciliation operatorName={selectedOperator} />
+      )}
     </div>
   );
 }
@@ -579,6 +583,179 @@ function Confetti() {
 /* ------------------------------------------------------------------ */
 /* Small sub-components                                                */
 /* ------------------------------------------------------------------ */
+function CashReconciliation({ operatorName }: { operatorName: string }) {
+  const [cashCounted, setCashCounted] = useState("");
+  const [interacCounted, setInteracCounted] = useState("");
+  const [cashApex, setCashApex] = useState("");
+  const [interacApex, setInteracApex] = useState("");
+  const [explanation, setExplanation] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/checklist/cash-reconciliation?operator=${encodeURIComponent(operatorName)}`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (cancelled || !res.data) return;
+        setCashCounted(res.data.cash_counted?.toString() ?? "");
+        setInteracCounted(res.data.interac_counted?.toString() ?? "");
+        setCashApex(res.data.cash_apex?.toString() ?? "");
+        setInteracApex(res.data.interac_apex?.toString() ?? "");
+        setExplanation(res.data.explanation ?? "");
+        setSaved(true);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [operatorName]);
+
+  const doSave = useCallback(() => {
+    setSaving(true);
+    fetch("/api/checklist/cash-reconciliation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        operatorName,
+        cashCounted: cashCounted ? parseFloat(cashCounted) : null,
+        interacCounted: interacCounted ? parseFloat(interacCounted) : null,
+        cashApex: cashApex ? parseFloat(cashApex) : null,
+        interacApex: interacApex ? parseFloat(interacApex) : null,
+        explanation: explanation || undefined,
+      }),
+    })
+      .then(() => { setSaved(true); setSaving(false); })
+      .catch(() => setSaving(false));
+  }, [operatorName, cashCounted, interacCounted, cashApex, interacApex, explanation]);
+
+  const schedSave = useCallback(() => {
+    setSaved(false);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(doSave, 1500);
+  }, [doSave]);
+
+  useEffect(() => () => { if (saveTimer.current) clearTimeout(saveTimer.current); }, []);
+
+  const parse = (v: string) => (v ? parseFloat(v) : 0);
+  const totalCounted = parse(cashCounted) + parse(interacCounted);
+  const totalApex = parse(cashApex) + parse(interacApex);
+  const diffCash = parse(cashCounted) - parse(cashApex);
+  const diffInterac = parse(interacCounted) - parse(interacApex);
+  const diffTotal = totalCounted - totalApex;
+  const hasDiff = diffCash !== 0 || diffInterac !== 0;
+
+  const inputClass =
+    "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-right tabular-nums focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100";
+
+  const fmt = (n: number) => n.toFixed(2) + " $";
+
+  return (
+    <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-200">
+          💰 Clôture de caisse
+        </h3>
+        {saving && <span className="text-xs text-brand-500">Sauvegarde...</span>}
+        {saved && !saving && <span className="text-xs text-emerald-500">✓ Sauvegardé</span>}
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-neutral-500 dark:text-neutral-400">
+              <th className="pb-2 text-left font-medium"></th>
+              <th className="pb-2 text-center font-medium">Comptant</th>
+              <th className="pb-2 text-center font-medium">Interac</th>
+              <th className="pb-2 text-center font-medium">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="py-1.5 pr-2 font-medium text-neutral-700 dark:text-neutral-300">Ce que j&apos;ai</td>
+              <td className="p-1">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={cashCounted}
+                  onChange={(e) => { setCashCounted(e.target.value); schedSave(); }}
+                  placeholder="0.00"
+                  className={inputClass}
+                />
+              </td>
+              <td className="p-1">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={interacCounted}
+                  onChange={(e) => { setInteracCounted(e.target.value); schedSave(); }}
+                  placeholder="0.00"
+                  className={inputClass}
+                />
+              </td>
+              <td className="p-1 text-center font-semibold tabular-nums text-neutral-800 dark:text-neutral-200">
+                {fmt(totalCounted)}
+              </td>
+            </tr>
+            <tr>
+              <td className="py-1.5 pr-2 font-medium text-neutral-700 dark:text-neutral-300">Ce que Apex dit</td>
+              <td className="p-1">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={cashApex}
+                  onChange={(e) => { setCashApex(e.target.value); schedSave(); }}
+                  placeholder="0.00"
+                  className={inputClass}
+                />
+              </td>
+              <td className="p-1">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={interacApex}
+                  onChange={(e) => { setInteracApex(e.target.value); schedSave(); }}
+                  placeholder="0.00"
+                  className={inputClass}
+                />
+              </td>
+              <td className="p-1 text-center font-semibold tabular-nums text-neutral-800 dark:text-neutral-200">
+                {fmt(totalApex)}
+              </td>
+            </tr>
+            <tr className="border-t border-neutral-200 dark:border-neutral-700">
+              <td className="py-1.5 pr-2 font-bold text-neutral-800 dark:text-neutral-200">Différence</td>
+              <td className={`p-1 text-center font-bold tabular-nums ${diffCash === 0 ? "text-emerald-600" : "text-red-600"}`}>
+                {fmt(diffCash)}
+              </td>
+              <td className={`p-1 text-center font-bold tabular-nums ${diffInterac === 0 ? "text-emerald-600" : "text-red-600"}`}>
+                {fmt(diffInterac)}
+              </td>
+              <td className={`p-1 text-center font-bold tabular-nums ${diffTotal === 0 ? "text-emerald-600" : "text-red-600"}`}>
+                {fmt(diffTotal)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {hasDiff && (
+        <div className="mt-3">
+          <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            Explications
+          </label>
+          <textarea
+            value={explanation}
+            onChange={(e) => { setExplanation(e.target.value); schedSave(); }}
+            placeholder="Expliquer la différence..."
+            rows={2}
+            className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CountdownRing({ seconds, total }: { seconds: number; total: number }) {
   const pct = seconds / total;
   const r = 6;
