@@ -644,6 +644,8 @@ function CashReconciliation({ operatorName }: { operatorName: string }) {
   const diffTotal = totalCounted - totalApex;
   const hasDiff = diffCash !== 0 || diffInterac !== 0;
 
+  const onlyNumbers = (value: string) => value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+
   const inputClass =
     "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-right tabular-nums focus:border-brand-500 focus:ring-1 focus:ring-brand-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100";
 
@@ -677,7 +679,7 @@ function CashReconciliation({ operatorName }: { operatorName: string }) {
                   type="text"
                   inputMode="decimal"
                   value={cashCounted}
-                  onChange={(e) => { setCashCounted(e.target.value); schedSave(); }}
+                  onChange={(e) => { setCashCounted(onlyNumbers(e.target.value)); schedSave(); }}
                   placeholder="0.00"
                   className={inputClass}
                 />
@@ -687,7 +689,7 @@ function CashReconciliation({ operatorName }: { operatorName: string }) {
                   type="text"
                   inputMode="decimal"
                   value={interacCounted}
-                  onChange={(e) => { setInteracCounted(e.target.value); schedSave(); }}
+                  onChange={(e) => { setInteracCounted(onlyNumbers(e.target.value)); schedSave(); }}
                   placeholder="0.00"
                   className={inputClass}
                 />
@@ -703,7 +705,7 @@ function CashReconciliation({ operatorName }: { operatorName: string }) {
                   type="text"
                   inputMode="decimal"
                   value={cashApex}
-                  onChange={(e) => { setCashApex(e.target.value); schedSave(); }}
+                  onChange={(e) => { setCashApex(onlyNumbers(e.target.value)); schedSave(); }}
                   placeholder="0.00"
                   className={inputClass}
                 />
@@ -713,7 +715,7 @@ function CashReconciliation({ operatorName }: { operatorName: string }) {
                   type="text"
                   inputMode="decimal"
                   value={interacApex}
-                  onChange={(e) => { setInteracApex(e.target.value); schedSave(); }}
+                  onChange={(e) => { setInteracApex(onlyNumbers(e.target.value)); schedSave(); }}
                   placeholder="0.00"
                   className={inputClass}
                 />
