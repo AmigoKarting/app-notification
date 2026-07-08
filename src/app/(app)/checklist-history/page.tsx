@@ -6,7 +6,9 @@ import { requireUser } from "@/domain/auth/session";
 import { listRecentChecklists } from "@/domain/checklists/repository";
 import { listAllChecklistTasks } from "@/domain/checklists/tasks-repository";
 import { getServerDictionary, getLocale } from "@/lib/i18n/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ChecklistHistoryCard } from "./checklist-history-card";
+import type { CashReconciliationData } from "./checklist-history-card";
 
 export const dynamic = "force-dynamic";
 
@@ -28,10 +30,23 @@ export default async function ChecklistHistoryPage() {
   const t = getServerDictionary();
   const locale = getLocale();
   const dateFmt = locale === "en" ? "en-US" : "fr-FR";
-  const [checklists, allTasks] = await Promise.all([
+  const supabase = createAdminClient();
+  const [checklists, allTasks, { data: cashRecs }] = await Promise.all([
     listRecentChecklists(),
     listAllChecklistTasks(),
+    (supabase as any).from("cash_reconciliations").select("*").order("date", { ascending: false }).limit(200),
   ]);
+
+  const cashRecMap = new Map<string, CashReconciliationData>();
+  for (const cr of cashRecs ?? []) {
+    cashRecMap.set(`${cr.date}|${cr.operator_name}`, {
+      cashCounted: cr.cash_counted,
+      interacCounted: cr.interac_counted,
+      cashApex: cr.cash_apex,
+      interacApex: cr.interac_apex,
+      explanation: cr.explanation,
+    });
+  }
 
   const activeTasks = allTasks.filter((task) => task.is_active);
   const sectionOrder = ["opening", "during", "closing", "free_time"];
@@ -106,6 +121,9 @@ export default async function ChecklistHistoryPage() {
                     }).filter((s) => s.total > 0);
 
                     const timestamps = cl.completed_timestamps ?? {};
+                    const clDate = new Date(cl.submitted_at);
+                    const clDateKey = `${clDate.getFullYear()}-${String(clDate.getMonth() + 1).padStart(2, "0")}-${String(clDate.getDate()).padStart(2, "0")}`;
+                    const cashRec = cashRecMap.get(`${clDateKey}|${operatorName}`) ?? null;
 
                     return (
                       <ChecklistHistoryCard
@@ -133,6 +151,7 @@ export default async function ChecklistHistoryPage() {
                         })}
                         timestamps={timestamps}
                         notes={cl.notes}
+                        cashReconciliation={cashRec}
                       />
                     );
                   })}

@@ -17,6 +17,14 @@ interface SectionStat {
   missed: TaskInfo[];
 }
 
+export interface CashReconciliationData {
+  cashCounted: number | null;
+  interacCounted: number | null;
+  cashApex: number | null;
+  interacApex: number | null;
+  explanation: string | null;
+}
+
 interface Props {
   id: string;
   operatorName: string;
@@ -31,6 +39,7 @@ interface Props {
   sections: SectionStat[];
   timestamps: Record<string, string | string[]>;
   notes: string | null;
+  cashReconciliation?: CashReconciliationData | null;
 }
 
 function formatTime(ts: string): string {
@@ -45,7 +54,7 @@ function formatTime(ts: string): string {
 export function ChecklistHistoryCard({
   id, operatorName, accountName, showAccount, isSupervisor,
   completedForRole, totalForRole, pct, submittedAt, dateFmt,
-  sections, timestamps, notes,
+  sections, timestamps, notes, cashReconciliation,
 }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -160,8 +169,62 @@ export function ChecklistHistoryCard({
               </p>
             </div>
           )}
+
+          {cashReconciliation && (
+            <CashReconciliationView data={cashReconciliation} />
+          )}
         </div>
       )}
     </Card>
+  );
+}
+
+function CashReconciliationView({ data }: { data: CashReconciliationData }) {
+  const c = (v: number | null) => v ?? 0;
+  const fmt = (n: number) => n.toFixed(2) + " $";
+  const totalCounted = c(data.cashCounted) + c(data.interacCounted);
+  const totalApex = c(data.cashApex) + c(data.interacApex);
+  const diffCash = c(data.cashCounted) - c(data.cashApex);
+  const diffInterac = c(data.interacCounted) - c(data.interacApex);
+  const diffTotal = totalCounted - totalApex;
+  const diffColor = (n: number) => n === 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400";
+
+  return (
+    <div className="mt-3 border-t border-neutral-100 pt-3 dark:border-neutral-800">
+      <p className="mb-2 text-xs font-bold text-neutral-700 dark:text-neutral-300">💰 Clôture de caisse</p>
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="text-neutral-400">
+            <th className="pb-1 text-left font-medium"></th>
+            <th className="pb-1 text-right font-medium">Comptant</th>
+            <th className="pb-1 text-right font-medium">Interac</th>
+            <th className="pb-1 text-right font-medium">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td className="py-0.5 text-neutral-600 dark:text-neutral-400">Ce que j&apos;ai</td>
+            <td className="py-0.5 text-right tabular-nums text-neutral-800 dark:text-neutral-200">{fmt(c(data.cashCounted))}</td>
+            <td className="py-0.5 text-right tabular-nums text-neutral-800 dark:text-neutral-200">{fmt(c(data.interacCounted))}</td>
+            <td className="py-0.5 text-right tabular-nums font-semibold text-neutral-800 dark:text-neutral-200">{fmt(totalCounted)}</td>
+          </tr>
+          <tr>
+            <td className="py-0.5 text-neutral-600 dark:text-neutral-400">Apex</td>
+            <td className="py-0.5 text-right tabular-nums text-neutral-800 dark:text-neutral-200">{fmt(c(data.cashApex))}</td>
+            <td className="py-0.5 text-right tabular-nums text-neutral-800 dark:text-neutral-200">{fmt(c(data.interacApex))}</td>
+            <td className="py-0.5 text-right tabular-nums font-semibold text-neutral-800 dark:text-neutral-200">{fmt(totalApex)}</td>
+          </tr>
+          <tr className="border-t border-neutral-200 dark:border-neutral-700">
+            <td className="py-0.5 font-bold text-neutral-700 dark:text-neutral-300">Diff.</td>
+            <td className={`py-0.5 text-right tabular-nums font-bold ${diffColor(diffCash)}`}>{fmt(diffCash)}</td>
+            <td className={`py-0.5 text-right tabular-nums font-bold ${diffColor(diffInterac)}`}>{fmt(diffInterac)}</td>
+            <td className={`py-0.5 text-right tabular-nums font-bold ${diffColor(diffTotal)}`}>{fmt(diffTotal)}</td>
+          </tr>
+        </tbody>
+      </table>
+      {data.explanation && (
+        <p className="mt-1.5 text-xs text-neutral-500 dark:text-neutral-400">📝 {data.explanation}</p>
+      )}
+    </div>
   );
 }
